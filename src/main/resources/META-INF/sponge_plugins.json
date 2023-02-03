@@ -1,0 +1,29 @@
+{
+  "loader": {
+    "name": "java_plain",
+    "version": "1.0"
+  },
+  "license": "All Rights Reserved",
+  "plugins": [
+    {
+      "id": "essentialss",
+      "name": "EssentialsS",
+      "version": "${version}",
+      "entrypoint": "org.essentialss.implementation.EssentialsSMain",
+      "description": "One stop shop for all essential tools",
+      "branding": {},
+      "links": {
+      },
+      "contributors": [
+      ],
+      "dependencies": [
+        {
+          "id": "spongeapi",
+          "version": "8.1.0",
+          "load-order": "after",
+          "optional": false
+        }
+      ]
+    }
+  ]
+}

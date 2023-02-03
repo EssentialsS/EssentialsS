@@ -1,0 +1,81 @@
+<component name="InspectionProjectProfileManager">
+    <profile version="1.0">
+        <option name="myName" value="Project Default"/>
+        <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="false" level="WARNING"
+                         enabled_by_default="false"/>
+        <inspection_tool class="ClassCanBeRecord" enabled="false" level="WEAK WARNING" enabled_by_default="false"/>
+        <inspection_tool class="ClassMayBeInterface" enabled="true" level="WEAK WARNING" enabled_by_default="true"
+                         editorAttributes="INFO_ATTRIBUTES"/>
+        <inspection_tool class="ClassWithOnlyPrivateConstructors" enabled="true" level="WARNING"
+                         enabled_by_default="true"/>
+        <inspection_tool class="CollectionsFieldAccessReplaceableByMethodCall" enabled="true" level="WARNING"
+                         enabled_by_default="true"/>
+        <inspection_tool class="Convert2streamapi" enabled="true" level="WARNING" enabled_by_default="true"
+                         editorAttributes="WARNING_ATTRIBUTES"/>
+        <inspection_tool class="EqualsCalledOnEnumConstant" enabled="true" level="WEAK WARNING"
+                         enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES"/>
+        <inspection_tool class="ExtendsUtilityClass" enabled="true" level="WARNING" enabled_by_default="true"/>
+        <inspection_tool class="FoldExpressionIntoStream" enabled="true" level="WARNING" enabled_by_default="true"
+                         editorAttributes="WARNING_ATTRIBUTES"/>
+        <inspection_tool class="IfCanBeAssertion" enabled="false" level="WEAK WARNING" enabled_by_default="false"
+                         editorAttributes="INFO_ATTRIBUTES"/>
+        <inspection_tool class="InstanceofThis" enabled="true" level="WARNING" enabled_by_default="true"/>
+        <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="WARNING" enabled_by_default="true"
+                         editorAttributes="WARNING_ATTRIBUTES">
+            <option name="ignoreObjectMethods" value="true"/>
+            <option name="ignoreAnonymousClassMethods" value="false"/>
+        </inspection_tool>
+        <inspection_tool class="NegativelyNamedBooleanVariable" enabled="true" level="WARNING"
+                         enabled_by_default="true"/>
+        <inspection_tool class="NonFinalUtilityClass" enabled="true" level="WARNING" enabled_by_default="true"/>
+        <inspection_tool class="ObsoleteCollection" enabled="true" level="WARNING" enabled_by_default="true">
+            <option name="ignoreRequiredObsoleteCollectionTypes" value="true"/>
+        </inspection_tool>
+        <inspection_tool class="OptionalContainsCollection" enabled="true" level="WARNING" enabled_by_default="true"/>
+        <inspection_tool class="OverlyStrongTypeCast" enabled="true" level="WARNING" enabled_by_default="true">
+            <option name="ignoreInMatchingInstanceof" value="false"/>
+        </inspection_tool>
+        <inspection_tool class="ProblematicVarargsMethodOverride" enabled="true" level="WEAK WARNING"
+                         enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES"/>
+        <inspection_tool class="ReturnNull" enabled="true" level="WARNING" enabled_by_default="true">
+            <option name="m_reportObjectMethods" value="true"/>
+            <option name="m_reportArrayMethods" value="true"/>
+            <option name="m_reportCollectionMethods" value="true"/>
+            <option name="m_ignorePrivateMethods" value="false"/>
+        </inspection_tool>
+        <inspection_tool class="SizeReplaceableByIsEmpty" enabled="true" level="WEAK WARNING" enabled_by_default="true"
+                         editorAttributes="INFO_ATTRIBUTES"/>
+        <inspection_tool class="SystemOutErr" enabled="true" level="WARNING" enabled_by_default="true"/>
+        <inspection_tool class="TypeMayBeWeakened" enabled="true" level="WARNING" enabled_by_default="true">
+            <option name="useRighthandTypeAsWeakestTypeInAssignments" value="true"/>
+            <option name="useParameterizedTypeForCollectionMethods" value="true"/>
+            <option name="doNotWeakenToJavaLangObject" value="true"/>
+            <option name="onlyWeakentoInterface" value="true"/>
+        </inspection_tool>
+        <inspection_tool class="UNCHECKED_WARNING" enabled="true" level="WARNING" enabled_by_default="true">
+            <option name="IGNORE_UNCHECKED_ASSIGNMENT" value="false"/>
+            <option name="IGNORE_UNCHECKED_GENERICS_ARRAY_CREATION" value="false"/>
+            <option name="IGNORE_UNCHECKED_CALL" value="false"/>
+            <option name="IGNORE_UNCHECKED_CAST" value="true"/>
+            <option name="IGNORE_UNCHECKED_OVERRIDING" value="false"/>
+        </inspection_tool>
+        <inspection_tool class="UseOfObsoleteDateTimeApi" enabled="true" level="WARNING" enabled_by_default="true"/>
+        <inspection_tool class="UtilityClassWithPublicConstructor" enabled="true" level="WARNING"
+                         enabled_by_default="true"/>
+        <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="WARNING"
+                         enabled_by_default="true">
+            <option name="ignorableAnnotations">
+                <value/>
+            </option>
+            <option name="ignoreClassesWithOnlyMain" value="false"/>
+        </inspection_tool>
+        <inspection_tool class="VariableTypeCanBeExplicit" enabled="true" level="WARNING" enabled_by_default="true"
+                         editorAttributes="WARNING_ATTRIBUTES"/>
+        <inspection_tool class="WeakerAccess" enabled="false" level="WEAK WARNING" enabled_by_default="false"
+                         editorAttributes="INFO_ATTRIBUTES">
+            <option name="SUGGEST_PACKAGE_LOCAL_FOR_MEMBERS" value="true"/>
+            <option name="SUGGEST_PACKAGE_LOCAL_FOR_TOP_CLASSES" value="true"/>
+            <option name="SUGGEST_PRIVATE_FOR_INNERS" value="false"/>
+        </inspection_tool>
+    </profile>
+</component>

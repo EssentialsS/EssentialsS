@@ -1,6 +1,7 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="1380d8e7-15f8-3477-8808-f724d42077bb" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AbstractClassWithoutAbstractMethods" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AnonymousClassComplexity" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_limit" value="3" />
@@ -59,8 +60,8 @@
       <option name="m_ignoreInnerInterfaces" value="false" />
     </inspection_tool>
     <inspection_tool class="InstanceofThis" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="InterfaceMayBeAnnotatedFunctional" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
-    <inspection_tool class="InterfaceNeverImplemented" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES">
+    <inspection_tool class="InterfaceMayBeAnnotatedFunctional" enabled="false" level="WEAK WARNING" enabled_by_default="false" editorAttributes="INFO_ATTRIBUTES" />
+    <inspection_tool class="InterfaceNeverImplemented" enabled="false" level="WARNING" enabled_by_default="false" editorAttributes="WARNING_ATTRIBUTES">
       <option name="ignoreInterfacesThatOnlyDeclareConstants" value="false" />
     </inspection_tool>
     <inspection_tool class="JavaLangImport" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
@@ -128,6 +129,15 @@
     </inspection_tool>
     <inspection_tool class="ReturnSeparatedFromComputation" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="ReuseOfLocalVariable" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="SSBasedInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <replaceConfiguration name="Optional only" description="Returning of null on a public method should not be done as it leads to confusion to what the method actual returns. Instead this should match the Sponge rules whereby we use ``Optional`` for methods that may not return a null value" suppressId="allow-nullable" problemDescriptor="Returning of null" text="&#10;public @Nullable $ReturnType$ $Method$($ParameterType$ $Parameter$);" recursive="false" caseInsensitive="true" type="JAVA" pattern_context="member" reformatAccordingToStyle="false" shortenFQN="false" replacement="public Optional&lt;$ReturnType$&gt; $Method$($ParameterType$ $Parameter$);">
+        <constraint name="__context__" within="" contains="" />
+        <constraint name="ReturnType" within="" contains="" />
+        <constraint name="Method" within="" contains="" />
+        <constraint name="ParameterType" within="" contains="" />
+        <constraint name="Parameter" minCount="0" maxCount="2147483647" within="" contains="" />
+      </replaceConfiguration>
+    </inspection_tool>
     <inspection_tool class="SimplifiableAnnotation" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="SimplifiableEqualsExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="SimplifiableIfStatement" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />

@@ -6,9 +6,9 @@
   "license": "All Rights Reserved",
   "plugins": [
     {
-      "id": "essentialss",
+      "id": "essentials-s",
       "name": "EssentialsS",
-      "version": "${version}",
+      "version": "0.0.1",
       "entrypoint": "org.essentialss.implementation.EssentialsSMain",
       "description": "One stop shop for all essential tools",
       "branding": {},

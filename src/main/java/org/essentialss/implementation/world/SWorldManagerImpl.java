@@ -23,7 +23,6 @@ public class SWorldManagerImpl implements SWorldManager {
         if (opData.isPresent()) {
             return opData.get();
         }
-        //throw new RuntimeException("Need to implement world data loading");
         SWorldData data = new SWorldDataImpl(new SWorldDataBuilder().setWorld(worldData));
         try {
             data.reloadFromConfig();

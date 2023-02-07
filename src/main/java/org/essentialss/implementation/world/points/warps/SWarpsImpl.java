@@ -33,4 +33,29 @@ public class SWarpsImpl implements SWarp {
     public @NotNull Vector3d position() {
         return this.position;
     }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SWarp)) {
+            return false;
+        }
+        SWarp warp = (SWarp) obj;
+        if (!warp.identifier().equals(this.identifier())) {
+            return false;
+        }
+        if (!warp.worldData().identifier().equals(this.worldData().identifier())) {
+            return false;
+        }
+        return warp.identifier().equals(this.identifier());
+    }
+
+    @Override
+    public String toString() {
+        return "Warp(" + this.position() + ", " + this.worldData.identifier() + ", " + this.identifier() + ")";
+    }
 }

@@ -17,11 +17,12 @@ public class SWorldDataSerializer {
 
     public static void load(@NotNull SWorldData worldData) throws ConfigurateException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        File file = new File(folder, worldData.identifier() + ".conf");
+        File file = new File(folder, "data/world/" + worldData.identifier() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
         CommentedConfigurationNode root = loader.load();
+        worldData.clearPoints();
 
-        root.node("points").childrenList().parallelStream().forEach(node -> {
+        root.node("points").childrenList().forEach(node -> {
             String type = node.node("type").getString();
             if (null == type) {
                 return;
@@ -42,12 +43,13 @@ public class SWorldDataSerializer {
 
     public static void save(@NotNull SWorldData worldData) throws ConfigurateException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        File file = new File(folder, worldData.identifier() + ".conf");
+        File file = new File(folder, "data/world/" + worldData.identifier() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
-        CommentedConfigurationNode root = loader.load();
+        CommentedConfigurationNode root = loader.createNode();
 
         CommentedConfigurationNode pointNode = root.node("points");
         for (SWarp warp : worldData.warps()) {
+
             CommentedConfigurationNode points = pointNode.appendListNode();
             points.node("name").set(warp.identifier());
             points.node("type").set("Warp");

@@ -2,6 +2,7 @@ package org.essentialss.implementation.command.point.create;
 
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.utils.SParameters;
+import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.warp.SWarpBuilder;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.Optional;
 
@@ -102,13 +104,31 @@ public class CreateWarpCommand {
     public static CommandResult execute(@NotNull Location<?, ?> location,
                                         @NotNull String warpName,
                                         @NotNull Cause cause) {
-        boolean added = EssentialsSMain
-                .plugin()
-                .worldManager()
-                .get()
-                .dataFor(location.world())
-                .register(new SWarpBuilder().name(warpName).point(location.position()), cause);
-        return added ? CommandResult.success() : CommandResult.error(Component.text("Could not register that warp"));
+
+        SWorldData worldData = EssentialsSMain.plugin().worldManager().get().dataFor(location.world());
+        try {
+            //Ensures any user manually added values are loaded
+            worldData.reloadFromConfig();
+        } catch (ConfigurateException e) {
+            return CommandResult.error(
+                    Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
+        }
+        boolean added;
+        try {
+            added = worldData.register(new SWarpBuilder().name(warpName).point(location.position()), cause);
+        }catch (IllegalStateException e){
+            return CommandResult.error(Component.text(e.getMessage()));
+        }
+        if (added) {
+            try {
+                worldData.saveToConfig();
+            } catch (ConfigurateException e) {
+                return CommandResult.error(
+                        Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
+            }
+            return CommandResult.success();
+        }
+        return CommandResult.error(Component.text("Could not register that warp"));
     }
 
     public static Command.Parameterized createRegisterWarpCommand() {

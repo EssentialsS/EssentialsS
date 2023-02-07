@@ -9,6 +9,7 @@ import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.api.world.points.jail.SJailSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnType;
+import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.api.world.points.warp.SWarpBuilder;
 import org.essentialss.implementation.events.point.register.RegisterPointPostEventImpl;
 import org.essentialss.implementation.events.point.register.RegisterPointPreEventImpl;
@@ -26,6 +27,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Optional;
 
 public class SWorldDataImpl implements SWorldData {
 
@@ -45,6 +47,11 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public void reloadFromConfig() throws ConfigurateException {
         SWorldDataSerializer.load(this);
+    }
+
+    @Override
+    public void clearPoints() {
+        this.points.clear();
     }
 
     @Override
@@ -87,6 +94,21 @@ public class SWorldDataImpl implements SWorldData {
 
     @Override
     public boolean register(@NotNull SWarpBuilder builder, boolean runEvent, @Nullable Cause cause) {
+        new Validator<>(builder.name()).notNull().validate();
+
+        Optional<SWarp> opWarp = this
+                .warps()
+                .parallelStream()
+                .filter(warp -> warp.position().equals(builder.point()))
+                .findAny();
+        if (opWarp.isPresent()) {
+            throw new IllegalArgumentException(
+                    "Another warp (" + opWarp.get().identifier() + ") with that location has been found ");
+        }
+        //noinspection DataFlowIssue
+        if (this.warp(builder.name()).isPresent()) {
+            throw new IllegalArgumentException("Another warp has the name of " + builder.name());
+        }
         return this.register(new SWarpsImpl(builder, this), runEvent, cause);
     }
 

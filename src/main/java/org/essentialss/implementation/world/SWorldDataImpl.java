@@ -21,6 +21,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.world.World;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -39,6 +40,16 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public @NotNull World<?, ?> spongeWorld() {
         return this.world;
+    }
+
+    @Override
+    public void reloadFromConfig() throws ConfigurateException {
+        SWorldDataSerializer.load(this);
+    }
+
+    @Override
+    public void saveToConfig() throws ConfigurateException {
+        SWorldDataSerializer.save(this);
     }
 
     @Override

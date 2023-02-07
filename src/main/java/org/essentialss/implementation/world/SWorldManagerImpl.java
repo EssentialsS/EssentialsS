@@ -4,6 +4,7 @@ import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.SWorldManager;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.world.World;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -22,6 +23,14 @@ public class SWorldManagerImpl implements SWorldManager {
         if (opData.isPresent()) {
             return opData.get();
         }
-        throw new RuntimeException("Need to implement world data loading");
+        //throw new RuntimeException("Need to implement world data loading");
+        SWorldData data = new SWorldDataImpl(new SWorldDataBuilder().setWorld(worldData));
+        try {
+            data.reloadFromConfig();
+        } catch (ConfigurateException e) {
+            throw new RuntimeException(e);
+        }
+        this.worldData.add(data);
+        return data;
     }
 }

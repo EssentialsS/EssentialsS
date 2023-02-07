@@ -17,7 +17,6 @@ import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
@@ -25,14 +24,21 @@ public class CreateWarpCommand {
 
     private static class Execute implements CommandExecutor {
 
-        private final @NotNull Parameter.Value<Vector3d> locationParameter;
+        private final @NotNull Parameter.Value<Double> locationXParameter;
+        private final @NotNull Parameter.Value<Double> locationYParameter;
+        private final @NotNull Parameter.Value<Double> locationZParameter;
+
         private final @NotNull Parameter.Value<ServerWorld> worldParameter;
         private final @NotNull Parameter.Value<String> warpNameParameter;
 
         public Execute(@NotNull Parameter.Value<String> warpName,
-                       @NotNull Parameter.Value<Vector3d> position,
+                       @NotNull Parameter.Value<Double> x,
+                       @NotNull Parameter.Value<Double> y,
+                       @NotNull Parameter.Value<Double> z,
                        @NotNull Parameter.Value<ServerWorld> world) {
-            this.locationParameter = position;
+            this.locationXParameter = x;
+            this.locationYParameter = y;
+            this.locationZParameter = z;
             this.worldParameter = world;
             this.warpNameParameter = warpName;
         }
@@ -43,29 +49,53 @@ public class CreateWarpCommand {
             World<?, ?> world;
             if (opWorld.isPresent()) {
                 world = opWorld.get();
-            } else if (Sponge.isClientAvailable()) {
-                world = Sponge
-                        .client()
-                        .world()
-                        .orElseThrow(() -> new CommandException(
-                                Component.text("client is used but world could not be found")));
+            } else if (context.subject() instanceof Locatable) {
+                world = ((Locatable) context.subject()).world();
             } else {
                 throw new CommandException(Component.text("Location must be specified"));
             }
 
-            Optional<Vector3d> opPosition = context.one(this.locationParameter);
-            Vector3d position;
+            Optional<Double> opPositionX = context.one(this.locationXParameter);
+            Optional<Double> opPositionY = context.one(this.locationYParameter);
+            Optional<Double> opPositionZ = context.one(this.locationZParameter);
 
-            if (opPosition.isPresent()) {
-                position = opPosition.get();
+            double posX;
+            double posY;
+            double posZ;
+
+            if (opPositionX.isPresent()) {
+                posX = opPositionX.get();
             } else if (context.subject() instanceof Locatable) {
-                position = ((Locatable) context.subject()).location().position();
+                posX = ((Locatable) context.subject()).location().position().x();
+            } else {
+                throw new CommandException(Component.text("Location must be specified"));
+            }
+
+            if (opPositionY.isPresent()) {
+                posY = opPositionY.get();
+            } else if (context.subject() instanceof Locatable) {
+                posY = ((Locatable) context.subject()).location().position().y();
+            } else {
+                throw new CommandException(Component.text("Location must be specified"));
+            }
+
+            if (opPositionZ.isPresent()) {
+                posZ = opPositionZ.get();
+            } else if (context.subject() instanceof Locatable) {
+                posZ = ((Locatable) context.subject()).location().position().z();
             } else {
                 throw new CommandException(Component.text("Location must be specified"));
             }
 
             String warpName = context.requireOne(this.warpNameParameter);
-            return CreateWarpCommand.execute(world.location(position), warpName, context.contextCause());
+            CommandResult result = CreateWarpCommand.execute(world.location(posX, posY, posZ), warpName,
+                                                             context.contextCause());
+            if (result.isSuccess()) {
+                context.cause().audience().sendMessage(Component.text("Created warp '" + warpName + "'"));
+            } else {
+                context.cause().audience().sendMessage(Component.text("Could not register new warp"));
+            }
+            return result;
         }
     }
 
@@ -83,11 +113,15 @@ public class CreateWarpCommand {
 
     public static Command.Parameterized createRegisterWarpCommand() {
         Parameter.Key<String> warpNameKey = Parameter.key("name", String.class);
-        Parameter.Key<Vector3d> locationKey = Parameter.key("location", Vector3d.class);
+        Parameter.Key<Double> xKey = Parameter.key("x", Double.class);
+        Parameter.Key<Double> yKey = Parameter.key("y", Double.class);
+        Parameter.Key<Double> zKey = Parameter.key("z", Double.class);
         Parameter.Key<ServerWorld> worldKey = Parameter.key("world", ServerWorld.class);
 
+        Parameter.Value<Double> x = SParameters.location(false, Location::x).key(xKey).optional().build();
+        Parameter.Value<Double> y = SParameters.location(false, Location::y).key(yKey).optional().build();
+        Parameter.Value<Double> z = SParameters.location(false, Location::z).key(zKey).optional().build();
 
-        Parameter.Value<Vector3d> location = SParameters.location(false).key(locationKey).optional().build();
         Parameter.Value<String> warpName = Parameter.string().key(warpNameKey).build();
         Parameter.Value<ServerWorld> world = Parameter
                 .world()
@@ -99,9 +133,11 @@ public class CreateWarpCommand {
         return Command
                 .builder()
                 .addParameter(warpName)
-                .addParameter(location)
+                .addParameter(x)
+                .addParameter(y)
+                .addParameter(z)
                 .addParameter(world)
-                .executor(new Execute(warpName, location, world))
+                .executor(new Execute(warpName, x, y, z, world))
                 .build();
     }
 

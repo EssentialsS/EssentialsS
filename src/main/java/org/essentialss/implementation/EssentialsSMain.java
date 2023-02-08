@@ -3,6 +3,7 @@ package org.essentialss.implementation;
 import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
 import org.essentialss.api.EssentialsSAPI;
+import org.essentialss.api.config.SConfigManager;
 import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.utils.Singleton;
 import org.essentialss.api.world.SWorldManager;
@@ -60,6 +61,11 @@ public class EssentialsSMain implements EssentialsSAPI {
     @Override
     public @NotNull Singleton<SPlayerManager> playerManager() {
         throw new RuntimeException("Player manager not implemented");
+    }
+
+    @Override
+    public @NotNull Singleton<SConfigManager> configManager() {
+        throw new RuntimeException("Config manager not implemented");
     }
 
     public static EssentialsSMain plugin() {

@@ -9,14 +9,15 @@ import org.essentialss.api.utils.Singleton;
 import org.essentialss.api.world.SWorldManager;
 import org.essentialss.implementation.command.hat.HatCommand;
 import org.essentialss.implementation.command.point.PointCommand;
+import org.essentialss.implementation.command.point.list.ListSpawnCommand;
+import org.essentialss.implementation.command.point.list.ListWarpCommand;
 import org.essentialss.implementation.command.run.RunCommand;
+import org.essentialss.implementation.config.SConfigManagerImpl;
 import org.essentialss.implementation.world.SWorldManagerImpl;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -29,6 +30,9 @@ public class EssentialsSMain implements EssentialsSAPI {
     private static EssentialsSMain plugin;
 
     private final Singleton<SWorldManager> worldManager = new Singleton<>(SWorldManagerImpl::new);
+    private final Singleton<SConfigManager> configManager = new Singleton<>(SConfigManagerImpl::new);
+
+    public static final int MINIMUM_PAGE_SIZE = 1;
 
     @SuppressWarnings("AccessStaticViaInstance")
     @Inject
@@ -43,6 +47,9 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, RunCommand.createRunCommand(), "run", "execute");
         event.register(this.container, HatCommand.createHatCommand(), "hat");
         event.register(this.container, PointCommand.createWarpCommand(), "warp");
+        event.register(this.container, ListWarpCommand.createWarpListCommand(), "warps");
+        event.register(this.container, PointCommand.createSpawnCommand(), "spawn");
+        event.register(this.container, ListSpawnCommand.createSpawnListCommand(), "spawns");
     }
 
     public @NotNull PluginContainer container() {
@@ -65,7 +72,7 @@ public class EssentialsSMain implements EssentialsSAPI {
 
     @Override
     public @NotNull Singleton<SConfigManager> configManager() {
-        throw new RuntimeException("Config manager not implemented");
+        return this.configManager;
     }
 
     public static EssentialsSMain plugin() {

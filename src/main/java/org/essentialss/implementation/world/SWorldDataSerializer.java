@@ -35,7 +35,7 @@ public class SWorldDataSerializer {
                 if (null == warpName) {
                     return;
                 }
-                worldData.register(new SWarpBuilder().name(warpName).point(new Vector3d(x, y, z)), false, null);
+                worldData.register(new SWarpBuilder().setName(warpName).setPoint(new Vector3d(x, y, z)), false, null);
                 return;
             }
         });

@@ -115,8 +115,8 @@ public class CreateWarpCommand {
         }
         boolean added;
         try {
-            added = worldData.register(new SWarpBuilder().name(warpName).point(location.position()), cause);
-        }catch (IllegalStateException e){
+            added = worldData.register(new SWarpBuilder().setName(warpName).setPoint(location.position()), cause);
+        } catch (IllegalArgumentException e) {
             return CommandResult.error(Component.text(e.getMessage()));
         }
         if (added) {

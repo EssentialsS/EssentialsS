@@ -75,7 +75,7 @@ public class SWorldDataImpl implements SWorldData {
     public boolean register(@NotNull SSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
         new Validator<>(builder.point()).notNull().validate();
         SSpawnPointImpl spawnPoint = new SSpawnPointImpl(builder, this);
-        if (SSpawnType.WORLD_ASSIGNED == builder.spawnType()) {
+        if (builder.spawnTypes().contains(SSpawnType.WORLD_ASSIGNED)) {
             if (runEvent) {
                 if (null == cause) {
                     throw new IllegalArgumentException("Cause cannot be null when running events");

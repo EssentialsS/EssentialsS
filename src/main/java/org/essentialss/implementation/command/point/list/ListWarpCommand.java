@@ -59,7 +59,7 @@ public class ListWarpCommand {
                 .sorted(Comparator.comparing(StringIdentifier::identifier))
                 .collect(Collectors.toList());
 
-        CommandPager.displayList(audience, page, warp -> Component.text(warp.identifier()), warps);
+        CommandPager.displayList(audience, page, "Warps", warp -> Component.text(warp.identifier()), warps);
         return CommandResult.success();
     }
 

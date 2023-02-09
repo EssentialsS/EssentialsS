@@ -56,7 +56,7 @@ public class ListSpawnCommand {
                 .sorted(Comparator.comparing(v -> v.position().toString()))
                 .collect(Collectors.toList());
 
-        CommandPager.displayList(audience, page, spawn -> Component.text(
+        CommandPager.displayList(audience, page, "Spawns", spawn -> Component.text(
                 spawn.types().iterator().next().name() + " - " + spawn.position() + " - " + spawn
                         .worldData()
                         .identifier()), spawns);

@@ -7,13 +7,13 @@ import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.SPoint;
 import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.api.world.points.jail.SJailSpawnPointBuilder;
+import org.essentialss.api.world.points.spawn.SSpawnPoint;
 import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnType;
 import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.api.world.points.warp.SWarpBuilder;
 import org.essentialss.implementation.events.point.register.RegisterPointPostEventImpl;
 import org.essentialss.implementation.events.point.register.RegisterPointPreEventImpl;
-import org.essentialss.implementation.world.points.spawn.DefaultSpawnPoint;
 import org.essentialss.implementation.world.points.spawn.SSpawnPointImpl;
 import org.essentialss.implementation.world.points.warps.SWarpsImpl;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +62,14 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public @NotNull UnmodifiableCollection<SPoint> points() {
         LinkedList<SPoint> list = new LinkedList<>(this.points);
-        list.add(new DefaultSpawnPoint(this));
+        if (list
+                .parallelStream()
+                .filter(point -> point instanceof SSpawnPoint)
+                .noneMatch(point -> ((SSpawnPoint) point).types().contains(SSpawnType.MAIN_SPAWN))) {
+            list.add(new SSpawnPointImpl(new SSpawnPointBuilder()
+                                                 .setPoint(this.world.properties().spawnPosition().toDouble())
+                                                 .setSpawnTypes(SSpawnType.MAIN_SPAWN), this));
+        }
         return new UnmodifiableCollection<>(list);
     }
 
@@ -74,22 +81,16 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public boolean register(@NotNull SSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
         new Validator<>(builder.point()).notNull().validate();
-        SSpawnPointImpl spawnPoint = new SSpawnPointImpl(builder, this);
-        if (builder.spawnTypes().contains(SSpawnType.WORLD_ASSIGNED)) {
-            if (runEvent) {
-                if (null == cause) {
-                    throw new IllegalArgumentException("Cause cannot be null when running events");
-                }
-                RegisterPointPreEventImpl preEvent = new RegisterPointPreEventImpl(spawnPoint, cause);
-                Sponge.eventManager().post(preEvent);
-                if (preEvent.isCancelled()) {
-                    return false;
-                }
-            }
-            this.world.properties().setSpawnPosition(builder.point().toInt());
-            return true;
+        SPoint spawnPoint = new SSpawnPointImpl(builder, this);
+        boolean register = this.register(spawnPoint, runEvent, cause);
+        if (!register) {
+            return false;
         }
-        return this.register(spawnPoint, runEvent, cause);
+        if (builder.spawnTypes().contains(SSpawnType.MAIN_SPAWN)) {
+            //noinspection DataFlowIssue
+            this.world.properties().setSpawnPosition(builder.point().toInt());
+        }
+        return true;
     }
 
     @Override

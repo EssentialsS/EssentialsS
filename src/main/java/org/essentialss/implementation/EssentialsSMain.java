@@ -13,6 +13,7 @@ import org.essentialss.implementation.command.point.list.ListSpawnCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
 import org.essentialss.implementation.command.run.RunCommand;
 import org.essentialss.implementation.config.SConfigManagerImpl;
+import org.essentialss.implementation.player.SPlayerManagerImpl;
 import org.essentialss.implementation.world.SWorldManagerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
@@ -31,6 +32,7 @@ public class EssentialsSMain implements EssentialsSAPI {
 
     private final Singleton<SWorldManager> worldManager = new Singleton<>(SWorldManagerImpl::new);
     private final Singleton<SConfigManager> configManager = new Singleton<>(SConfigManagerImpl::new);
+    private final Singleton<SPlayerManager> playerManager = new Singleton<>(SPlayerManagerImpl::new);
 
     public static final int MINIMUM_PAGE_SIZE = 1;
 
@@ -67,7 +69,7 @@ public class EssentialsSMain implements EssentialsSAPI {
 
     @Override
     public @NotNull Singleton<SPlayerManager> playerManager() {
-        throw new RuntimeException("Player manager not implemented");
+        return this.playerManager;
     }
 
     @Override

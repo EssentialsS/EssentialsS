@@ -6,10 +6,8 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.essentialss.api.utils.validation.ValidationRules;
 import org.essentialss.api.utils.validation.Validator;
-import org.essentialss.api.world.points.spawn.SSpawnPoint;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.command.CommandResult;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -26,13 +24,13 @@ public class CommandPager<T> {
 
     public CommandPager(Collection<T> originalList) {
         this(EssentialsSMain
-                .plugin()
-                .configManager()
-                .get()
-                .general()
-                .get()
-                .pageSize()
-                .parseDefault(EssentialsSMain.plugin().configManager().get().general().get()), originalList);
+                     .plugin()
+                     .configManager()
+                     .get()
+                     .general()
+                     .get()
+                     .pageSize()
+                     .parseDefault(EssentialsSMain.plugin().configManager().get().general().get()), originalList);
     }
 
     public CommandPager(int pageSize, Collection<T> originalList) {
@@ -49,19 +47,20 @@ public class CommandPager<T> {
         return Math.max((this.originalList.size() / this.pageSize), MINIMUM_PAGE);
     }
 
-    public boolean hasPreviousPage(int currentPage){
+    public boolean hasPreviousPage(int currentPage) {
         return MINIMUM_PAGE < currentPage;
     }
 
-    public boolean hasNextPage(int currentPage){
+    public boolean hasNextPage(int currentPage) {
         return this.totalPages() > currentPage;
     }
 
-    public List<T> results(int currentPage){
+    public List<T> results(int currentPage) {
         new Validator<>(currentPage).rule(ValidationRules.isGreaterThan(MINIMUM_PAGE - 1)).validate();
         int indexMax = this.pageSize * currentPage;
         int indexMin = Math.min(indexMax - this.pageSize, this.originalList.size());
         int totalPages = this.totalPages();
+        indexMax = Math.min(indexMax, this.originalList.size());
 
         if (indexMin >= indexMax) {
             throw new IllegalStateException("Page is too large. Maximum page number is " + totalPages);
@@ -69,13 +68,17 @@ public class CommandPager<T> {
         return this.originalList.subList(indexMin, indexMax);
     }
 
-    public static <T> void displayList(@NotNull Audience audience, int page, Function<T, Component> toMessage, Collection<T> options){
+    public static <T> void displayList(@NotNull Audience audience,
+                                       int page,
+                                       @NotNull String title,
+                                       Function<T, Component> toMessage,
+                                       Collection<T> options) {
         CommandPager<T> pager = new CommandPager<>(options);
         List<T> toDisplay = pager.results(page);
         audience.sendMessage(Component
                                      .text("====[")
                                      .color(NamedTextColor.AQUA)
-                                     .append(Component.text("Spawns (page " + page + "/" + pager.totalPages()))
+                                     .append(Component.text(title + " (page " + page + "/" + pager.totalPages()))
                                      .append(Component.text(")]===").color(NamedTextColor.AQUA)));
         toDisplay.forEach(message -> audience.sendMessage(toMessage.apply(message)));
         Component pageNext = Component.empty();

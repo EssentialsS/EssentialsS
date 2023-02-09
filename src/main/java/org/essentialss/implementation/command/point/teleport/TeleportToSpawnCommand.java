@@ -10,7 +10,6 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
@@ -34,20 +33,20 @@ public class TeleportToSpawnCommand {
                 return TeleportToSpawnCommand.execute(opPlayer.get());
             }
             if (context.subject() instanceof Player) {
-                return TeleportToSpawnCommand.execute((Entity) context.subject());
+                return TeleportToSpawnCommand.execute((Player) context.subject());
             }
             throw new CommandException(Component.text("Player needs to be specified"));
         }
     }
 
-    public static CommandResult execute(@NotNull Entity player) {
+    public static CommandResult execute(@NotNull Player player) {
         SSpawnPoint point = EssentialsSMain
                 .plugin()
                 .worldManager()
                 .get()
                 .dataFor(player.world())
                 .spawnPoint(player.location().position());
-        player.setPosition(point.location().position());
+        EssentialsSMain.plugin().playerManager().get().dataFor(player).teleport(point.position());
         return CommandResult.success();
     }
 

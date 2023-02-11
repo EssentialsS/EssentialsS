@@ -10,6 +10,7 @@ import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -56,14 +57,18 @@ public class CommandPager<T> {
     }
 
     public List<T> results(int currentPage) {
+        if (0 == currentPage) {
+            return Collections.emptyList();
+        }
         new Validator<>(currentPage).rule(ValidationRules.isGreaterThan(MINIMUM_PAGE - 1)).validate();
         int indexMax = this.pageSize * currentPage;
         int indexMin = Math.min(indexMax - this.pageSize, this.originalList.size());
         int totalPages = this.totalPages();
         indexMax = Math.min(indexMax, this.originalList.size());
 
-        if (indexMin >= indexMax) {
-            throw new IllegalStateException("Page is too large. Maximum page number is " + totalPages);
+        if (indexMin > indexMax) {
+            throw new IllegalStateException(
+                    "Page is too large. Maximum page number is " + totalPages + " -> Current page " + currentPage);
         }
         return this.originalList.subList(indexMin, indexMax);
     }

@@ -5,20 +5,23 @@ import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestBuilder;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.world.SWorldData;
+import org.essentialss.api.world.points.OfflineLocation;
+import org.essentialss.api.world.points.home.SHome;
+import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.LinkedTransferQueue;
 
 public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerData {
 
@@ -26,6 +29,7 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
     private boolean isAfk;
     private final Collection<TeleportRequest> teleportRequests = new LinkedHashSet<>();
     private int backTeleportIndex;
+    private LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
 
     public SPlayerDataImpl(@NotNull Player player) {
         this.player = player;
@@ -37,13 +41,18 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
     }
 
     @Override
-    public void releaseFromJail(@NotNull Location<?, ?> spawnTo) {
+    public void releaseFromJail(@NotNull OfflineLocation spawnTo) {
         this.isInJail = false;
         this.releaseFromJail = null;
-        if (spawnTo.onServer().isPresent()) {
-            this.player.setLocation(spawnTo.onServer().get());
+        Optional<Location<?, ?>> opLoc = spawnTo.location();
+        if (!opLoc.isPresent()) {
+            throw new IllegalArgumentException("Cannot get location");
         }
-        if (!this.player.world().equals(spawnTo.world())) {
+        Location<?, ?> loc = opLoc.get();
+        if (loc.onServer().isPresent()) {
+            this.player.setLocation(loc.onServer().get());
+        }
+        if (!this.player.world().equals(loc.world())) {
             throw new IllegalStateException("World has not loaded. Cannot release from jail");
         }
         this.player.setPosition(spawnTo.position());
@@ -56,14 +65,15 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
 
     @Override
     public void sendToJail(@NotNull SJailSpawnPoint point, @Nullable Duration length) {
-        if (point.location().onServer().isPresent()) {
-            this.player.setLocation(point.location().onServer().get());
+        Location<?, ?> location = point.location().location().orElseThrow(() -> new IllegalStateException("World has not loaded"));
+        if (location.onServer().isPresent()) {
+            this.player.setLocation(location.onServer().get());
             this.isInJail = true;
             if (null != length) {
                 this.releaseFromJail = LocalDateTime.now().plus(length);
             }
         }
-        World<?, ?> world = point.worldData().spongeWorld();
+        World<?, ?> world = location.world();
         if (!world.equals(this.player.world())) {
             throw new IllegalStateException("World has not loaded. Cannot send to jail");
         }
@@ -72,6 +82,15 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
         if (null != length) {
             this.releaseFromJail = LocalDateTime.now().plus(length);
         }
+    }
+
+    @Override
+    public void register(@NotNull SHomeBuilder builder) {
+        SHome home = new SHomeImpl(builder);
+        if (this.homes.parallelStream().anyMatch(h -> h.identifier().equalsIgnoreCase(builder.home()))) {
+            throw new IllegalArgumentException("House already registered");
+        }
+        this.homes.add(home);
     }
 
     @Override
@@ -132,5 +151,15 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
     public void accept(@NotNull TeleportRequest request) throws IllegalStateException {
         throw new RuntimeException("Not implemented yet");
 
+    }
+
+    @Override
+    public void reloadFromConfig() throws ConfigurateException {
+
+    }
+
+    @Override
+    public void saveToConfig() throws ConfigurateException {
+        UserDataSerializer.save(this);
     }
 }

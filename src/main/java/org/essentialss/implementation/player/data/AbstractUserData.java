@@ -4,10 +4,10 @@ import org.essentialss.api.player.data.SGeneralOfflineData;
 import org.essentialss.api.player.mail.MailMessage;
 import org.essentialss.api.player.mail.MailMessageBuilder;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
+import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.api.world.Location;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -20,7 +20,7 @@ public abstract class AbstractUserData implements SGeneralOfflineData {
     protected boolean muted;
     protected boolean isInJail;
     protected @Nullable LocalDateTime releaseFromJail;
-    protected LinkedList<Location<?, ?>> backTeleportLocations = new LinkedList<>();
+    protected LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
     protected LinkedList<MailMessage> mailMessages = new LinkedList<>();
 
     protected boolean preventingTeleportRequests;
@@ -67,27 +67,27 @@ public abstract class AbstractUserData implements SGeneralOfflineData {
 
     @Override
     public @NotNull UnmodifiableCollection<SHome> homes() {
-        return null;
+        throw new RuntimeException("homes not implemented yet");
     }
 
     @Override
-    public @NotNull LinkedList<Location<?, ?>> backTeleportLocations() {
+    public @NotNull LinkedList<OfflineLocation> backTeleportLocations() {
         return this.backTeleportLocations;
     }
 
     @Override
-    public void setBackTeleportLocations(Collection<Location<?, ?>> locations) {
+    public void setBackTeleportLocations(Collection<OfflineLocation> locations) {
         this.backTeleportLocations.clear();
         this.backTeleportLocations.addAll(locations);
     }
 
     @Override
-    public void addBackTeleportLocation(@NotNull Location<?, ?> location) {
+    public void addBackTeleportLocation(@NotNull OfflineLocation location) {
         this.backTeleportLocations.add(location);
     }
 
     @Override
-    public void removeBackTeleportLocation(@NotNull Location<?, ?> location) {
+    public void removeBackTeleportLocation(@NotNull OfflineLocation location) {
         this.backTeleportLocations.remove(location);
     }
 

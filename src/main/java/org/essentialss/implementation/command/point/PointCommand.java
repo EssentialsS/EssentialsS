@@ -1,5 +1,6 @@
 package org.essentialss.implementation.command.point;
 
+import org.essentialss.implementation.command.point.create.CreateSpawnCommand;
 import org.essentialss.implementation.command.point.create.CreateWarpCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
 import org.essentialss.implementation.command.point.teleport.TeleportToSpawnCommand;
@@ -21,8 +22,10 @@ public class PointCommand {
     }
 
     public static Command.Parameterized createSpawnCommand() {
+        Command.Parameterized create = CreateSpawnCommand.createSpawnCommand();
 
-        return TeleportToSpawnCommand.createSpawnToCommand(Command.builder());
+
+        return TeleportToSpawnCommand.createSpawnToCommand(Command.builder().addChild(create, "create", "new"));
     }
 
 }

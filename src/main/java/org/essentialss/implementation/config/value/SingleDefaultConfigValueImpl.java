@@ -1,8 +1,6 @@
 package org.essentialss.implementation.config.value;
 
 import org.essentialss.api.config.value.SingleConfigValue;
-import org.essentialss.api.utils.validation.ValidationRules;
-import org.essentialss.api.utils.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -19,7 +17,7 @@ public abstract class SingleDefaultConfigValueImpl<T> implements SingleConfigVal
     }
 
     public SingleDefaultConfigValueImpl(@NotNull T defaultValue, @NotNull Object... nodes) {
-        this.nodes = new Validator<>(nodes).rule(ValidationRules.isLengthGreaterThan(0)).validate();
+        this.nodes = nodes;
         this.defaultValue = defaultValue;
     }
 

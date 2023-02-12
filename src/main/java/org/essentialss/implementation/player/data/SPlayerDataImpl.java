@@ -94,6 +94,11 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
     }
 
     @Override
+    public void deregister(@NotNull SHome home) {
+        this.homes.remove(home);
+    }
+
+    @Override
     public @NotNull Player spongePlayer() {
         return this.player;
     }

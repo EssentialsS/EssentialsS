@@ -33,11 +33,11 @@ public class CreateWarpCommand {
         private final @NotNull Parameter.Value<ServerWorld> worldParameter;
         private final @NotNull Parameter.Value<String> warpNameParameter;
 
-        public Execute(@NotNull Parameter.Value<String> warpName,
-                       @NotNull Parameter.Value<Double> x,
-                       @NotNull Parameter.Value<Double> y,
-                       @NotNull Parameter.Value<Double> z,
-                       @NotNull Parameter.Value<ServerWorld> world) {
+        private Execute(@NotNull Parameter.Value<String> warpName,
+                        @NotNull Parameter.Value<Double> x,
+                        @NotNull Parameter.Value<Double> y,
+                        @NotNull Parameter.Value<Double> z,
+                        @NotNull Parameter.Value<ServerWorld> world) {
             this.locationXParameter = x;
             this.locationYParameter = y;
             this.locationZParameter = z;

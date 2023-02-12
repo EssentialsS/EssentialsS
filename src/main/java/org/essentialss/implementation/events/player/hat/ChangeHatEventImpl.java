@@ -1,4 +1,4 @@
-package org.essentialss.implementation.events.hat;
+package org.essentialss.implementation.events.player.hat;
 
 import org.essentialss.api.events.player.hat.ChangeHatEvent;
 import org.jetbrains.annotations.NotNull;

@@ -5,6 +5,7 @@ import org.essentialss.api.utils.SParameters;
 import org.essentialss.api.world.points.SPoint;
 import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -57,10 +58,20 @@ public class TeleportToWarpCommand {
     }
 
     public static Command.Parameterized createWarpToCommand(@NotNull Command.Parameterized.Builder builder) {
-        Parameter.Value<ServerPlayer> player = Parameter.player().key("player").optional().build();
+        Parameter.Value<ServerPlayer> player = Parameter
+                .player()
+                .key("player")
+                .requiredPermission(SPermissions.WARP_TELEPORT_OTHER.node())
+                .optional()
+                .build();
         Parameter.Value<SWarp> warp = SParameters.warp().key("warp").build();
 
-        return builder.addParameter(warp).addParameter(player).executor(new Execute(warp, player)).build();
+        return builder
+                .addParameter(warp)
+                .addParameter(player)
+                .executor(new Execute(warp, player))
+                .permission(SPermissions.WARP_TELEPORT_SELF.node())
+                .build();
     }
 
 }

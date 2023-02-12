@@ -2,6 +2,7 @@ package org.essentialss.implementation.player.data;
 
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
+import org.essentialss.api.world.points.home.SHome;
 import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
 import org.essentialss.implementation.EssentialsSMain;
@@ -71,7 +72,12 @@ public class SUserDataImpl extends AbstractUserData {
 
     @Override
     public void register(@NotNull SHomeBuilder builder) {
+        throw new RuntimeException("Offline player not implemented yet");
+    }
 
+    @Override
+    public void deregister(@NotNull SHome home) {
+        throw new RuntimeException("Offline player not implemented yet");
     }
 
     public @NotNull Optional<SWorldData> world() {

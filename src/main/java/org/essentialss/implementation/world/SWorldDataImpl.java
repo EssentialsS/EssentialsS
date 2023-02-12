@@ -5,7 +5,7 @@ import org.essentialss.api.utils.validation.ValidationRules;
 import org.essentialss.api.utils.validation.Validator;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.SPoint;
-import org.essentialss.api.world.points.home.SHomeBuilder;
+import org.essentialss.api.world.points.jail.SJailSpawnPoint;
 import org.essentialss.api.world.points.jail.SJailSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnPoint;
 import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
@@ -101,11 +101,6 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
-    public boolean register(@NotNull SHomeBuilder builder, boolean runEvent, @Nullable Cause cause) {
-        throw new RuntimeException("home is not implemented");
-    }
-
-    @Override
     public boolean register(@NotNull SSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
         new Validator<>(builder.point()).notNull().validate();
         SPoint spawnPoint = new SSpawnPointImpl(builder, this);
@@ -155,6 +150,28 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public boolean register(@NotNull SJailSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
         throw new RuntimeException("Jail is not implemented");
+    }
+
+    @Override
+    public boolean deregister(@NotNull SSpawnPoint builder, boolean runEvent, @Nullable Cause cause) {
+        return this.deregisterPoint(builder, runEvent, cause);
+    }
+
+    @Override
+    public boolean deregister(@NotNull SWarp builder, boolean runEvent, @Nullable Cause cause) {
+        return this.deregisterPoint(builder, runEvent, cause);
+    }
+
+    @Override
+    public boolean deregister(@NotNull SJailSpawnPoint builder, boolean runEvent, @Nullable Cause cause) {
+        throw new RuntimeException("Jail not implemented yet");
+    }
+
+    private boolean deregisterPoint(@NotNull SPoint point, boolean runEvent, @Nullable Cause cause) {
+        //TODO events
+        boolean result = this.points.remove(point);
+        //TODO events
+        return result;
     }
 
     @Override

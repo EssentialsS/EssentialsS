@@ -7,6 +7,7 @@ import org.essentialss.api.world.SWorldManager;
 import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.misc.CommandPager;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -69,7 +70,12 @@ public class ListWarpCommand {
                 .key("page")
                 .optional()
                 .build();
-        return Command.builder().addParameter(pageNumberParameter).executor(new Execute(pageNumberParameter)).build();
+        return Command
+                .builder()
+                .addParameter(pageNumberParameter)
+                .executor(new Execute(pageNumberParameter))
+                .permission(SPermissions.WARPS.node())
+                .build();
     }
 
 }

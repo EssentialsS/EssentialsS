@@ -1,7 +1,8 @@
 package org.essentialss.implementation.command.hat;
 
 import net.kyori.adventure.text.Component;
-import org.essentialss.implementation.events.hat.ChangeHatEventImpl;
+import org.essentialss.implementation.events.player.hat.ChangeHatEventImpl;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -30,8 +31,8 @@ public class HatCommand {
         private final @NotNull Parameter.Value<ItemStackSnapshot> itemParameter;
         private final @NotNull Parameter.Value<ServerPlayer> targetParameter;
 
-        public Execute(@NotNull Parameter.Value<ServerPlayer> target,
-                       @NotNull Parameter.Value<ItemStackSnapshot> item) {
+        private Execute(@NotNull Parameter.Value<ServerPlayer> target,
+                        @NotNull Parameter.Value<ItemStackSnapshot> item) {
             this.itemParameter = item;
             this.targetParameter = target;
         }
@@ -97,11 +98,17 @@ public class HatCommand {
         Parameter.Value<ItemStackSnapshot> itemParameter = Parameter
                 .itemStackSnapshot()
                 .key(itemKey)
+                .requiredPermission(SPermissions.HAT_CREATE_ITEM.node())
                 .optional()
                 .build();
 
         Parameter.Key<ServerPlayer> playerKey = Parameter.key("player", ServerPlayer.class);
-        Parameter.Value<ServerPlayer> targetParameter = Parameter.playerOrTarget().key(playerKey).optional().build();
+        Parameter.Value<ServerPlayer> targetParameter = Parameter
+                .playerOrTarget()
+                .key(playerKey)
+                .requiredPermission(SPermissions.HAT_OTHER.node())
+                .optional()
+                .build();
 
         return Command
                 .builder()

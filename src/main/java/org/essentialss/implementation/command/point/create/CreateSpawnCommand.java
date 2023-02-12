@@ -7,6 +7,7 @@ import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnType;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -34,11 +35,11 @@ public class CreateSpawnCommand {
 
         private final @NotNull Parameter.Value<SSpawnType> spawnTypeParameter;
 
-        public Execute(@NotNull Parameter.Value<SSpawnType> spawnTypeParameter,
-                       @NotNull Parameter.Value<ServerWorld> world,
-                       @NotNull Parameter.Value<Double> x,
-                       @NotNull Parameter.Value<Double> y,
-                       @NotNull Parameter.Value<Double> z) {
+        private Execute(@NotNull Parameter.Value<SSpawnType> spawnTypeParameter,
+                        @NotNull Parameter.Value<ServerWorld> world,
+                        @NotNull Parameter.Value<Double> x,
+                        @NotNull Parameter.Value<Double> y,
+                        @NotNull Parameter.Value<Double> z) {
             this.spawnTypeParameter = spawnTypeParameter;
             this.worldParameter = world;
             this.xParameter = x;
@@ -73,6 +74,24 @@ public class CreateSpawnCommand {
 
             SWorldData world = EssentialsSMain.plugin().worldManager().get().dataFor(opWorld.get());
             OfflineLocation loc = new OfflineLocation(world, new Vector3d(opX.get(), opY.get(), opZ.get()));
+
+            if ((SSpawnType.DISTANCE_SPAWN == spawnType) && !context
+                    .subject()
+                    .hasPermission(SPermissions.SPAWN_CREATE_DISTANCE.node(), context.contextCause())) {
+                throw new CommandException(Component.text("You do not have permission for distance spawn"));
+            }
+
+            if ((SSpawnType.MAIN_SPAWN == spawnType) && !context
+                    .subject()
+                    .hasPermission(SPermissions.SPAWN_CREATE_MAIN.node(), context.contextCause())) {
+                throw new CommandException(Component.text("You do not have permission for main spawn"));
+            }
+            if ((SSpawnType.FIRST_LOGIN == spawnType) && !context
+                    .subject()
+                    .hasPermission(SPermissions.SPAWN_CREATE_FIRST.node(), context.contextCause())) {
+                throw new CommandException(Component.text("You do not have permission for first spawn"));
+            }
+
             return CreateSpawnCommand.execute(loc, spawnType, context.contextCause());
         }
     }

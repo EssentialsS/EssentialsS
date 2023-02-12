@@ -8,6 +8,7 @@ import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.utils.Singleton;
 import org.essentialss.api.world.SWorldManager;
 import org.essentialss.implementation.command.hat.HatCommand;
+import org.essentialss.implementation.command.nick.NicknameCommand;
 import org.essentialss.implementation.command.point.PointCommand;
 import org.essentialss.implementation.command.point.list.ListSpawnCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
@@ -52,6 +53,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, ListWarpCommand.createWarpListCommand(), "warps");
         event.register(this.container, PointCommand.createSpawnCommand(), "spawn");
         event.register(this.container, ListSpawnCommand.createSpawnListCommand(), "spawns");
+        event.register(this.container, NicknameCommand.createNicknameCommand(), "nickname", "nick");
     }
 
     public @NotNull PluginContainer container() {

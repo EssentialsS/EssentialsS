@@ -1,5 +1,6 @@
 package org.essentialss.implementation.player.data;
 
+import net.kyori.adventure.text.Component;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestBuilder;
@@ -36,6 +37,16 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
     }
 
     @Override
+    public @NotNull Component displayName() {
+        return this.spongePlayer().displayName().get();
+    }
+
+    @Override
+    public void setDisplayName(@NotNull Component component) {
+        this.spongePlayer().displayName().set(component);
+    }
+
+    @Override
     public @NotNull UUID uuid() {
         return this.player.uniqueId();
     }
@@ -65,7 +76,10 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
 
     @Override
     public void sendToJail(@NotNull SJailSpawnPoint point, @Nullable Duration length) {
-        Location<?, ?> location = point.location().location().orElseThrow(() -> new IllegalStateException("World has not loaded"));
+        Location<?, ?> location = point
+                .location()
+                .location()
+                .orElseThrow(() -> new IllegalStateException("World has not loaded"));
         if (location.onServer().isPresent()) {
             this.player.setLocation(location.onServer().get());
             this.isInJail = true;

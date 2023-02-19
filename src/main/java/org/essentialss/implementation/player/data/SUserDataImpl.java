@@ -1,9 +1,8 @@
 package org.essentialss.implementation.player.data;
 
+import org.essentialss.api.player.data.SGeneralOfflineData;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
-import org.essentialss.api.world.points.home.SHome;
-import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
@@ -20,9 +19,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SUserDataImpl extends AbstractUserData {
+public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflineData {
 
     private final @NotNull User user;
+
 
     public SUserDataImpl(@NotNull User user) {
         this.user = user;
@@ -70,16 +70,6 @@ public class SUserDataImpl extends AbstractUserData {
         }
     }
 
-    @Override
-    public void register(@NotNull SHomeBuilder builder) {
-        throw new RuntimeException("Offline player not implemented yet");
-    }
-
-    @Override
-    public void deregister(@NotNull SHome home) {
-        throw new RuntimeException("Offline player not implemented yet");
-    }
-
     public @NotNull Optional<SWorldData> world() {
         ResourceKey key = this.user.worldKey();
         return Sponge
@@ -91,11 +81,16 @@ public class SUserDataImpl extends AbstractUserData {
 
     @Override
     public void reloadFromConfig() throws ConfigurateException {
-
+        UserDataSerializer.load(this);
     }
 
     @Override
     public void saveToConfig() throws ConfigurateException {
         UserDataSerializer.save(this);
+    }
+
+    @Override
+    public String playerName() {
+        return this.user.name();
     }
 }

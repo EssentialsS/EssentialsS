@@ -1,11 +1,14 @@
 package org.essentialss.implementation.player.data;
 
-import org.essentialss.api.player.data.SGeneralOfflineData;
+import net.kyori.adventure.text.Component;
+import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.player.mail.MailMessage;
 import org.essentialss.api.player.mail.MailMessageBuilder;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHome;
+import org.essentialss.api.world.points.home.SHomeBuilder;
+import org.essentialss.implementation.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,8 +16,9 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.concurrent.LinkedTransferQueue;
 
-public abstract class AbstractUserData implements SGeneralOfflineData {
+public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
     protected boolean canLooseItemsWhenUsed;
     protected boolean muted;
@@ -22,8 +26,30 @@ public abstract class AbstractUserData implements SGeneralOfflineData {
     protected @Nullable LocalDateTime releaseFromJail;
     protected LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
     protected LinkedList<MailMessage> mailMessages = new LinkedList<>();
+    protected @Nullable Component displayName;
+    protected final @NotNull LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
+
 
     protected boolean preventingTeleportRequests;
+
+    @Override
+    public @NotNull Component displayName() {
+        if (null == this.displayName) {
+            return Component.text(this.playerName());
+        }
+        return this.displayName;
+
+    }
+
+    @Override
+    public boolean hasSetDisplayName() {
+        return null != this.displayName;
+    }
+
+    @Override
+    public void setDisplayName(@Nullable Component component) {
+        this.displayName = component;
+    }
 
     @Override
     public boolean canLooseItemsWhenUsed() {
@@ -104,5 +130,37 @@ public abstract class AbstractUserData implements SGeneralOfflineData {
     @Override
     public void addMailMessage(@NotNull MailMessageBuilder builder) {
         throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public void register(@NotNull SHomeBuilder builder) {
+        SHome home = new SHomeImpl(builder);
+        if (this.homes.parallelStream().anyMatch(h -> h.identifier().equalsIgnoreCase(builder.home()))) {
+            throw new IllegalArgumentException("House already registered");
+        }
+        this.homes.add(home);
+    }
+
+    @Override
+    public void deregister(@NotNull SHome home) {
+        this.homes.remove(home);
+    }
+
+    @Override
+    public void setHomes(@NotNull Collection<SHomeBuilder> homes) {
+        this.homes.clear();
+        homes.forEach(this::register);
+    }
+
+    public void applyChangesFrom(@NotNull AbstractProfileData data) {
+        this.backTeleportLocations.addAll(data.backTeleportLocations);
+        this.displayName = data.displayName;
+        this.homes.addAll(data.homes);
+        this.releaseFromJail = data.releaseFromJail;
+        this.canLooseItemsWhenUsed = data.canLooseItemsWhenUsed;
+        this.isInJail = data.isInJail;
+        this.mailMessages.addAll(data.mailMessages);
+        this.muted = data.muted;
+        this.preventingTeleportRequests = data.preventingTeleportRequests;
     }
 }

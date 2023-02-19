@@ -1,17 +1,14 @@
 package org.essentialss.implementation.player.data;
 
-import net.kyori.adventure.text.Component;
+import org.essentialss.api.message.MessageData;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestBuilder;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
-import org.essentialss.api.world.points.home.SHome;
-import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
 import org.essentialss.implementation.EssentialsSMain;
-import org.essentialss.implementation.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
@@ -22,29 +19,18 @@ import org.spongepowered.configurate.ConfigurateException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.LinkedTransferQueue;
 
-public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerData {
+public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlayerData {
 
     private final @NotNull Player player;
     private boolean isAfk;
     private final Collection<TeleportRequest> teleportRequests = new LinkedHashSet<>();
     private int backTeleportIndex;
-    private LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
 
     public SPlayerDataImpl(@NotNull Player player) {
         this.player = player;
     }
 
-    @Override
-    public @NotNull Component displayName() {
-        return this.spongePlayer().displayName().get();
-    }
-
-    @Override
-    public void setDisplayName(@NotNull Component component) {
-        this.spongePlayer().displayName().set(component);
-    }
 
     @Override
     public @NotNull UUID uuid() {
@@ -99,22 +85,13 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
     }
 
     @Override
-    public void register(@NotNull SHomeBuilder builder) {
-        SHome home = new SHomeImpl(builder);
-        if (this.homes.parallelStream().anyMatch(h -> h.identifier().equalsIgnoreCase(builder.home()))) {
-            throw new IllegalArgumentException("House already registered");
-        }
-        this.homes.add(home);
-    }
-
-    @Override
-    public void deregister(@NotNull SHome home) {
-        this.homes.remove(home);
-    }
-
-    @Override
     public @NotNull Player spongePlayer() {
         return this.player;
+    }
+
+    @Override
+    public void sendMessageTo(@NotNull MessageData data) {
+        this.player.sendMessage(data.formattedMessage());
     }
 
     @Override
@@ -174,11 +151,27 @@ public class SPlayerDataImpl extends AbstractUserData implements SGeneralPlayerD
 
     @Override
     public void reloadFromConfig() throws ConfigurateException {
-
+        UserDataSerializer.load(this);
     }
 
     @Override
     public void saveToConfig() throws ConfigurateException {
         UserDataSerializer.save(this);
+    }
+
+    @Override
+    public String playerName() {
+        return this.player.name();
+    }
+
+    @Override
+    public void applyChangesFrom(@NotNull AbstractProfileData data) {
+        super.applyChangesFrom(data);
+        if (data instanceof SPlayerDataImpl) {
+            SPlayerDataImpl pData = (SPlayerDataImpl) data;
+            this.isAfk = pData.isAfk;
+            this.teleportRequests.addAll(pData.teleportRequests);
+            this.backTeleportIndex = pData.backTeleportIndex;
+        }
     }
 }

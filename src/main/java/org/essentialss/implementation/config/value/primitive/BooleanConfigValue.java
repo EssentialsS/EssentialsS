@@ -8,9 +8,8 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 public class BooleanConfigValue extends SingleDefaultConfigValueImpl<Boolean> {
 
-    @Deprecated
-    public BooleanConfigValue(@NotNull Boolean defaultValue) {
-        super(defaultValue);
+    public BooleanConfigValue(@NotNull Object... nodes) {
+        super(false, nodes);
     }
 
     public BooleanConfigValue(@NotNull Boolean defaultValue, @NotNull Object... nodes) {

@@ -1,0 +1,50 @@
+name: Crash
+description: If Essentials-S is crashing
+title: "[Crash Related Bug]: "
+labels: [ "bug", "triage", "crash" ]
+body:
+  - type: dropdown
+    id: api
+    attributes:
+      label: API version
+      description: "What Sponge API are you using?"
+      options:
+        - 8.x.x
+        - 9.x.x
+        - 10.x.x
+    validations:
+      required: true
+  - type: dropdown
+    id: implementation
+    attributes:
+      label: Sponge platform
+      description: "What platform of sponge are you running?"
+      options:
+        - Sponge Forge
+        - Sponge Vanilla
+        - Lantern
+    validations:
+      required: true
+  - type: input
+    id: essentials-s-version
+    attributes:
+      label: Essentials-S version
+      description: "Please state the version of Essentials-S you are using as shown in '/essentials info' command"
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: Crash log
+      description: Please show the crashlog here
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: recreate
+    attributes:
+      label: Steps-To-Recreate
+      description: Describe how to recreate the issue
+    validations:
+      required: true

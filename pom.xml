@@ -12,7 +12,7 @@
     <name>EssentialsSImpImplementation</name>
 
     <modules>
-        <module>../API</module>
+        <module>./api</module>
     </modules>
 
     <properties>

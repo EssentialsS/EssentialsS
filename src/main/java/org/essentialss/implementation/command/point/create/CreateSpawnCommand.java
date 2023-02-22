@@ -24,7 +24,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
-public class CreateSpawnCommand {
+public final class CreateSpawnCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -81,14 +81,10 @@ public class CreateSpawnCommand {
                 throw new CommandException(Component.text("You do not have permission for distance spawn"));
             }
 
-            if ((SSpawnType.MAIN_SPAWN == spawnType) && !context
-                    .subject()
-                    .hasPermission(SPermissions.SPAWN_CREATE_MAIN.node(), context.contextCause())) {
+            if ((SSpawnType.MAIN_SPAWN == spawnType) && !context.subject().hasPermission(SPermissions.SPAWN_CREATE_MAIN.node(), context.contextCause())) {
                 throw new CommandException(Component.text("You do not have permission for main spawn"));
             }
-            if ((SSpawnType.FIRST_LOGIN == spawnType) && !context
-                    .subject()
-                    .hasPermission(SPermissions.SPAWN_CREATE_FIRST.node(), context.contextCause())) {
+            if ((SSpawnType.FIRST_LOGIN == spawnType) && !context.subject().hasPermission(SPermissions.SPAWN_CREATE_FIRST.node(), context.contextCause())) {
                 throw new CommandException(Component.text("You do not have permission for first spawn"));
             }
 
@@ -96,13 +92,8 @@ public class CreateSpawnCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull OfflineLocation location,
-                                        @NotNull SSpawnType type,
-                                        @NotNull Cause cause) {
-        boolean result = location
-                .worldData()
-                .register(new SSpawnPointBuilder().setSpawnTypes(type).setPoint(location.position()), cause);
-        return result ? CommandResult.success() : CommandResult.error(Component.text("Could not create spawn"));
+    private CreateSpawnCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createSpawnCommand() {
@@ -122,5 +113,10 @@ public class CreateSpawnCommand {
                 .executor(new Execute(spawnType, world, x, y, z))
                 .build();
 
+    }
+
+    public static CommandResult execute(@NotNull OfflineLocation location, @NotNull SSpawnType type, @NotNull Cause cause) {
+        boolean result = location.worldData().register(new SSpawnPointBuilder().setSpawnTypes(type).setPoint(location.position()), cause);
+        return result ? CommandResult.success() : CommandResult.error(Component.text("Could not create spawn"));
     }
 }

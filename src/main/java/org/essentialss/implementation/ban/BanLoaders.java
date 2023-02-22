@@ -2,7 +2,6 @@ package org.essentialss.implementation.ban;
 
 import org.essentialss.implementation.ban.account.AccountBanLoaderImpl;
 import org.essentialss.implementation.ban.ip.IPAddressBanLoader;
-import org.essentialss.implementation.ban.ip.IPBanDataImpl;
 
 public interface BanLoaders {
 

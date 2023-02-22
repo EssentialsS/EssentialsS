@@ -12,9 +12,9 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class WhoIsCommand {
+public final class WhoIsCommand {
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final Parameter.Value<SGeneralUnloadedData> value;
 
@@ -29,17 +29,18 @@ public class WhoIsCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull SGeneralUnloadedData data, @NotNull Audience audience) {
-        audience.sendMessage(Component.text(data.playerName() + " is ").append(data.displayName()));
-        return CommandResult.success();
+    private WhoIsCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createWhoIsCommand() {
-        Parameter.Value<SGeneralUnloadedData> player = SParameters
-                .offlinePlayersNicknames(true, t -> true)
-                .key("nickname")
-                .build();
+        Parameter.Value<SGeneralUnloadedData> player = SParameters.offlinePlayersNickname(true, t -> true).key("nickname").build();
         return Command.builder().addParameter(player).executor(new Execute(player)).build();
+    }
+
+    public static CommandResult execute(@NotNull SGeneralUnloadedData data, @NotNull Audience audience) {
+        audience.sendMessage(Component.text(data.playerName() + " is ").append(data.displayName()));
+        return CommandResult.success();
     }
 
 }

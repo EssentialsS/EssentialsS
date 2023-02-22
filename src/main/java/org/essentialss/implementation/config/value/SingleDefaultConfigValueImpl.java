@@ -12,11 +12,11 @@ public abstract class SingleDefaultConfigValueImpl<T> implements SingleConfigVal
     private final @NotNull T defaultValue;
 
     @Deprecated
-    public SingleDefaultConfigValueImpl(@NotNull T defaultValue) {
+    protected SingleDefaultConfigValueImpl(@NotNull T defaultValue) {
         this(defaultValue, new Object[0]);
     }
 
-    public SingleDefaultConfigValueImpl(@NotNull T defaultValue, @NotNull Object... nodes) {
+    protected SingleDefaultConfigValueImpl(@NotNull T defaultValue, @NotNull Object... nodes) {
         this.nodes = nodes;
         this.defaultValue = defaultValue;
     }

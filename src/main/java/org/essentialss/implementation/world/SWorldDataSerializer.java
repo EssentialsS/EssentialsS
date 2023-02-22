@@ -9,13 +9,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.File;
 
-public class SWorldDataSerializer {
+final class SWorldDataSerializer {
 
-    public static void load(@NotNull SWorldData worldData) throws ConfigurateException {
+    private SWorldDataSerializer() {
+        throw new RuntimeException("Should not create");
+    }
+
+    static void load(@NotNull SWorldData worldData) throws ConfigurateException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
         File file = new File(folder, "data/world/" + worldData.identifier() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
@@ -41,7 +46,8 @@ public class SWorldDataSerializer {
         });
     }
 
-    public static void save(@NotNull SWorldData worldData) throws ConfigurateException {
+    @SuppressWarnings("DuplicateThrows")
+    static void save(@NotNull SWorldData worldData) throws ConfigurateException, SerializationException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
         File file = new File(folder, "data/world/" + worldData.identifier() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
@@ -49,7 +55,6 @@ public class SWorldDataSerializer {
 
         CommentedConfigurationNode pointNode = root.node("points");
         for (SWarp warp : worldData.warps()) {
-
             CommentedConfigurationNode points = pointNode.appendListNode();
             points.node("name").set(warp.identifier());
             points.node("type").set("Warp");

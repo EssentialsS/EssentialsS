@@ -3,12 +3,9 @@ package org.essentialss.implementation.config.value.simple;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class UUIDConfigValue implements SingleConfigValue<UUID> {

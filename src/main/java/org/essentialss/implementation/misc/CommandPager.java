@@ -23,6 +23,8 @@ public class CommandPager<T> {
     public static final int MINIMUM_PAGE_SIZE = 1;
     public static final int MINIMUM_PAGE = 1;
 
+    public static final String PAGE_ARGUMENT = "[page]";
+
     public CommandPager(Collection<T> originalList) {
         this(EssentialsSMain
                      .plugin()
@@ -76,6 +78,7 @@ public class CommandPager<T> {
     public static <T> void displayList(@NotNull Audience audience,
                                        int page,
                                        @NotNull String title,
+                                       @NotNull String command,
                                        Function<T, Component> toMessage,
                                        Collection<T> options) {
         CommandPager<T> pager = new CommandPager<>(options);
@@ -91,7 +94,7 @@ public class CommandPager<T> {
         if (pager.hasPreviousPage(page)) {
             Component component = Component
                     .text("<<Previous<<")
-                    .clickEvent(ClickEvent.runCommand("warps list " + (page - 1)));
+                    .clickEvent(ClickEvent.runCommand(command.replaceAll(PAGE_ARGUMENT, (page - 1) + "")));
             pageNext = pageNext.append(component);
         }
         if (pager.hasNextPage(page)) {
@@ -99,7 +102,9 @@ public class CommandPager<T> {
                 Component splitComponent = Component.text(" | ");
                 pageNext = pageNext.append(splitComponent);
             }
-            Component nextPage = Component.text(">>Next>>").clickEvent(ClickEvent.runCommand("warps list " + page + 1));
+            Component nextPage = Component
+                    .text(">>Next>>")
+                    .clickEvent(ClickEvent.runCommand(command.replaceAll(PAGE_ARGUMENT, (page + 1) + "")));
             pageNext = pageNext.append(nextPage);
         }
         if (!pageNext.equals(Component.empty())) {

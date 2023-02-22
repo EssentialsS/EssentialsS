@@ -8,7 +8,18 @@ import org.essentialss.implementation.command.point.teleport.TeleportToSpawnComm
 import org.essentialss.implementation.command.point.teleport.TeleportToWarpCommand;
 import org.spongepowered.api.command.Command;
 
-public class PointCommand {
+public final class PointCommand {
+
+    private PointCommand() {
+        throw new RuntimeException("Should not create");
+    }
+
+    public static Command.Parameterized createSpawnCommand() {
+        Command.Parameterized create = CreateSpawnCommand.createSpawnCommand();
+
+
+        return TeleportToSpawnCommand.createSpawnToCommand(Command.builder().addChild(create, "create", "new"));
+    }
 
     public static Command.Parameterized createWarpCommand() {
         Command.Parameterized register = CreateWarpCommand.createRegisterWarpCommand();
@@ -22,13 +33,6 @@ public class PointCommand {
                                                                  .addChild(register, "create", "register")
                                                                  .addChild(teleportTo, "teleport", "to")
                                                                  .addChild(list, "list", "display"));
-    }
-
-    public static Command.Parameterized createSpawnCommand() {
-        Command.Parameterized create = CreateSpawnCommand.createSpawnCommand();
-
-
-        return TeleportToSpawnCommand.createSpawnToCommand(Command.builder().addChild(create, "create", "new"));
     }
 
 }

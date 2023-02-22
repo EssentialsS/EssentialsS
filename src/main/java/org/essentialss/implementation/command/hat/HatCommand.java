@@ -24,15 +24,14 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 
 import java.util.Optional;
 
-public class HatCommand {
+public final class HatCommand {
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final @NotNull Parameter.Value<ItemStackSnapshot> itemParameter;
         private final @NotNull Parameter.Value<ServerPlayer> targetParameter;
 
-        private Execute(@NotNull Parameter.Value<ServerPlayer> target,
-                        @NotNull Parameter.Value<ItemStackSnapshot> item) {
+        private Execute(@NotNull Parameter.Value<ServerPlayer> target, @NotNull Parameter.Value<ItemStackSnapshot> item) {
             this.itemParameter = item;
             this.targetParameter = target;
         }
@@ -66,32 +65,16 @@ public class HatCommand {
             CommandResult result = HatCommand.execute(finalPlayer, item, context.contextCause());
             if (result.isSuccess() && (null != hotbarClearItem)) {
                 Hotbar hotbar = finalPlayer.inventory().hotbar();
-                Slot slot = hotbar
-                        .slot(hotbarClearItem)
-                        .orElseThrow(() -> new RuntimeException("Hotbar slot doesn't exist"));
+                Slot slot = hotbar.slot(hotbarClearItem).orElseThrow(() -> new RuntimeException("Hotbar slot doesn't exist"));
                 slot.clear();
             }
             return result;
         }
     }
 
-    public static CommandResult execute(@NotNull Player player, @NotNull ItemStack item, @NotNull Cause cause) {
-        EquipmentInventory equipment = player.inventory().equipment();
-        Optional<ItemStack> currentItem = equipment.peek(EquipmentTypes.HEAD);
-
-        Transaction<ItemStack> transaction = new Transaction<>(currentItem.orElse(ItemStack.empty()), item);
-        ChangeHatEventImpl changeHatEvent = new ChangeHatEventImpl(player, transaction, cause);
-        Sponge.eventManager().post(changeHatEvent);
-        if (changeHatEvent.isCancelled()) {
-            return CommandResult.error(Component.text("A plugin cancelled this command"));
-        }
-
-        currentItem.ifPresent(itemStack -> player.inventory().offer(itemStack));
-        equipment.set(EquipmentTypes.HEAD,
-                      changeHatEvent.item().custom().orElseGet(() -> changeHatEvent.item().finalReplacement()));
-        return CommandResult.success();
+    private HatCommand() {
+        throw new RuntimeException("Should not create");
     }
-
 
     public static Command.Parameterized createHatCommand() {
         Parameter.Key<ItemStackSnapshot> itemKey = Parameter.key("hat", ItemStackSnapshot.class);
@@ -110,12 +93,23 @@ public class HatCommand {
                 .optional()
                 .build();
 
-        return Command
-                .builder()
-                .executor(new Execute(targetParameter, itemParameter))
-                .addParameter(targetParameter)
-                .addParameter(itemParameter)
-                .build();
+        return Command.builder().executor(new Execute(targetParameter, itemParameter)).addParameter(targetParameter).addParameter(itemParameter).build();
 
+    }
+
+    public static CommandResult execute(@NotNull Player player, @NotNull ItemStack item, @NotNull Cause cause) {
+        EquipmentInventory equipment = player.inventory().equipment();
+        Optional<ItemStack> currentItem = equipment.peek(EquipmentTypes.HEAD);
+
+        Transaction<ItemStack> transaction = new Transaction<>(currentItem.orElse(ItemStack.empty()), item);
+        ChangeHatEventImpl changeHatEvent = new ChangeHatEventImpl(player, transaction, cause);
+        Sponge.eventManager().post(changeHatEvent);
+        if (changeHatEvent.isCancelled()) {
+            return CommandResult.error(Component.text("A plugin cancelled this command"));
+        }
+
+        currentItem.ifPresent(itemStack -> player.inventory().offer(itemStack));
+        equipment.set(EquipmentTypes.HEAD, changeHatEvent.item().custom().orElseGet(() -> changeHatEvent.item().finalReplacement()));
+        return CommandResult.success();
     }
 }

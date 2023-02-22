@@ -3,7 +3,11 @@ package org.essentialss.implementation.command.ban;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 
-public class BanCommands {
+public final class BanCommands {
+
+    private BanCommands() {
+        throw new RuntimeException("Should not create");
+    }
 
     public static Command.Parameterized createBanCommand() {
         Command.Parameterized banAccountCommand = AccountBanCommand.createBanAccountCommand();

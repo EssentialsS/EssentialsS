@@ -97,8 +97,9 @@ public class SBanManagerImpl implements SBanManager {
         loader.save(root);
     }
 
+    @SuppressWarnings("DuplicateThrows")
     @Override
-    public void reloadFromConfig() throws ConfigurateException {
+    public void reloadFromConfig() throws ConfigurateException, SerializationException {
         Path path = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory();
         File file = new File(path.toFile(), "data/banned.conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();

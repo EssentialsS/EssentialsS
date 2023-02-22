@@ -14,7 +14,7 @@ import org.spongepowered.api.command.parameter.Parameter.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.permission.Subject;
 
-public class RunPlayerCMDCommand {
+public final class RunPlayerCMDCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -34,20 +34,17 @@ public class RunPlayerCMDCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull Subject player, @NotNull Audience audience, @NotNull String command)
-            throws CommandException {
-        return Sponge.server().commandManager().process(player, audience, command);
+    private RunPlayerCMDCommand() {
+        throw new RuntimeException("Should not create");
     }
 
-
-    public static @NotNull Command.Parameterized createRunPlayerCommand() {
+    static @NotNull Command.Parameterized createRunPlayerCommand() {
         Parameter.Key<ServerPlayer> serverPlayerKey = Parameter.key("player", ServerPlayer.class);
         Value<ServerPlayer> playerParameter = Parameter.player().key(serverPlayerKey).build();
 
         Parameter.Key<String> commandParameterKey = Parameter.key("command", String.class);
         Value<String> commandParameter = SParameters
-                .commandParameter((cause, input) -> cause.requireOne(serverPlayerKey),
-                                  (cause, input) -> cause.cause().audience())
+                .commandParameter((cause, input) -> cause.requireOne(serverPlayerKey), (cause, input) -> cause.cause().audience())
                 .key(commandParameterKey)
                 .build();
 
@@ -58,5 +55,9 @@ public class RunPlayerCMDCommand {
                 .addParameter(commandParameter)
                 .executionRequirements(cause -> Sponge.isServerAvailable())
                 .build();
+    }
+
+    public static CommandResult execute(@NotNull Subject player, @NotNull Audience audience, @NotNull String command) throws CommandException {
+        return Sponge.server().commandManager().process(player, audience, command);
     }
 }

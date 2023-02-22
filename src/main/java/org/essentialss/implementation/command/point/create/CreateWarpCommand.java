@@ -22,9 +22,9 @@ import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.Optional;
 
-public class CreateWarpCommand {
+public final class CreateWarpCommand {
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final @NotNull Parameter.Value<Double> locationXParameter;
         private final @NotNull Parameter.Value<Double> locationYParameter;
@@ -90,8 +90,7 @@ public class CreateWarpCommand {
             }
 
             String warpName = context.requireOne(this.warpNameParameter);
-            CommandResult result = CreateWarpCommand.execute(world.location(posX, posY, posZ), warpName,
-                                                             context.contextCause());
+            CommandResult result = CreateWarpCommand.execute(world.location(posX, posY, posZ), warpName, context.contextCause());
             if (result.isSuccess()) {
                 context.cause().audience().sendMessage(Component.text("Created warp '" + warpName + "'"));
             } else {
@@ -101,34 +100,8 @@ public class CreateWarpCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull Location<?, ?> location,
-                                        @NotNull String warpName,
-                                        @NotNull Cause cause) {
-
-        SWorldData worldData = EssentialsSMain.plugin().worldManager().get().dataFor(location.world());
-        try {
-            //Ensures any user manually added values are loaded
-            worldData.reloadFromConfig();
-        } catch (ConfigurateException e) {
-            return CommandResult.error(
-                    Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
-        }
-        boolean added;
-        try {
-            added = worldData.register(new SWarpBuilder().setName(warpName).setPoint(location.position()), cause);
-        } catch (IllegalArgumentException e) {
-            return CommandResult.error(Component.text(e.getMessage()));
-        }
-        if (added) {
-            try {
-                worldData.saveToConfig();
-            } catch (ConfigurateException e) {
-                return CommandResult.error(
-                        Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
-            }
-            return CommandResult.success();
-        }
-        return CommandResult.error(Component.text("Could not register that warp"));
+    private CreateWarpCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createRegisterWarpCommand() {
@@ -143,12 +116,7 @@ public class CreateWarpCommand {
         Parameter.Value<Double> z = SParameters.location(false, Location::z).key(zKey).optional().build();
 
         Parameter.Value<String> warpName = Parameter.string().key(warpNameKey).build();
-        Parameter.Value<ServerWorld> world = Parameter
-                .world()
-                .key(worldKey)
-                .optional()
-                .requirements(cause -> Sponge.isServerAvailable())
-                .build();
+        Parameter.Value<ServerWorld> world = Parameter.world().key(worldKey).optional().requirements(cause -> Sponge.isServerAvailable()).build();
 
         return Command
                 .builder()
@@ -159,6 +127,32 @@ public class CreateWarpCommand {
                 .addParameter(world)
                 .executor(new Execute(warpName, x, y, z, world))
                 .build();
+    }
+
+    public static CommandResult execute(@NotNull Location<?, ?> location, @NotNull String warpName, @NotNull Cause cause) {
+
+        SWorldData worldData = EssentialsSMain.plugin().worldManager().get().dataFor(location.world());
+        try {
+            //Ensures any user manually added values are loaded
+            worldData.reloadFromConfig();
+        } catch (ConfigurateException e) {
+            return CommandResult.error(Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
+        }
+        boolean added;
+        try {
+            added = worldData.register(new SWarpBuilder().setName(warpName).setPoint(location.position()), cause);
+        } catch (IllegalArgumentException e) {
+            return CommandResult.error(Component.text(e.getMessage()));
+        }
+        if (added) {
+            try {
+                worldData.saveToConfig();
+            } catch (ConfigurateException e) {
+                return CommandResult.error(Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
+            }
+            return CommandResult.success();
+        }
+        return CommandResult.error(Component.text("Could not register that warp"));
     }
 
 }

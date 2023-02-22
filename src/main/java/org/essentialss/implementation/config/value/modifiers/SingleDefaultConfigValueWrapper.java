@@ -18,23 +18,23 @@ public class SingleDefaultConfigValueWrapper<V> implements SingleConfigValue.Def
     }
 
     @Override
+    public V defaultValue() {
+        return this.defaultValue;
+    }
+
+    @Override
     public @NotNull Object[] nodes() {
         return this.configValue.nodes();
     }
 
+    @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable V parse(@NotNull ConfigurationNode root) throws SerializationException {
-        //noinspection allow-nullable
         return this.configValue.parse(root);
     }
 
     @Override
     public void set(@NotNull ConfigurationNode root, @Nullable V value) throws SerializationException {
         this.configValue.set(root, value);
-    }
-
-    @Override
-    public V defaultValue() {
-        return this.defaultValue;
     }
 }

@@ -2,6 +2,7 @@ package org.essentialss.implementation.player.data;
 
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.config.value.CollectionConfigValue;
+import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHomeBuilder;
@@ -16,46 +17,32 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class UserDataSerializer {
+final class UserDataSerializer {
 
-    private static final BooleanConfigValue CAN_LOOSE_ITEMS_WHEN_USED = new BooleanConfigValue(true, "inventory",
-                                                                                               "LooseItemsWhenUsed");
-    private static final BooleanConfigValue PREVENT_TELEPORT_REQUESTS = new BooleanConfigValue(false, "other",
-                                                                                               "BlockingTeleportRequests");
+    private static final ConfigValue<Boolean> CAN_LOOSE_ITEMS_WHEN_USED = new BooleanConfigValue(true, "inventory", "LooseItemsWhenUsed");
+    private static final ConfigValue<Boolean> PREVENT_TELEPORT_REQUESTS = new BooleanConfigValue(false, "other", "BlockingTeleportRequests");
     private static final BooleanConfigValue IS_IN_JAIL = new BooleanConfigValue(false, "jail", "In");
     private static final DateTimeConfigValue RELEASED_FROM_JAIL = new DateTimeConfigValue("jail", "ReleasedOn");
     private static final ComponentConfigValue DISPLAY_NAME = new ComponentConfigValue("other", "DisplayName");
 
     private static final BooleanConfigValue IS_MUTED = new BooleanConfigValue(false, "chat", "Muted");
-    private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListDefaultConfigValueImpl<>(
-            new LocationConfigValue("placement"), "locations", "back");
+    private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListDefaultConfigValueImpl<>(new LocationConfigValue("placement"),
+                                                                                                                  "locations", "back");
 
-    private static final CollectionConfigValue<SHomeBuilder> HOMES = new ListDefaultConfigValueImpl<>(
-            new HomeConfigValue(), "homes");
+    private static final CollectionConfigValue<SHomeBuilder> HOMES = new ListDefaultConfigValueImpl<>(new HomeConfigValue(), "homes");
 
-    public static void save(SGeneralUnloadedData userData) throws ConfigurateException {
-        File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        File file = new File(folder, "data/players/" + userData.uuid() + ".conf");
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
-        CommentedConfigurationNode root = loader.createNode();
-        IS_MUTED.set(root, userData.muted());
-        IS_IN_JAIL.set(root, userData.isInJail());
-        PREVENT_TELEPORT_REQUESTS.set(root, userData.isPreventingTeleportRequests());
-        CAN_LOOSE_ITEMS_WHEN_USED.set(root, userData.canLooseItemsWhenUsed());
-        RELEASED_FROM_JAIL.set(root, userData.releasedFromJailTime().orElse(null));
-        DISPLAY_NAME.set(root, userData.hasSetDisplayName() ? userData.displayName() : null);
-        BACK_LOCATIONS.set(root, userData.backTeleportLocations());
-        //HOMES.set(root, userData.homes().stream().map(SHome::builder).collect(Collectors.toList()));
-
-        loader.save(root);
+    private UserDataSerializer() {
+        throw new RuntimeException("Should not create");
     }
 
-    public static void load(SGeneralUnloadedData userData) throws ConfigurateException {
+    @SuppressWarnings("DuplicateThrows")
+    static void load(SGeneralUnloadedData userData) throws ConfigurateException, SerializationException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
         File file = new File(folder, "data/players/" + userData.uuid() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
@@ -82,5 +69,23 @@ public class UserDataSerializer {
         if (null != homes) {
             userData.setHomes(homes);
         }
+    }
+
+    @SuppressWarnings("DuplicateThrows")
+    static void save(SGeneralUnloadedData userData) throws ConfigurateException, SerializationException {
+        File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
+        File file = new File(folder, "data/players/" + userData.uuid() + ".conf");
+        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
+        CommentedConfigurationNode root = loader.createNode();
+        IS_MUTED.set(root, userData.muted());
+        IS_IN_JAIL.set(root, userData.isInJail());
+        PREVENT_TELEPORT_REQUESTS.set(root, userData.isPreventingTeleportRequests());
+        CAN_LOOSE_ITEMS_WHEN_USED.set(root, userData.canLooseItemsWhenUsed());
+        RELEASED_FROM_JAIL.set(root, userData.releasedFromJailTime().orElse(null));
+        DISPLAY_NAME.set(root, userData.hasSetDisplayName() ? userData.displayName() : null);
+        BACK_LOCATIONS.set(root, userData.backTeleportLocations());
+        //HOMES.set(root, userData.homes().stream().map(SHome::builder).collect(Collectors.toList()));
+
+        loader.save(root);
     }
 }

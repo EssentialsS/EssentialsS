@@ -19,10 +19,10 @@ import org.spongepowered.api.event.Cause;
 
 import java.util.Optional;
 
-public class TeleportToSpawnCommand {
+public final class TeleportToSpawnCommand {
 
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final @NotNull Parameter.Value<ServerPlayer> target;
 
@@ -43,13 +43,21 @@ public class TeleportToSpawnCommand {
         }
     }
 
+    private TeleportToSpawnCommand() {
+        throw new RuntimeException("Should not create");
+    }
+
+    public static Command.Parameterized createSpawnToCommand() {
+        return createSpawnToCommand(Command.builder());
+    }
+
+    public static Command.Parameterized createSpawnToCommand(@NotNull Command.Parameterized.Builder builder) {
+        Parameter.Value<ServerPlayer> player = Parameter.player().key("player").requiredPermission(SPermissions.SPAWN_TELEPORT_OTHER.node()).optional().build();
+        return builder.addParameter(player).executor(new Execute(player)).permission(SPermissions.SPAWN_TELEPORT_SELF.node()).build();
+    }
+
     public static CommandResult execute(@NotNull Player player, @NotNull Cause cause) {
-        SSpawnPoint point = EssentialsSMain
-                .plugin()
-                .worldManager()
-                .get()
-                .dataFor(player.world())
-                .spawnPoint(player.location().position());
+        SSpawnPoint point = EssentialsSMain.plugin().worldManager().get().dataFor(player.world()).spawnPoint(player.location().position());
 
         PlayerTeleportToPointImpl event = new PlayerTeleportToPointImpl(player, point, cause);
         Sponge.eventManager().post(event);
@@ -59,24 +67,6 @@ public class TeleportToSpawnCommand {
 
         EssentialsSMain.plugin().playerManager().get().dataFor(player).teleport(point.position());
         return CommandResult.success();
-    }
-
-    public static Command.Parameterized createSpawnToCommand() {
-        return createSpawnToCommand(Command.builder());
-    }
-
-    public static Command.Parameterized createSpawnToCommand(@NotNull Command.Parameterized.Builder builder) {
-        Parameter.Value<ServerPlayer> player = Parameter
-                .player()
-                .key("player")
-                .requiredPermission(SPermissions.SPAWN_TELEPORT_OTHER.node())
-                .optional()
-                .build();
-        return builder
-                .addParameter(player)
-                .executor(new Execute(player))
-                .permission(SPermissions.SPAWN_TELEPORT_SELF.node())
-                .build();
     }
 
 }

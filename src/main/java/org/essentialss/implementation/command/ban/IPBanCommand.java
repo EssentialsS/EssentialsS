@@ -1,7 +1,6 @@
 package org.essentialss.implementation.command.ban;
 
-import net.kyori.adventure.text.Component;
-import org.essentialss.api.player.data.SGeneralPlayerData;
+import org.essentialss.api.config.BanConfig;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
@@ -13,18 +12,17 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.time.LocalDateTime;
 
-public class IPBanCommand {
+public final class IPBanCommand {
 
-    private static class PlayerExecute implements CommandExecutor {
+    private static final class PlayerExecute implements CommandExecutor {
 
         private final @NotNull Parameter.Value<String> hostname;
 
-        private PlayerExecute(Parameter.Value<String> user) {
+        private PlayerExecute(@NotNull Parameter.Value<String> user) {
             this.hostname = user;
         }
 
@@ -35,14 +33,11 @@ public class IPBanCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull String hostname,
-                                        @Nullable String lastKnownUser,
-                                        @Nullable LocalDateTime until) {
-        EssentialsSMain.plugin().banManager().get().banIp(hostname, lastKnownUser, until);
-        return CommandResult.success();
+    private IPBanCommand() {
+        throw new RuntimeException("Should not create");
     }
 
-    public static Command.Parameterized createIPAddressBanCommand() {
+    static Command.Parameterized createIPAddressBanCommand() {
         Parameter.Value<String> parameter = SParameters.hostname().key("ipAddress").build();
 
         return Command
@@ -51,6 +46,20 @@ public class IPBanCommand {
                 .executor(new PlayerExecute(parameter))
                 .executionRequirements(cause -> Sponge.isServerAvailable())
                 .build();
+    }
+
+    public static CommandResult execute(@NotNull String hostname, @Nullable String lastKnownUser, @Nullable LocalDateTime until) {
+        EssentialsSMain.plugin().banManager().get().banIp(hostname, lastKnownUser, until);
+        BanConfig banConfig = EssentialsSMain.plugin().banManager().get().banConfig().get();
+        if (Sponge.isServerAvailable()) {
+            for (ServerPlayer player : Sponge.server().onlinePlayers()) {
+                String playersHostname = player.connection().address().getHostName();
+                if (playersHostname.equalsIgnoreCase(hostname)) {
+                    player.kick(banConfig.banMessage().parseDefault(banConfig));
+                }
+            }
+        }
+        return CommandResult.success();
     }
 
 }

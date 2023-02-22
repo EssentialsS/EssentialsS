@@ -1,7 +1,6 @@
 package org.essentialss.implementation.config.value.simple;
 
 import org.essentialss.api.config.value.SingleConfigValue;
-import org.essentialss.api.utils.CrossSpongePlatformUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;

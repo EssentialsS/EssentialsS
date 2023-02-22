@@ -18,14 +18,14 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Optional;
 
-public class TeleportToWarpCommand {
+public final class TeleportToWarpCommand {
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final @NotNull Parameter.Value<SWarp> warps;
         private final @NotNull Parameter.Value<ServerPlayer> target;
 
-        public Execute(@NotNull Parameter.Value<SWarp> warp, @NotNull Parameter.Value<ServerPlayer> target) {
+        private Execute(@NotNull Parameter.Value<SWarp> warp, @NotNull Parameter.Value<ServerPlayer> target) {
             this.warps = warp;
             this.target = target;
         }
@@ -44,13 +44,8 @@ public class TeleportToWarpCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull Player player, @NotNull SPoint warp) {
-        try {
-            EssentialsSMain.plugin().playerManager().get().dataFor(player).teleport(warp.location());
-            return CommandResult.success();
-        } catch (IllegalStateException e) {
-            return CommandResult.error(Component.text("The world you are trying to warp to is not loaded"));
-        }
+    private TeleportToWarpCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createWarpToCommand() {
@@ -58,20 +53,19 @@ public class TeleportToWarpCommand {
     }
 
     public static Command.Parameterized createWarpToCommand(@NotNull Command.Parameterized.Builder builder) {
-        Parameter.Value<ServerPlayer> player = Parameter
-                .player()
-                .key("player")
-                .requiredPermission(SPermissions.WARP_TELEPORT_OTHER.node())
-                .optional()
-                .build();
+        Parameter.Value<ServerPlayer> player = Parameter.player().key("player").requiredPermission(SPermissions.WARP_TELEPORT_OTHER.node()).optional().build();
         Parameter.Value<SWarp> warp = SParameters.warp().key("warp").build();
 
-        return builder
-                .addParameter(warp)
-                .addParameter(player)
-                .executor(new Execute(warp, player))
-                .permission(SPermissions.WARP_TELEPORT_SELF.node())
-                .build();
+        return builder.addParameter(warp).addParameter(player).executor(new Execute(warp, player)).permission(SPermissions.WARP_TELEPORT_SELF.node()).build();
+    }
+
+    public static CommandResult execute(@NotNull Player player, @NotNull SPoint warp) {
+        try {
+            EssentialsSMain.plugin().playerManager().get().dataFor(player).teleport(warp.location());
+            return CommandResult.success();
+        } catch (IllegalStateException e) {
+            return CommandResult.error(Component.text("The world you are trying to warp to is not loaded"));
+        }
     }
 
 }

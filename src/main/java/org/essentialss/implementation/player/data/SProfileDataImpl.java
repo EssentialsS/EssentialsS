@@ -4,6 +4,7 @@ import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.UUID;
 
@@ -15,13 +16,15 @@ public class SProfileDataImpl extends AbstractProfileData implements SGeneralUnl
         this.profile = profile;
     }
 
+    @SuppressWarnings("DuplicateThrows")
     @Override
-    public void reloadFromConfig() throws ConfigurateException {
+    public void reloadFromConfig() throws ConfigurateException, SerializationException {
         UserDataSerializer.load(this);
     }
 
+    @SuppressWarnings("DuplicateThrows")
     @Override
-    public void saveToConfig() throws ConfigurateException {
+    public void saveToConfig() throws ConfigurateException, SerializationException {
         UserDataSerializer.save(this);
     }
 

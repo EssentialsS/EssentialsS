@@ -13,11 +13,11 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Cause;
 
-public class DeleteWarpCommand {
+public final class DeleteWarpCommand {
 
     private static final class Execute implements CommandExecutor {
 
-        private final Parameter.Value<SWarp> warp;
+        private final @NotNull Parameter.Value<SWarp> warp;
 
         private Execute(@NotNull Parameter.Value<SWarp> warp) {
             this.warp = warp;
@@ -30,19 +30,18 @@ public class DeleteWarpCommand {
         }
     }
 
-    public static CommandResult execute(@NotNull SWarp warp, @NotNull Cause cause) {
-        boolean deregistered = warp.worldData().deregister(warp, cause);
-        return deregistered ? CommandResult.success() : CommandResult.error(Component.text("Could not delete warp"));
+    private DeleteWarpCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createDeleteWarpCommand() {
         Parameter.Value<SWarp> warp = SParameters.warp().key("warp").build();
-        return Command
-                .builder()
-                .addParameter(warp)
-                .executor(new Execute(warp))
-                .permission(SPermissions.WARP_REMOVE.node())
-                .build();
+        return Command.builder().addParameter(warp).executor(new Execute(warp)).permission(SPermissions.WARP_REMOVE.node()).build();
+    }
+
+    public static CommandResult execute(@NotNull SWarp warp, @NotNull Cause cause) {
+        boolean deregistered = warp.worldData().deregister(warp, cause);
+        return deregistered ? CommandResult.success() : CommandResult.error(Component.text("Could not delete warp"));
     }
 
 }

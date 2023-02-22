@@ -25,11 +25,9 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
 
 public class SWorldDataImpl implements SWorldData {
 
@@ -49,17 +47,59 @@ public class SWorldDataImpl implements SWorldData {
         this.points.addAll(new Validator<>(builder.points()).rule(ValidationRules.notNull()).validate());
     }
 
+    private boolean deregisterPoint(@NotNull SPoint point, boolean runEvent, @Nullable Cause cause) {
+        //TODO events
+        boolean result = this.points.remove(point);
+        //TODO events
+        return result;
+    }
+
+    @Override
+    public @NotNull String identifier() {
+        if (null != this.id) {
+            return this.id;
+        }
+        //noinspection DataFlowIssue
+        return this.key.formatted();
+    }
+
+    private boolean register(@NotNull SPoint point, boolean runEvents, @Nullable Cause cause) {
+        if (runEvents) {
+            if (null == cause) {
+                throw new IllegalArgumentException("Cause cannot be null when running events");
+            }
+            RegisterPointPreEventImpl preEvent = new RegisterPointPreEventImpl(point, cause);
+            Sponge.eventManager().post(preEvent);
+            if (preEvent.isCancelled()) {
+                return false;
+            }
+        }
+        boolean added = this.points.add(point);
+        if (runEvents) {
+            Event postEvent = new RegisterPointPostEventImpl(point, cause);
+            Sponge.eventManager().post(postEvent);
+        }
+        return added;
+
+    }
+
+    @Override
+    public void reloadFromConfig() throws ConfigurateException {
+        SWorldDataSerializer.load(this);
+    }
+
+    @Override
+    public void saveToConfig() throws ConfigurateException {
+        SWorldDataSerializer.save(this);
+    }
+
     @Override
     public @NotNull Optional<World<?, ?>> spongeWorld() {
         if ((null != this.key) && Sponge.isServerAvailable()) {
             return Sponge.server().worldManager().world(this.key).map(sWorld -> sWorld);
         }
         if ((null != this.id) && Sponge.isClientAvailable()) {
-            return Sponge
-                    .client()
-                    .world()
-                    .filter(world -> world.context().toString().equalsIgnoreCase(this.id))
-                    .map(sWorld -> sWorld);
+            return Sponge.client().world().filter(world -> world.context().toString().equalsIgnoreCase(this.id)).map(sWorld -> sWorld);
         }
         return Optional.empty();
     }
@@ -70,18 +110,8 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
-    public void reloadFromConfig() throws ConfigurateException {
-        SWorldDataSerializer.load(this);
-    }
-
-    @Override
     public void clearPoints() {
         this.points.clear();
-    }
-
-    @Override
-    public void saveToConfig() throws ConfigurateException {
-        SWorldDataSerializer.save(this);
     }
 
     @Override
@@ -91,11 +121,10 @@ public class SWorldDataImpl implements SWorldData {
                 .parallelStream()
                 .filter(point -> point instanceof SSpawnPoint)
                 .noneMatch(point -> ((SSpawnPoint) point).types().contains(SSpawnType.MAIN_SPAWN))) {
-            this.spongeWorld().ifPresent(sWorld -> {
-                list.add(new SSpawnPointImpl(new SSpawnPointBuilder()
-                                                     .setPoint(sWorld.properties().spawnPosition().toDouble())
-                                                     .setSpawnTypes(SSpawnType.MAIN_SPAWN), this));
-            });
+            this
+                    .spongeWorld()
+                    .ifPresent(sWorld -> list.add(new SSpawnPointImpl(
+                            new SSpawnPointBuilder().setPoint(sWorld.properties().spawnPosition().toDouble()).setSpawnTypes(SSpawnType.MAIN_SPAWN), this)));
         }
         return new UnmodifiableCollection<>(list);
     }
@@ -112,7 +141,8 @@ public class SWorldDataImpl implements SWorldData {
             //noinspection DataFlowIssue
             Optional<World<?, ?>> opWorld = this.spongeWorld();
             if (opWorld.isPresent()) {
-                opWorld.get().properties().setSpawnPosition(builder.point().toInt());
+                Vector3d point = Objects.requireNonNull(builder.point());
+                opWorld.get().properties().setSpawnPosition(point.toInt());
                 return true;
             }
             if (Sponge.isServerAvailable()) {
@@ -120,8 +150,7 @@ public class SWorldDataImpl implements SWorldData {
                         .server()
                         .worldManager()
                         .loadProperties(this.key)
-                        .thenAccept(opProperties -> opProperties.ifPresent(
-                                properties -> properties.setSpawnPosition(spawnPoint.position().toInt())));
+                        .thenAccept(opProperties -> opProperties.ifPresent(properties -> properties.setSpawnPosition(spawnPoint.position().toInt())));
             }
         }
         return true;
@@ -131,14 +160,9 @@ public class SWorldDataImpl implements SWorldData {
     public boolean register(@NotNull SWarpBuilder builder, boolean runEvent, @Nullable Cause cause) {
         new Validator<>(builder.name()).notNull().validate();
 
-        Optional<SWarp> opWarp = this
-                .warps()
-                .parallelStream()
-                .filter(warp -> warp.position().equals(builder.point()))
-                .findAny();
+        Optional<SWarp> opWarp = this.warps().parallelStream().filter(warp -> warp.position().equals(builder.point())).findAny();
         if (opWarp.isPresent()) {
-            throw new IllegalArgumentException(
-                    "Another warp (" + opWarp.get().identifier() + ") with that location has been found ");
+            throw new IllegalArgumentException("Another warp (" + opWarp.get().identifier() + ") with that location has been found ");
         }
         //noinspection DataFlowIssue
         if (this.warp(builder.name()).isPresent()) {
@@ -167,47 +191,11 @@ public class SWorldDataImpl implements SWorldData {
         throw new RuntimeException("Jail not implemented yet");
     }
 
-    private boolean deregisterPoint(@NotNull SPoint point, boolean runEvent, @Nullable Cause cause) {
-        //TODO events
-        boolean result = this.points.remove(point);
-        //TODO events
-        return result;
-    }
-
     @Override
     public boolean isWorld(@NotNull World<?, ?> world) {
         if ((world instanceof ServerWorld) && ((ServerWorld) world).key().equals(this.key)) {
             return true;
         }
         return world.context().toString().equalsIgnoreCase(this.id);
-    }
-
-    private boolean register(@NotNull SPoint point, boolean runEvents, @Nullable Cause cause) {
-        if (runEvents) {
-            if (null == cause) {
-                throw new IllegalArgumentException("Cause cannot be null when running events");
-            }
-            RegisterPointPreEventImpl preEvent = new RegisterPointPreEventImpl(point, cause);
-            Sponge.eventManager().post(preEvent);
-            if (preEvent.isCancelled()) {
-                return false;
-            }
-        }
-        boolean added = this.points.add(point);
-        if (runEvents) {
-            Event postEvent = new RegisterPointPostEventImpl(point, cause);
-            Sponge.eventManager().post(postEvent);
-        }
-        return added;
-
-    }
-
-    @Override
-    public @NotNull String identifier() {
-        if (null != this.id) {
-            return this.id;
-        }
-        //noinspection DataFlowIssue
-        return this.key.formatted();
     }
 }

@@ -21,17 +21,18 @@ import java.nio.file.Path;
 
 public class SBanConfigImpl implements BanConfig {
 
-    private static final SingleDefaultConfigValueWrapper<BanMultiplayerScreenOptions> SHOW_BAN_ON_MULTIPLAYER_SCREEN = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleConfigValue.Default<BanMultiplayerScreenOptions> SHOW_BAN_ON_MULTIPLAYER_SCREEN = new SingleDefaultConfigValueWrapper<>(
             new EnumConfigValue<>(BanMultiplayerScreenOptions.class, "messages", "ShowOnMultiplayerScreen"),
             BanMultiplayerScreenOptions.DEFAULT);
-    private static final BooleanConfigValue SHOW_FULL_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue("messages",
-                                                                                                     "ShowFullOnMultiplayerScreen");
-    private static final SingleDefaultConfigValueWrapper<Component> BAN_MESSAGE = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleConfigValue.Default<Boolean> SHOW_FULL_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue(
+            "messages", "ShowFullOnMultiplayerScreen");
+    private static final SingleConfigValue.Default<Component> BAN_MESSAGE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("messages", "BannedMessage"), Component.text("You are banned from this server"));
     private static final ComponentConfigValue TEMP_BAN_MESSAGE = new ComponentConfigValue("messages",
                                                                                           "TempBannedMessage");
-    private static final BooleanConfigValue USE_BAN_MESSAGE_FOR_TEMP_BAN = new BooleanConfigValue(true, "messages",
-                                                                                                  "UseBanMessageForTempBan");
+    private static final SingleConfigValue.Default<Boolean> USE_BAN_MESSAGE_FOR_TEMP_BAN = new BooleanConfigValue(true,
+                                                                                                                  "messages",
+                                                                                                                  "UseBanMessageForTempBan");
 
     @Override
     public SingleConfigValue.Default<BanMultiplayerScreenOptions> showBanOnMultiplayerScreen() {

@@ -13,6 +13,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -29,6 +30,11 @@ public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflin
     }
 
     @Override
+    public String playerName() {
+        return this.user.name();
+    }
+
+    @Override
     public @NotNull UUID uuid() {
         return this.user.uniqueId();
     }
@@ -37,9 +43,7 @@ public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflin
     public void releaseFromJail(@NotNull OfflineLocation spawnTo) {
         this.isInJail = false;
         this.releaseFromJail = null;
-        Location<?, ?> location = spawnTo
-                .location()
-                .orElseThrow(() -> new RuntimeException("Server must be active to modify offline players"));
+        Location<?, ?> location = spawnTo.location().orElseThrow(() -> new RuntimeException("Server must be active to modify offline players"));
         Optional<ServerLocation> serverLocation = location.onServer();
         if (serverLocation.isPresent()) {
             this.user.setLocation(serverLocation.get().worldKey(), serverLocation.get().position());
@@ -70,27 +74,20 @@ public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflin
         }
     }
 
-    public @NotNull Optional<SWorldData> world() {
-        ResourceKey key = this.user.worldKey();
-        return Sponge
-                .server()
-                .worldManager()
-                .world(key)
-                .map(world -> EssentialsSMain.plugin().worldManager().get().dataFor(world));
-    }
-
+    @SuppressWarnings("DuplicateThrows")
     @Override
-    public void reloadFromConfig() throws ConfigurateException {
+    public void reloadFromConfig() throws ConfigurateException, SerializationException {
         UserDataSerializer.load(this);
     }
 
+    @SuppressWarnings("OverlyBroadThrowsClause")
     @Override
     public void saveToConfig() throws ConfigurateException {
         UserDataSerializer.save(this);
     }
 
-    @Override
-    public String playerName() {
-        return this.user.name();
+    public @NotNull Optional<SWorldData> world() {
+        ResourceKey key = this.user.worldKey();
+        return Sponge.server().worldManager().world(key).map(world -> EssentialsSMain.plugin().worldManager().get().dataFor(world));
     }
 }

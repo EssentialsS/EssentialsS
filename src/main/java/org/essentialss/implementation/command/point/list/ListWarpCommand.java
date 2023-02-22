@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListWarpCommand {
+public final class ListWarpCommand {
 
     private static final int MINIMUM_PAGE_SIZE = 1;
 
@@ -40,6 +40,10 @@ public class ListWarpCommand {
             int page = context.one(this.pageParameter).orElse(1);
             return ListWarpCommand.execute(context.cause().audience(), page);
         }
+    }
+
+    private ListWarpCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     private static Collection<? extends World<?, ?>> world() {
@@ -60,7 +64,8 @@ public class ListWarpCommand {
                 .sorted(Comparator.comparing(StringIdentifier::identifier))
                 .collect(Collectors.toList());
 
-        CommandPager.displayList(audience, page, "Warps", warp -> Component.text(warp.identifier()), warps);
+        CommandPager.displayList(audience, page, "Warps", "warps " + CommandPager.PAGE_ARGUMENT,
+                                 warp -> Component.text(warp.identifier()), warps);
         return CommandResult.success();
     }
 

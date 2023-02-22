@@ -20,17 +20,28 @@ import java.util.concurrent.LinkedTransferQueue;
 
 public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
-    protected boolean canLooseItemsWhenUsed;
-    protected boolean muted;
-    protected boolean isInJail;
-    protected @Nullable LocalDateTime releaseFromJail;
-    protected LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
-    protected LinkedList<MailMessage> mailMessages = new LinkedList<>();
-    protected @Nullable Component displayName;
-    protected final @NotNull LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
+    final LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
+    private final LinkedList<MailMessage> mailMessages = new LinkedList<>();
+    private final @NotNull LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
+    boolean isInJail;
+    @Nullable LocalDateTime releaseFromJail;
+    private boolean canLooseItemsWhenUsed;
+    @Nullable
+    private Component displayName;
+    private boolean muted;
+    private boolean preventingTeleportRequests;
 
-
-    protected boolean preventingTeleportRequests;
+    public void applyChangesFrom(@NotNull AbstractProfileData data) {
+        this.backTeleportLocations.addAll(data.backTeleportLocations);
+        this.displayName = data.displayName;
+        this.homes.addAll(data.homes);
+        this.releaseFromJail = data.releaseFromJail;
+        this.canLooseItemsWhenUsed = data.canLooseItemsWhenUsed;
+        this.isInJail = data.isInJail;
+        this.mailMessages.addAll(data.mailMessages);
+        this.muted = data.muted;
+        this.preventingTeleportRequests = data.preventingTeleportRequests;
+    }
 
     @Override
     public @NotNull Component displayName() {
@@ -97,6 +108,26 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
+    public void register(@NotNull SHomeBuilder builder) {
+        SHome home = new SHomeImpl(builder);
+        if (this.homes.parallelStream().anyMatch(h -> h.identifier().equalsIgnoreCase(builder.home()))) {
+            throw new IllegalArgumentException("House already registered");
+        }
+        this.homes.add(home);
+    }
+
+    @Override
+    public void deregister(@NotNull SHome home) {
+        this.homes.remove(home);
+    }
+
+    @Override
+    public void setHomes(@NotNull Collection<SHomeBuilder> homes) {
+        this.homes.clear();
+        homes.forEach(this::register);
+    }
+
+    @Override
     public @NotNull LinkedList<OfflineLocation> backTeleportLocations() {
         return this.backTeleportLocations;
     }
@@ -130,37 +161,5 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     @Override
     public void addMailMessage(@NotNull MailMessageBuilder builder) {
         throw new RuntimeException("Not implemented yet");
-    }
-
-    @Override
-    public void register(@NotNull SHomeBuilder builder) {
-        SHome home = new SHomeImpl(builder);
-        if (this.homes.parallelStream().anyMatch(h -> h.identifier().equalsIgnoreCase(builder.home()))) {
-            throw new IllegalArgumentException("House already registered");
-        }
-        this.homes.add(home);
-    }
-
-    @Override
-    public void deregister(@NotNull SHome home) {
-        this.homes.remove(home);
-    }
-
-    @Override
-    public void setHomes(@NotNull Collection<SHomeBuilder> homes) {
-        this.homes.clear();
-        homes.forEach(this::register);
-    }
-
-    public void applyChangesFrom(@NotNull AbstractProfileData data) {
-        this.backTeleportLocations.addAll(data.backTeleportLocations);
-        this.displayName = data.displayName;
-        this.homes.addAll(data.homes);
-        this.releaseFromJail = data.releaseFromJail;
-        this.canLooseItemsWhenUsed = data.canLooseItemsWhenUsed;
-        this.isInJail = data.isInJail;
-        this.mailMessages.addAll(data.mailMessages);
-        this.muted = data.muted;
-        this.preventingTeleportRequests = data.preventingTeleportRequests;
     }
 }

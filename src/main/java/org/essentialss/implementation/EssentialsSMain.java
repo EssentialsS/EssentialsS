@@ -17,6 +17,9 @@ import org.essentialss.implementation.command.point.PointCommand;
 import org.essentialss.implementation.command.point.list.ListSpawnCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
 import org.essentialss.implementation.command.run.RunCommand;
+import org.essentialss.implementation.command.teleport.request.TeleportAcceptRequestCommand;
+import org.essentialss.implementation.command.teleport.request.TeleportRequestToPlayerCommand;
+import org.essentialss.implementation.command.teleport.request.TeleportRequestsCommand;
 import org.essentialss.implementation.command.unban.UnbanCommands;
 import org.essentialss.implementation.config.SConfigManagerImpl;
 import org.essentialss.implementation.listeners.connection.BanConnectionListeners;
@@ -68,6 +71,11 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, WhoIsCommand.createWhoIsCommand(), "whois", "realname");
         event.register(this.container, BanCommands.createBanCommand(), "ban");
         event.register(this.container, UnbanCommands.createUnbanCommands(), "unban");
+        event.register(this.container, TeleportRequestsCommand.createTeleportRequestsCommand(), "teleportrequests",
+                       "tprequests", "tpr");
+        event.register(this.container, TeleportRequestToPlayerCommand.createTeleportRequestToPlayerCommand(),
+                       "teleportto", "tpto", "tpt");
+        event.register(this.container, TeleportAcceptRequestCommand.createTeleportAcceptCommand(), "tpaccept", "tpa");
     }
 
     @Listener

@@ -1,0 +1,19 @@
+name: Missing Documentation
+description: If Essentials-S Wiki's are missing documentation or the documentation is out of date
+title: "[Wiki]: "
+labels: [ "documentation", "triage" ]
+body:
+  - type: input
+    id: section
+    attributes:
+      label: Documentation section
+      description: "What is the documentation about"
+    validations:
+      required: true
+  - type: input
+    id: detail
+    attributes:
+      label: Detail
+      description: "What specific detail is missing/needs updating"
+    validations:
+      required: true

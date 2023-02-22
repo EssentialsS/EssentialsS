@@ -1,0 +1,12 @@
+name: Feature
+description: If Essentials-S is missing something that you want
+title: "[Feature]: "
+labels: [ "enhancement" ]
+body:
+  - type: textarea
+    id: feature
+    attributes:
+      label: Describe feature
+      description: Please describe the feature in as much detail as possible
+    validations:
+      required: true

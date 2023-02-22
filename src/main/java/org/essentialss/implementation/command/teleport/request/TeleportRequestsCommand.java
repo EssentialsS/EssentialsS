@@ -84,7 +84,7 @@ public final class TeleportRequestsCommand {
                 message = message.append(Component.text(" - Teleporting you to them"));
             }
             Duration ago = Duration.between(request.sentTime(), LocalDateTime.now());
-            message = message.append(Component.text(" - " + FriendlyString.toString(ago) + " ago"));
+            message = message.append(Component.text(" - Sent " + FriendlyString.toString(ago) + " ago"));
             int redValue = Constants.UNSIGNED_BYTE_MAX;
             Optional<LocalDateTime> opExpireTime = request.expiresAt();
             if (opExpireTime.isPresent()) {

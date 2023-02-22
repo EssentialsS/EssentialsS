@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
 import org.essentialss.api.EssentialsSAPI;
 import org.essentialss.api.ban.SBanManager;
+import org.essentialss.api.config.BanConfig;
 import org.essentialss.api.config.SConfigManager;
 import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.utils.Singleton;
@@ -17,9 +18,7 @@ import org.essentialss.implementation.command.point.PointCommand;
 import org.essentialss.implementation.command.point.list.ListSpawnCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
 import org.essentialss.implementation.command.run.RunCommand;
-import org.essentialss.implementation.command.teleport.request.TeleportAcceptRequestCommand;
-import org.essentialss.implementation.command.teleport.request.TeleportRequestToPlayerCommand;
-import org.essentialss.implementation.command.teleport.request.TeleportRequestsCommand;
+import org.essentialss.implementation.command.teleport.request.*;
 import org.essentialss.implementation.command.unban.UnbanCommands;
 import org.essentialss.implementation.config.SConfigManagerImpl;
 import org.essentialss.implementation.listeners.connection.BanConnectionListeners;
@@ -39,17 +38,13 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 @Plugin("essentials-s")
 public class EssentialsSMain implements EssentialsSAPI {
 
+    private static EssentialsSMain plugin;
     private final PluginContainer container;
     private final Logger logger;
-
-    private static EssentialsSMain plugin;
-
     private final Singleton<SWorldManager> worldManager = new Singleton<>(SWorldManagerImpl::new);
     private final Singleton<SConfigManager> configManager = new Singleton<>(SConfigManagerImpl::new);
     private final Singleton<SPlayerManager> playerManager = new Singleton<>(SPlayerManagerImpl::new);
     private final Singleton<SBanManager> banManager = new Singleton<>(SBanManagerImpl::new);
-
-    public static final int MINIMUM_PAGE_SIZE = 1;
 
     @SuppressWarnings("AccessStaticViaInstance")
     @Inject
@@ -59,23 +54,41 @@ public class EssentialsSMain implements EssentialsSAPI {
         this.logger = logger;
     }
 
+    public @NotNull PluginContainer container() {
+        return this.container;
+    }
+
+    public @NotNull Logger logger() {
+        return this.logger;
+    }
+
     @Listener
     public void onCommandRegister(RegisterCommandEvent<Command.Parameterized> event) {
+        //misc
         event.register(this.container, RunCommand.createRunCommand(), "run", "execute");
         event.register(this.container, HatCommand.createHatCommand(), "hat");
+        //warp
         event.register(this.container, PointCommand.createWarpCommand(), "warp");
         event.register(this.container, ListWarpCommand.createWarpListCommand(), "warps");
+        //spawn
         event.register(this.container, PointCommand.createSpawnCommand(), "spawn");
         event.register(this.container, ListSpawnCommand.createSpawnListCommand(), "spawns");
+        //nickname
         event.register(this.container, NicknameCommand.createNicknameCommand(), "nickname", "nick");
         event.register(this.container, WhoIsCommand.createWhoIsCommand(), "whois", "realname");
-        event.register(this.container, BanCommands.createBanCommand(), "ban");
-        event.register(this.container, UnbanCommands.createUnbanCommands(), "unban");
-        event.register(this.container, TeleportRequestsCommand.createTeleportRequestsCommand(), "teleportrequests",
-                       "tprequests", "tpr");
-        event.register(this.container, TeleportRequestToPlayerCommand.createTeleportRequestToPlayerCommand(),
-                       "teleportto", "tpto", "tpt");
+        //teleport
+        event.register(this.container, TeleportRequestsCommand.createTeleportRequestsCommand(), "teleportrequests", "tprequests", "tpr");
+        event.register(this.container, TeleportRequestToPlayerCommand.createTeleportRequestToPlayerCommand(), "teleportto", "tpto", "tpt");
+        event.register(this.container, TeleportRequestHerePlayerCommand.createTeleportRequestHerePlayerCommand(), "teleporthere", "tphere", "tph");
         event.register(this.container, TeleportAcceptRequestCommand.createTeleportAcceptCommand(), "tpaccept", "tpa");
+        event.register(this.container, TeleportDenyRequestCommand.createTeleportDenyCommand(), "tpdeny", "tpd");
+        //ban
+        BanConfig banConfig = this.banManager().get().banConfig().get();
+        if (banConfig.useEssentialsSBanCommands().parseDefault(banConfig)) {
+            event.register(this.container, BanCommands.createBanCommand(), "ban");
+            event.register(this.container, UnbanCommands.createUnbanCommands(), "unban");
+        }
+
     }
 
     @Listener
@@ -87,14 +100,6 @@ public class EssentialsSMain implements EssentialsSAPI {
         EventManager eventManager = Sponge.eventManager();
         eventManager.registerListeners(this.container, new ConnectionListeners());
         eventManager.registerListeners(this.container, new BanConnectionListeners());
-    }
-
-    public @NotNull PluginContainer container() {
-        return this.container;
-    }
-
-    public @NotNull Logger logger() {
-        return this.logger;
     }
 
     @Override

@@ -22,17 +22,19 @@ import java.nio.file.Path;
 public class SBanConfigImpl implements BanConfig {
 
     private static final SingleConfigValue.Default<BanMultiplayerScreenOptions> SHOW_BAN_ON_MULTIPLAYER_SCREEN = new SingleDefaultConfigValueWrapper<>(
-            new EnumConfigValue<>(BanMultiplayerScreenOptions.class, "messages", "ShowOnMultiplayerScreen"),
-            BanMultiplayerScreenOptions.DEFAULT);
-    private static final SingleConfigValue.Default<Boolean> SHOW_FULL_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue(
-            "messages", "ShowFullOnMultiplayerScreen");
+            new EnumConfigValue<>(BanMultiplayerScreenOptions.class, "messages", "ShowOnMultiplayerScreen"), BanMultiplayerScreenOptions.DEFAULT);
+    private static final SingleConfigValue.Default<Boolean> SHOW_FULL_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue("messages", "ShowFullOnMultiplayerScreen");
     private static final SingleConfigValue.Default<Component> BAN_MESSAGE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("messages", "BannedMessage"), Component.text("You are banned from this server"));
-    private static final ComponentConfigValue TEMP_BAN_MESSAGE = new ComponentConfigValue("messages",
-                                                                                          "TempBannedMessage");
-    private static final SingleConfigValue.Default<Boolean> USE_BAN_MESSAGE_FOR_TEMP_BAN = new BooleanConfigValue(true,
-                                                                                                                  "messages",
-                                                                                                                  "UseBanMessageForTempBan");
+    private static final ComponentConfigValue TEMP_BAN_MESSAGE = new ComponentConfigValue("messages", "TempBannedMessage");
+    private static final SingleConfigValue.Default<Boolean> USE_BAN_MESSAGE_FOR_TEMP_BAN = new BooleanConfigValue(true, "messages", "UseBanMessageForTempBan");
+    private static final SingleConfigValue.Default<Boolean> USE_ESSENTIALS_S_BAN_COMMANDS = new BooleanConfigValue(true, "enabled", "banCommands",
+                                                                                                                   "EssentialsSBanCommands");
+
+    @Override
+    public SingleConfigValue.Default<Component> banMessage() {
+        return BAN_MESSAGE;
+    }
 
     @Override
     public SingleConfigValue.Default<BanMultiplayerScreenOptions> showBanOnMultiplayerScreen() {
@@ -42,11 +44,6 @@ public class SBanConfigImpl implements BanConfig {
     @Override
     public SingleConfigValue.Default<Boolean> showFullOnMultiplayerScreen() {
         return SHOW_FULL_ON_MULTIPLAYER_SCREEN;
-    }
-
-    @Override
-    public SingleConfigValue.Default<Component> banMessage() {
-        return BAN_MESSAGE;
     }
 
     @Override
@@ -60,21 +57,29 @@ public class SBanConfigImpl implements BanConfig {
     }
 
     @Override
+    public SingleConfigValue.Default<Boolean> useEssentialsSBanCommands() {
+        return USE_ESSENTIALS_S_BAN_COMMANDS;
+    }
+
+    @Override
     public @NotNull File file() {
         Path path = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory();
         return new File(path.toFile(), "config/BanConfig.conf");
     }
 
     @Override
-    public void generateDefault() throws SerializationException {
+    public void update() throws SerializationException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode root = loader.createNode();
 
-        SHOW_FULL_ON_MULTIPLAYER_SCREEN.setDefault(root);
-        SHOW_BAN_ON_MULTIPLAYER_SCREEN.setDefault(root);
-        BAN_MESSAGE.setDefault(root);
-        TEMP_BAN_MESSAGE.set(root, Component.text("You have been temporary banned"));
-        USE_BAN_MESSAGE_FOR_TEMP_BAN.setDefault(root);
+        SHOW_FULL_ON_MULTIPLAYER_SCREEN.setDefaultIfNotPresent(root);
+        SHOW_BAN_ON_MULTIPLAYER_SCREEN.setDefaultIfNotPresent(root);
+        BAN_MESSAGE.setDefaultIfNotPresent(root);
+        if (null == TEMP_BAN_MESSAGE.parse(root)) {
+            TEMP_BAN_MESSAGE.set(root, Component.text("You have been temporary banned"));
+        }
+        USE_BAN_MESSAGE_FOR_TEMP_BAN.setDefaultIfNotPresent(root);
+        USE_ESSENTIALS_S_BAN_COMMANDS.setDefaultIfNotPresent(root);
 
         try {
             loader.save(root);

@@ -17,20 +17,22 @@ public class SGeneralConfigImpl implements GeneralConfig {
     private static final IntegerConfigValue PAGE_SIZE = new IntegerConfigValue(10, "misc", "ListPageSize");
 
     @Override
-    public SingleConfigValue.Default<Integer> pageSize() {
-        return PAGE_SIZE;
-    }
-
-    @Override
     public @NotNull File file() {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
         return new File(folder, "configs/general.conf");
     }
 
     @Override
-    public void generateDefault() throws SerializationException {
+    public void update() throws SerializationException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode node = loader.createNode();
-        PAGE_SIZE.set(node, PAGE_SIZE.defaultValue());
+        if (node.node(PAGE_SIZE.nodes()).isNull()) {
+            PAGE_SIZE.set(node, PAGE_SIZE.defaultValue());
+        }
+    }
+
+    @Override
+    public SingleConfigValue.Default<Integer> pageSize() {
+        return PAGE_SIZE;
     }
 }

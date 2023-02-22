@@ -3,6 +3,7 @@ package org.essentialss.implementation.command.teleport.request;
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.teleport.PlayerTeleportRequest;
+import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 
+import java.util.Comparator;
 import java.util.Optional;
 
 public final class TeleportDenyRequestCommand {
@@ -30,16 +32,28 @@ public final class TeleportDenyRequestCommand {
 
         @Override
         public CommandResult execute(CommandContext context) throws CommandException {
-            SGeneralPlayerData sender = context.requireOne(this.sender);
             Optional<SGeneralPlayerData> opHolder = context.one(this.holder);
             if (!opHolder.isPresent()) {
                 if (context.subject() instanceof Player) {
                     opHolder = Optional.of(EssentialsSMain.plugin().playerManager().get().dataFor((Player) context.subject()));
-                } else {
-                    return CommandResult.error(Component.text("Both players must be specified"));
                 }
             }
-            return TeleportDenyRequestCommand.execute(opHolder.get(), sender);
+            if (!opHolder.isPresent()) {
+                return CommandResult.error(Component.text("Both players must be specified"));
+            }
+            SGeneralPlayerData holder = opHolder.get();
+            Optional<SGeneralPlayerData> opSender = context.one(this.sender);
+            if (!opSender.isPresent()) {
+                opSender = holder
+                        .teleportRequests(PlayerTeleportRequest.class)
+                        .stream()
+                        .min(Comparator.comparing(TeleportRequest::sentTime))
+                        .flatMap(PlayerTeleportRequest::senderAsPlayerData);
+            }
+            if (!opSender.isPresent()) {
+                return CommandResult.error(Component.text("Both players need to specified"));
+            }
+            return TeleportDenyRequestCommand.execute(holder, opSender.get());
         }
     }
 
@@ -64,7 +78,7 @@ public final class TeleportDenyRequestCommand {
                 return false;
             }
             return playerData.teleportRequests(PlayerTeleportRequest.class).parallelStream().anyMatch(pd -> pd.sender().equals(data.uuid()));
-        }).key("player").build();
+        }).key("player").optional().build();
 
         return Command.builder().addParameter(holder).addParameter(sender).executor(new Execute(holder, sender)).build();
 

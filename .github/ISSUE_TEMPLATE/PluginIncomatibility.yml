@@ -12,8 +12,8 @@ body:
         - 8.x.x
         - 9.x.x
         - 10.x.x
-      validations:
-        required: true
+    validations:
+      required: true
   - type: dropdown
     id: implementation
     attributes:
@@ -23,8 +23,8 @@ body:
         - Sponge Forge
         - Sponge Vanilla
         - Lantern
-      validations:
-        required: true
+    validations:
+      required: true
   - type: input
     id: essentials-s-version
     attributes:

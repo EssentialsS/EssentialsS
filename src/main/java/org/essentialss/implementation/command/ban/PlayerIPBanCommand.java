@@ -5,6 +5,7 @@ import org.essentialss.api.config.BanConfig;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
@@ -54,6 +55,7 @@ public final class PlayerIPBanCommand {
                 .addParameter(parameter)
                 .executor(new PlayerExecute(parameter))
                 .executionRequirements(cause -> Sponge.isServerAvailable())
+                .permission(SPermissions.BAN_BY_MAC_ADDRESS.node())
                 .build();
     }
 

@@ -5,6 +5,7 @@ import org.essentialss.api.ban.SBanManager;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
@@ -58,6 +59,7 @@ public final class AccountBanCommand {
                 .addParameter(reason)
                 .executor(new Execute(profile, reason))
                 .executionRequirements(cause -> Sponge.isServerAvailable())
+                .permission(SPermissions.BAN_BY_ACCOUNT.node())
                 .build();
     }
 

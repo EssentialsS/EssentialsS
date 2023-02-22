@@ -22,9 +22,14 @@ public enum SPermissions implements SPermission {
     SPAWN_TELEPORT_SELF("essentialss.spawn.self"),
     SPAWN_TELEPORT_OTHER("essentialss.spawn.other"),
     SPAWNS("essentialss.spawns"),
-    HAT_SELF("essentials.hat.self", true),
-    HAT_OTHER("essentials.hat.other"),
-    HAT_CREATE_ITEM("essentials.hat.item");
+    HAT_SELF("essentialss.hat.self", true),
+    HAT_OTHER("essentialss.hat.other"),
+    HAT_CREATE_ITEM("essentialss.hat.item"),
+    BAN_BY_ALL("essentialss.ban.by"),
+    BAN_BY_ACCOUNT("essentialss.ban.by.account"),
+    BAN_BY_IP("essentialss.ban.by.ip"),
+    BAN_BY_IP_PLAYER("essentialss.ban.by.ip.player"),
+    BAN_BY_MAC_ADDRESS("essentialss.ban.by.mac");
 
     private final @NotNull String node;
     private final boolean shouldApplyToDefault;

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class AwayFromKeyboardBarMessageAdapterImpl implements AwayFromKeyboardBarMessageAdapter {
-    private static SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("player", "interaction", "AwayFromKeyboardBar"),
             Component.text(SPlaceHolders.DURATION.formattedPlaceholderTag() + " until you are kicked"));
     private final @Nullable Component message;

@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class AwayFromKeyboardMessageAdapterImpl implements AwayFromKeyboardMessageAdapter {
-    private static SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("player", "interaction", "AwayFromKeyboard"),
             Component.text(SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " is away from their keyboard"));
     private final @Nullable Component message;

@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class BackToKeyboardMessageAdapterImpl implements BackToKeyboardMessageAdapter {
-    private static SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("player", "interaction", "BackToKeyboard"),
             Component.text(SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " is back"));
     private final @Nullable Component message;

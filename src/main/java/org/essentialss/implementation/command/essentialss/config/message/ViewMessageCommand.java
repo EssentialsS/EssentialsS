@@ -13,7 +13,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class ViewMessageCommand {
+public final class ViewMessageCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -29,15 +29,14 @@ public class ViewMessageCommand {
         }
     }
 
+    private ViewMessageCommand() {
+        throw new RuntimeException("Cannot run");
+    }
+
     public static Command.Parameterized createViewMessageCommand() {
         Parameter.Value<MessageAdapter> adapter = SParameters.messageAdapter().key("type").build();
 
-        return Command
-                .builder()
-                .addParameter(adapter)
-                .executor(new Execute(adapter))
-                .permission(SPermissions.CONFIG_VIEW_MESSAGE.node())
-                .build();
+        return Command.builder().addParameter(adapter).executor(new Execute(adapter)).permission(SPermissions.CONFIG_VIEW_MESSAGE.node()).build();
     }
 
     public static CommandResult execute(@NotNull Audience audience, @NotNull MessageAdapter configValue) {

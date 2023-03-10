@@ -10,7 +10,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class CommandUtils {
+public final class CommandUtils {
+
+    private CommandUtils() {
+        throw new RuntimeException("Cannot run");
+    }
 
     public static <T> T getTarget(@NotNull CommandContext context, Parameter.Value<T> parameter, Supplier<CommandException> supplier) throws CommandException {
         Optional<T> opPlayer = context.one(parameter);

@@ -73,6 +73,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         return this.configManager;
     }
 
+    @Override
     public @NotNull PluginContainer container() {
         return this.container;
     }

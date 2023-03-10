@@ -16,7 +16,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.File;
 import java.time.Duration;
@@ -82,7 +81,7 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     }
 
     @Override
-    public void update() throws SerializationException, ConfigurateException {
+    public void update() throws ConfigurateException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode root = loader.load();
         CAN_JOIN_IN_PLACE_OF_AFK_PLAYER.setDefaultIfNotPresent(root);

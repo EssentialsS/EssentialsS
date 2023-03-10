@@ -1,6 +1,5 @@
 package org.essentialss.implementation.command.essentialss.config.message;
 
-import jdk.vm.ci.meta.Constant;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.message.placeholder.MessageAdapter;
@@ -21,7 +20,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class SetMessageCommand {
+public final class SetMessageCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -39,6 +38,10 @@ public class SetMessageCommand {
         }
     }
 
+    private SetMessageCommand() {
+        throw new RuntimeException("Cannot run");
+    }
+
     public static Command.Parameterized createSetMessageCommand() {
         Parameter.Value<MessageAdapter> adapter = SParameters.messageAdapter().key("type").build();
         Parameter.Value<Component> newMessage = Parameter.formattingCodeTextOfRemainingElements().completer((context, currentInput) -> {
@@ -49,7 +52,7 @@ public class SetMessageCommand {
 
             return placeholders.parallelStream().map(SPlaceHolder::formattedPlaceholderTag).filter(placeholder -> {
                 int percentagesLength = currentInput.split("%").length - 1;
-                if(Constants.ZERO == (percentagesLength % 2)){
+                if (Constants.ZERO == (percentagesLength % 2)) {
                     return true;
                 }
                 int lastIndex = currentInput.lastIndexOf("%");

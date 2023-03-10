@@ -21,7 +21,7 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 
 import java.util.function.Supplier;
 
-public class DisplayInventoryCommand {
+public final class DisplayInventoryCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -42,6 +42,10 @@ public class DisplayInventoryCommand {
             }
             return DisplayInventoryCommand.execute((ServerPlayer) player.spongePlayer(), this.supplier);
         }
+    }
+
+    private DisplayInventoryCommand() {
+        throw new RuntimeException("Cannot run");
     }
 
     public static Command.Parameterized createAnvilInventoryCommand() {

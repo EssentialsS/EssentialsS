@@ -16,7 +16,7 @@ import java.util.Collections;
 
 public class PlayerOnlyCommandMessageAdapterImpl implements PlayerOnlyCommandMessageAdapter {
 
-    private static SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("player", "command", "PlayerOnlyCommand"), Component.text("Sorry. This command can only be ran as a player"));
     private final @Nullable Component message;
 

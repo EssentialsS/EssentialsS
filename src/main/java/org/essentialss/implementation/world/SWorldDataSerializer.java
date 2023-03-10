@@ -41,7 +41,6 @@ final class SWorldDataSerializer {
                     return;
                 }
                 worldData.register(new SWarpBuilder().setName(warpName).setPoint(new Vector3d(x, y, z)), false, null);
-                return;
             }
         });
     }

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class AwayFromKeyboardForTooLongMessageAdapterImpl implements AwayFromKeyboardForTooLongMessageAdapter {
-    private static SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
             new ComponentConfigValue("player", "kick", "afkTooLong"),
             Component.text("You have been removed from the server to make space for idling for too long"));
     private final @Nullable Component message;

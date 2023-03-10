@@ -4,7 +4,11 @@ import org.essentialss.implementation.command.essentialss.config.message.SetMess
 import org.essentialss.implementation.command.essentialss.config.message.ViewMessageCommand;
 import org.spongepowered.api.command.Command;
 
-public class EssentialsSCommand {
+public final class EssentialsSCommand {
+
+    private EssentialsSCommand() {
+        throw new RuntimeException("Cannot run");
+    }
 
     private static Command.Parameterized createConfigCommand() {
         return Command.builder().addChild(createConfigMessageCommand(), "message").build();

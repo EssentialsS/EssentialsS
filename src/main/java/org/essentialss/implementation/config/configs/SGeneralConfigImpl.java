@@ -1,6 +1,6 @@
-package org.essentialss.implementation.config;
+package org.essentialss.implementation.config.configs;
 
-import org.essentialss.api.config.GeneralConfig;
+import org.essentialss.api.config.configs.GeneralConfig;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.primitive.IntegerConfigValue;

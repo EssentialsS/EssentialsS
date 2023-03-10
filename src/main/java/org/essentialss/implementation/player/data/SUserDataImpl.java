@@ -30,7 +30,7 @@ public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflin
     }
 
     @Override
-    public String playerName() {
+    public @NotNull String playerName() {
         return this.user.name();
     }
 

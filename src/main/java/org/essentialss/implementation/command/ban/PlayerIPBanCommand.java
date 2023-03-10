@@ -1,7 +1,7 @@
 package org.essentialss.implementation.command.ban;
 
 import net.kyori.adventure.text.Component;
-import org.essentialss.api.config.BanConfig;
+import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;

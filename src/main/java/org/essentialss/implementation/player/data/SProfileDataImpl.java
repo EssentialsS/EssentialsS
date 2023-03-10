@@ -29,7 +29,7 @@ public class SProfileDataImpl extends AbstractProfileData implements SGeneralUnl
     }
 
     @Override
-    public String playerName() {
+    public @NotNull String playerName() {
         return this.profile.name().orElseGet(this.profile::examinableName);
     }
 

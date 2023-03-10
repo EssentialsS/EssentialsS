@@ -136,6 +136,11 @@
         <constraint name="ParameterType" within="" contains="" />
         <constraint name="Parameter" minCount="0" maxCount="2147483647" within="" contains="" />
       </replaceConfiguration>
+      <searchConfiguration name="Raw message" description="Messages sent to the player should be in a &#10;MessageAdapter. This allows the player to change&#10;the language of the message" suppressId="allow-raw-message" problemDescriptor="Message should be in a MessageAdapter" text="$player$.sendMessage(java.awt.Component.text($text$))" recursive="true" caseInsensitive="false" type="JAVA" pattern_context="default">
+        <constraint name="__context__" within="" contains="" />
+        <constraint name="player" within="" contains="" />
+        <constraint name="text" within="" contains="" />
+      </searchConfiguration>
     </inspection_tool>
     <inspection_tool class="SimplifiableAnnotation" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="SimplifiableEqualsExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />

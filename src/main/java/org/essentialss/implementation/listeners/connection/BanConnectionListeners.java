@@ -5,7 +5,7 @@ import org.essentialss.api.ban.BanMultiplayerScreenOptions;
 import org.essentialss.api.ban.SBanManager;
 import org.essentialss.api.ban.data.BanData;
 import org.essentialss.api.ban.data.IPBanData;
-import org.essentialss.api.config.BanConfig;
+import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.event.Listener;

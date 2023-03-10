@@ -1,5 +1,6 @@
 package org.essentialss.implementation.world;
 
+import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.utils.validation.ValidationRules;
 import org.essentialss.api.utils.validation.Validator;
@@ -47,71 +48,32 @@ public class SWorldDataImpl implements SWorldData {
         this.points.addAll(new Validator<>(builder.points()).rule(ValidationRules.notNull()).validate());
     }
 
-    private boolean deregisterPoint(@NotNull SPoint point, boolean runEvent, @Nullable Cause cause) {
-        //TODO events
-        boolean result = this.points.remove(point);
-        //TODO events
-        return result;
-    }
-
-    @Override
-    public @NotNull String identifier() {
-        if (null != this.id) {
-            return this.id;
-        }
-        //noinspection DataFlowIssue
-        return this.key.formatted();
-    }
-
-    private boolean register(@NotNull SPoint point, boolean runEvents, @Nullable Cause cause) {
-        if (runEvents) {
-            if (null == cause) {
-                throw new IllegalArgumentException("Cause cannot be null when running events");
-            }
-            RegisterPointPreEventImpl preEvent = new RegisterPointPreEventImpl(point, cause);
-            Sponge.eventManager().post(preEvent);
-            if (preEvent.isCancelled()) {
-                return false;
-            }
-        }
-        boolean added = this.points.add(point);
-        if (runEvents) {
-            Event postEvent = new RegisterPointPostEventImpl(point, cause);
-            Sponge.eventManager().post(postEvent);
-        }
-        return added;
-
-    }
-
-    @Override
-    public void reloadFromConfig() throws ConfigurateException {
-        SWorldDataSerializer.load(this);
-    }
-
-    @Override
-    public void saveToConfig() throws ConfigurateException {
-        SWorldDataSerializer.save(this);
-    }
-
-    @Override
-    public @NotNull Optional<World<?, ?>> spongeWorld() {
-        if ((null != this.key) && Sponge.isServerAvailable()) {
-            return Sponge.server().worldManager().world(this.key).map(sWorld -> sWorld);
-        }
-        if ((null != this.id) && Sponge.isClientAvailable()) {
-            return Sponge.client().world().filter(world -> world.context().toString().equalsIgnoreCase(this.id)).map(sWorld -> sWorld);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ResourceKey> worldKey() {
-        return Optional.empty();
-    }
-
     @Override
     public void clearPoints() {
         this.points.clear();
+    }
+
+    @Override
+    public boolean deregister(@NotNull SSpawnPoint builder, boolean runEvent, @Nullable Cause cause) {
+        return this.deregisterPoint(builder, runEvent, cause);
+    }
+
+    @Override
+    public boolean deregister(@NotNull SWarp builder, boolean runEvent, @Nullable Cause cause) {
+        return this.deregisterPoint(builder, runEvent, cause);
+    }
+
+    @Override
+    public boolean deregister(@NotNull SJailSpawnPoint builder, boolean runEvent, @Nullable Cause cause) {
+        throw new RuntimeException("Jail not implemented yet");
+    }
+
+    @Override
+    public boolean isWorld(@NotNull World<?, ?> world) {
+        if ((world instanceof ServerWorld) && ((ServerWorld) world).key().equals(this.key)) {
+            return true;
+        }
+        return world.context().toString().equalsIgnoreCase(this.id);
     }
 
     @Override
@@ -126,7 +88,7 @@ public class SWorldDataImpl implements SWorldData {
                     .ifPresent(sWorld -> list.add(new SSpawnPointImpl(
                             new SSpawnPointBuilder().setPoint(sWorld.properties().spawnPosition().toDouble()).setSpawnTypes(SSpawnType.MAIN_SPAWN), this)));
         }
-        return new UnmodifiableCollection<>(list);
+        return new SingleUnmodifiableCollection<>(list);
     }
 
     @Override
@@ -177,25 +139,64 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
-    public boolean deregister(@NotNull SSpawnPoint builder, boolean runEvent, @Nullable Cause cause) {
-        return this.deregisterPoint(builder, runEvent, cause);
-    }
-
-    @Override
-    public boolean deregister(@NotNull SWarp builder, boolean runEvent, @Nullable Cause cause) {
-        return this.deregisterPoint(builder, runEvent, cause);
-    }
-
-    @Override
-    public boolean deregister(@NotNull SJailSpawnPoint builder, boolean runEvent, @Nullable Cause cause) {
-        throw new RuntimeException("Jail not implemented yet");
-    }
-
-    @Override
-    public boolean isWorld(@NotNull World<?, ?> world) {
-        if ((world instanceof ServerWorld) && ((ServerWorld) world).key().equals(this.key)) {
-            return true;
+    public @NotNull Optional<World<?, ?>> spongeWorld() {
+        if ((null != this.key) && Sponge.isServerAvailable()) {
+            return Sponge.server().worldManager().world(this.key).map(sWorld -> sWorld);
         }
-        return world.context().toString().equalsIgnoreCase(this.id);
+        if ((null != this.id) && Sponge.isClientAvailable()) {
+            return Sponge.client().world().filter(world -> world.context().toString().equalsIgnoreCase(this.id)).map(sWorld -> sWorld);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ResourceKey> worldKey() {
+        return Optional.empty();
+    }
+
+    private boolean deregisterPoint(@NotNull SPoint point, boolean runEvent, @Nullable Cause cause) {
+        //TODO events
+        boolean result = this.points.remove(point);
+        //TODO events
+        return result;
+    }
+
+    @Override
+    public @NotNull String identifier() {
+        if (null != this.id) {
+            return this.id;
+        }
+        //noinspection DataFlowIssue
+        return this.key.formatted();
+    }
+
+    private boolean register(@NotNull SPoint point, boolean runEvents, @Nullable Cause cause) {
+        if (runEvents) {
+            if (null == cause) {
+                throw new IllegalArgumentException("Cause cannot be null when running events");
+            }
+            RegisterPointPreEventImpl preEvent = new RegisterPointPreEventImpl(point, cause);
+            Sponge.eventManager().post(preEvent);
+            if (preEvent.isCancelled()) {
+                return false;
+            }
+        }
+        boolean added = this.points.add(point);
+        if (runEvents) {
+            Event postEvent = new RegisterPointPostEventImpl(point, cause);
+            Sponge.eventManager().post(postEvent);
+        }
+        return added;
+
+    }
+
+    @Override
+    public void reloadFromConfig() throws ConfigurateException {
+        SWorldDataSerializer.load(this);
+    }
+
+    @Override
+    public void saveToConfig() throws ConfigurateException {
+        SWorldDataSerializer.save(this);
     }
 }

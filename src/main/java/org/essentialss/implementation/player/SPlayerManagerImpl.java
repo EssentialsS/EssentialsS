@@ -5,6 +5,8 @@ import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.player.data.SGeneralOfflineData;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
+import org.essentialss.api.player.data.module.load.ModuleLoader;
+import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
 import org.essentialss.implementation.player.data.AbstractProfileData;
 import org.essentialss.implementation.player.data.SPlayerDataImpl;
 import org.essentialss.implementation.player.data.SProfileDataImpl;
@@ -20,40 +22,12 @@ import org.spongepowered.configurate.ConfigurateException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.concurrent.LinkedTransferQueue;
 
 public class SPlayerManagerImpl implements SPlayerManager {
 
     private final Collection<AbstractProfileData> data = new LinkedHashSet<>();
-
-    private @NotNull Optional<AbstractProfileData> dataForProfile(@NotNull Identity profile) {
-        return this.data.stream().filter(data -> data.uuid().equals(profile.uuid())).findAny();
-    }
-
-    public void unload(@NotNull AbstractProfileData data) {
-        this.data.remove(data);
-    }
-
-    @Override
-    public @NotNull SGeneralPlayerData dataFor(@NotNull Player player) {
-        Optional<AbstractProfileData> opData = this.dataForProfile(player.profile());
-        if (opData.isPresent() && (opData.get() instanceof SGeneralPlayerData)) {
-            return (SGeneralPlayerData) opData.get();
-        }
-
-        SPlayerDataImpl playerData = new SPlayerDataImpl(player);
-        try {
-            playerData.reloadFromConfig();
-        } catch (ConfigurateException e) {
-            e.printStackTrace();
-        }
-
-        if (opData.isPresent()) {
-            playerData.applyChangesFrom(opData.get());
-            this.data.remove(opData.get());
-        }
-        this.data.add(playerData);
-        return playerData;
-    }
+    private final Collection<ModuleLoader<?, ?>> moduleLoaders = new LinkedTransferQueue<>();
 
     @Override
     public @NotNull SGeneralOfflineData dataFor(@NotNull User user) {
@@ -84,12 +58,7 @@ public class SPlayerManagerImpl implements SPlayerManager {
     @Override
     public @NotNull SGeneralUnloadedData dataFor(@NotNull GameProfile profile) {
         if (Sponge.isServerAvailable()) {
-            Optional<ServerPlayer> opPlayer = Sponge
-                    .server()
-                    .onlinePlayers()
-                    .stream()
-                    .filter(player -> player.profile().equals(profile))
-                    .findAny();
+            Optional<ServerPlayer> opPlayer = Sponge.server().onlinePlayers().stream().filter(player -> player.profile().equals(profile)).findAny();
             if (opPlayer.isPresent()) {
                 return this.dataFor(opPlayer.get());
             }
@@ -107,5 +76,45 @@ public class SPlayerManagerImpl implements SPlayerManager {
         }
         this.data.add(playerData);
         return playerData;
+    }
+
+    @Override
+    public @NotNull SGeneralPlayerData dataFor(@NotNull Player player) {
+        Optional<AbstractProfileData> opData = this.dataForProfile(player.profile());
+        if (opData.isPresent() && (opData.get() instanceof SGeneralPlayerData)) {
+            return (SGeneralPlayerData) opData.get();
+        }
+
+        SPlayerDataImpl playerData = new SPlayerDataImpl(player);
+        try {
+            playerData.reloadFromConfig();
+        } catch (ConfigurateException e) {
+            e.printStackTrace();
+        }
+
+        if (opData.isPresent()) {
+            playerData.applyChangesFrom(opData.get());
+            this.data.remove(opData.get());
+        }
+        this.data.add(playerData);
+        return playerData;
+    }
+
+    @Override
+    public @NotNull Collection<ModuleLoader<?, ?>> dataLoaders() {
+        return new SingleUnmodifiableCollection<>(this.moduleLoaders);
+    }
+
+    @Override
+    public void register(@NotNull ModuleLoader<?, ?> loader) {
+        this.moduleLoaders.add(loader);
+    }
+
+    private @NotNull Optional<AbstractProfileData> dataForProfile(@NotNull Identity profile) {
+        return this.data.stream().filter(data -> data.uuid().equals(profile.uuid())).findAny();
+    }
+
+    public void unload(@NotNull AbstractProfileData data) {
+        this.data.remove(data);
     }
 }

@@ -1,11 +1,15 @@
 package org.essentialss.implementation.player.data;
 
+import net.kyori.adventure.bossbar.BossBar;
 import org.essentialss.api.message.MessageData;
+import org.essentialss.api.modifier.SPlayerModifier;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
+import org.essentialss.api.player.data.module.ModuleData;
 import org.essentialss.api.player.teleport.PlayerTeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestBuilder;
+import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
@@ -29,8 +33,11 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
 
     private final @NotNull Player player;
     private final Collection<TeleportRequest> teleportRequests = new LinkedHashSet<>();
+    private final @NotNull Collection<SPlayerModifier<?>> afkModifiers = new LinkedHashSet<>();
+    private @Nullable BossBar afkBar;
     private int backTeleportIndex;
     private boolean isAfk;
+    private LocalDateTime lastAction = LocalDateTime.now();
 
     public SPlayerDataImpl(@NotNull Player player) {
         this.player = player;
@@ -68,6 +75,11 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
+    public Collection<SPlayerModifier<?>> appliedAwayFromKeyboardModifiers() {
+        return this.afkModifiers;
+    }
+
+    @Override
     public @NotNull OptionalInt backTeleportIndex() {
         if (this.backTeleportLocations.isEmpty()) {
             return OptionalInt.empty();
@@ -76,6 +88,11 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
             this.backTeleportIndex = this.backTeleportLocations.size() - 1;
         }
         return OptionalInt.of(this.backTeleportIndex);
+    }
+
+    @Override
+    public Optional<BossBar> barUntilKick() {
+        return Optional.ofNullable(this.afkBar);
     }
 
     @Override
@@ -89,13 +106,22 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
-    public boolean isAwayFromKeyboard() {
+    public boolean isShowingAwayFromKeyboard() {
         return this.isAfk;
     }
 
     @Override
-    public void setAwayFromKeyboard(boolean afk) {
-        this.isAfk = afk;
+    public LocalDateTime lastPlayerAction() {
+        return this.lastAction;
+    }
+
+    @Override
+    public void playerAction() {
+        this.lastAction = LocalDateTime.now();
+        this.isAfk = false;
+        if (null != this.afkBar) {
+            this.spongePlayer().hideBossBar(this.afkBar);
+        }
     }
 
     @Override
@@ -106,13 +132,29 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
+    public void registerData(@NotNull ModuleData<?> moduleData) {
+        this.moduleData.add(moduleData);
+    }
+
+    @Override
     public void releaseFromJail() {
         this.releaseFromJail(this.world().spawnPoint(this.player.position()).location());
     }
 
     @Override
     public void sendMessageTo(@NotNull MessageData data) {
+        //noinspection allow-raw-message
         this.player.sendMessage(data.formattedMessage());
+    }
+
+    @Override
+    public void setAwayFromKeyboardSince(@Nullable LocalDateTime since, @NotNull Collection<SPlayerModifier<?>> modifiers) {
+        if (null != since) {
+            this.lastAction = since;
+        }
+        this.isAfk = true;
+        this.afkModifiers.clear();
+        this.afkModifiers.addAll(modifiers);
     }
 
     @Override
@@ -124,6 +166,17 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
+    public void setBarUntilKick(@Nullable BossBar bar) {
+        this.afkBar = bar;
+    }
+
+    @Override
+    public void setNextToKeyboard() {
+        this.isAfk = false;
+        this.afkModifiers.clear();
+    }
+
+    @Override
     public @NotNull Player spongePlayer() {
         return this.player;
     }
@@ -131,7 +184,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     @Override
     public @NotNull UnmodifiableCollection<TeleportRequest> teleportRequests() {
         this.updateTeleportRequests();
-        return new UnmodifiableCollection<>(this.teleportRequests);
+        return new SingleUnmodifiableCollection<>(this.teleportRequests);
     }
 
     @Override
@@ -151,7 +204,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
-    public String playerName() {
+    public @NotNull String playerName() {
         return this.player.name();
     }
 

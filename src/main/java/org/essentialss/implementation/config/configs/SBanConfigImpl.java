@@ -1,8 +1,8 @@
-package org.essentialss.implementation.config;
+package org.essentialss.implementation.config.configs;
 
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.ban.BanMultiplayerScreenOptions;
-import org.essentialss.api.config.BanConfig;
+import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;

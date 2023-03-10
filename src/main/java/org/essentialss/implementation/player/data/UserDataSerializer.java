@@ -31,7 +31,6 @@ final class UserDataSerializer {
     private static final DateTimeConfigValue RELEASED_FROM_JAIL = new DateTimeConfigValue("jail", "ReleasedOn");
     private static final ComponentConfigValue DISPLAY_NAME = new ComponentConfigValue("other", "DisplayName");
 
-    private static final BooleanConfigValue IS_MUTED = new BooleanConfigValue(false, "chat", "Muted");
     private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListDefaultConfigValueImpl<>(new LocationConfigValue("placement"),
                                                                                                                   "locations", "back");
 
@@ -47,9 +46,6 @@ final class UserDataSerializer {
         File file = new File(folder, "data/players/" + userData.uuid() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
         CommentedConfigurationNode root = loader.load();
-
-        boolean isMuted = IS_MUTED.parseDefault(root);
-        userData.setMuted(isMuted);
 
         boolean isInJail = IS_IN_JAIL.parseDefault(root);
         if (isInJail && (userData instanceof AbstractProfileData)) {
@@ -77,7 +73,6 @@ final class UserDataSerializer {
         File file = new File(folder, "data/players/" + userData.uuid() + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
         CommentedConfigurationNode root = loader.createNode();
-        IS_MUTED.set(root, userData.muted());
         IS_IN_JAIL.set(root, userData.isInJail());
         PREVENT_TELEPORT_REQUESTS.set(root, userData.isPreventingTeleportRequests());
         CAN_LOOSE_ITEMS_WHEN_USED.set(root, userData.canLooseItemsWhenUsed());

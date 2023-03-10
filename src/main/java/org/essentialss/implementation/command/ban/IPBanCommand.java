@@ -1,6 +1,6 @@
 package org.essentialss.implementation.command.ban;
 
-import org.essentialss.api.config.BanConfig;
+import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.permissions.permission.SPermissions;

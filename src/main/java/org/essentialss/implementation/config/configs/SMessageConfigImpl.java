@@ -10,6 +10,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.File;
 import java.util.Collection;
@@ -30,11 +31,11 @@ public class SMessageConfigImpl implements MessageConfig {
     }
 
     @Override
-    public void update() throws ConfigurateException {
+    public void update() throws ConfigurateException, SerializationException {
         this.update(EssentialsSMain.plugin().messageManager().get().adapters());
     }
 
-    public void update(@NotNull MessageAdapters messageAdapters) throws ConfigurateException {
+    public void update(@NotNull MessageAdapters messageAdapters) throws ConfigurateException, SerializationException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode root = loader.load();
 

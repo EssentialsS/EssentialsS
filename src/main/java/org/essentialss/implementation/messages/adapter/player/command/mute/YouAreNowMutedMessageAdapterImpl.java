@@ -8,19 +8,16 @@ import org.essentialss.api.message.adapters.player.command.mute.YouAreNowMutedMe
 import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.message.placeholder.wrapper.collection.AndCollectionWrapperPlaceholder;
-import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.implementation.config.value.simple.ComponentConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class YouAreNowMutedMessageAdapterImpl implements YouAreNowMutedMessageAdapter {
@@ -51,7 +48,8 @@ public class YouAreNowMutedMessageAdapterImpl implements YouAreNowMutedMessageAd
             message = placeholder.apply(message, Arrays.asList(types));
         }
 
-        return message;    }
+        return message;
+    }
 
     @Override
     public @NotNull SingleConfigValue.Default<Component> configValue() {

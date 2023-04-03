@@ -32,7 +32,7 @@ public class SMessageManagerImpl implements MessageManager {
         if (!this.hasUpdatedConfig) {
             try {
                 this.config.update(this.adapters);
-                hasUpdatedConfig = true;
+                this.hasUpdatedConfig = true;
             } catch (ConfigurateException e) {
                 throw new RuntimeException(e);
             }

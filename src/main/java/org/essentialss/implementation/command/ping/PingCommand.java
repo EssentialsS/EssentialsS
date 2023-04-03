@@ -15,7 +15,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class PingCommand {
+public final class PingCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -30,6 +30,10 @@ public class PingCommand {
             SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.player);
             return PingCommand.execute(context.cause().audience(), player);
         }
+    }
+
+    private PingCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createPingCommand() {

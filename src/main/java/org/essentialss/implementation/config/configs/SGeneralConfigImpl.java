@@ -23,6 +23,7 @@ public class SGeneralConfigImpl implements GeneralConfig {
     private static final IntegerConfigValue PAGE_SIZE = new IntegerConfigValue(10, "misc", "ListPageSize");
 
     @Override
+    @SuppressWarnings("ReturnOfNull")
     public @NotNull Collection<ConfigValue<?>> expectedNodes() {
         return Arrays
                 .stream(SGeneralConfigImpl.class.getDeclaredFields())

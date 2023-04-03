@@ -26,6 +26,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.*;
@@ -196,7 +197,7 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
-    public void saveToConfig() throws ConfigurateException {
+    public void saveToConfig() throws ConfigurateException, SerializationException {
         SWorldDataSerializer.save(this);
     }
 }

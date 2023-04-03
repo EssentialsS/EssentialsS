@@ -35,7 +35,7 @@ public final class MuteCommand {
         public CommandResult execute(CommandContext context) throws CommandException {
             SGeneralUnloadedData playerData = context.requireOne(this.player);
             Collection<? extends MuteType> muteTypes = context.all(this.muteTypes);
-            MuteType[] muteTypesArray = muteTypes.stream().toArray(MuteType[]::new);
+            MuteType[] muteTypesArray = muteTypes.toArray(new MuteType[0]);
             return MuteCommand.execute(context.cause().audience(), playerData, muteTypesArray);
         }
     }

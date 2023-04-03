@@ -1,7 +1,6 @@
 package org.essentialss.implementation.messages.adapter.player.command;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import org.essentialss.api.config.configs.MessageConfig;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.api.message.MessageManager;

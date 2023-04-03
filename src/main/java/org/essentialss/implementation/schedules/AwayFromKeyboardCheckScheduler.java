@@ -57,9 +57,7 @@ public class AwayFromKeyboardCheckScheduler implements Runnable {
                 opBar = Optional.of(bar);
                 p.setBarUntilKick(bar);
             }
-            BossBar bossBar = opBar.get();
-            bossBar = bossBar.progress(percent);
-            bossBar = bossBar.name(adapter.adaptMessage(left));
+            BossBar bossBar = opBar.get().progress(percent).name(adapter.adaptMessage(left));
             p.spongePlayer().showBossBar(bossBar);
         });
     }

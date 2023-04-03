@@ -68,6 +68,7 @@ public class SBanConfigImpl implements BanConfig {
     }
 
     @Override
+    @SuppressWarnings("ReturnOfNull")
     public @NotNull Collection<ConfigValue<?>> expectedNodes() {
         return Arrays
                 .stream(SBanConfigImpl.class.getDeclaredFields())

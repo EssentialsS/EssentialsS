@@ -18,6 +18,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -42,6 +43,7 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     private static final CollectionConfigValue<SPlayerModifier<?>> MODIFIERS = new ListDefaultConfigValueImpl<>(new PlayerModifierConfigValue(), "general",
                                                                                                                 "duration", "modifier", "Modifiers");
     private static final SingleConfigValue.Default<Boolean> WILL_KICK_AFTER_DURATION = new BooleanConfigValue("general", "duration", "kick", "WillKick");
+    @SuppressWarnings("ReturnOfNull")
     private static final RelyOnConfigValue<Duration, Boolean> DURATION_UNTIL_KICK = RelyOnConfigValue.ifFalse(
             new DurationConfigValue("general", "duration", "kick", "Delay"), WILL_KICK_AFTER_DURATION, () -> null);
 
@@ -83,6 +85,7 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
 
 
     @Override
+    @SuppressWarnings("ReturnOfNull")
     public @NotNull Collection<ConfigValue<?>> expectedNodes() {
         return Arrays
                 .stream(AwayFromKeyboardConfigImpl.class.getDeclaredFields())
@@ -109,7 +112,7 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     }
 
     @Override
-    public void update() throws ConfigurateException {
+    public void update() throws ConfigurateException, SerializationException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode root = loader.load();
         CAN_JOIN_IN_PLACE_OF_AFK_PLAYER.setDefaultIfNotPresent(root);

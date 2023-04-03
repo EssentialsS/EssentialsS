@@ -30,6 +30,11 @@ public class PlayerModifierConfigValue implements SingleConfigValue<SPlayerModif
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<SPlayerModifier<?>> type() {
+        return (Class<SPlayerModifier<?>>) (Object) SPlayerModifier.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable SPlayerModifier<?> parse(@NotNull ConfigurationNode root) throws SerializationException {

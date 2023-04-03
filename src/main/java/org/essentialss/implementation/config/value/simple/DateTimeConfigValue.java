@@ -21,6 +21,11 @@ public class DateTimeConfigValue implements SingleConfigValue<LocalDateTime> {
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<LocalDateTime> type() {
+        return LocalDateTime.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable LocalDateTime parse(@NotNull ConfigurationNode root) throws SerializationException {

@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
+import org.essentialss.api.world.points.spawn.SSpawnPoint;
 import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnType;
 import org.essentialss.implementation.EssentialsSMain;
@@ -116,7 +117,7 @@ public final class CreateSpawnCommand {
     }
 
     public static CommandResult execute(@NotNull OfflineLocation location, @NotNull SSpawnType type, @NotNull Cause cause) {
-        boolean result = location.worldData().register(new SSpawnPointBuilder().setSpawnTypes(type).setPoint(location.position()), cause);
-        return result ? CommandResult.success() : CommandResult.error(Component.text("Could not create spawn"));
+        Optional<SSpawnPoint> result = location.worldData().register(new SSpawnPointBuilder().setSpawnTypes(type).setPoint(location.position()), cause);
+        return result.isPresent() ? CommandResult.success() : CommandResult.error(Component.text("Could not create spawn"));
     }
 }

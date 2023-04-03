@@ -9,15 +9,19 @@ import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.utils.Singleton;
+import org.essentialss.api.utils.parameter.ParameterAdapter;
 import org.essentialss.api.world.SWorldManager;
 import org.essentialss.implementation.ban.SBanManagerImpl;
+import org.essentialss.implementation.command.ParameterAdapters;
 import org.essentialss.implementation.command.ban.BanCommands;
 import org.essentialss.implementation.command.essentialss.EssentialsSCommand;
 import org.essentialss.implementation.command.hat.HatCommand;
 import org.essentialss.implementation.command.inventory.DisplayInventoryCommand;
 import org.essentialss.implementation.command.invsee.InventorySeeCommand;
+import org.essentialss.implementation.command.mute.MuteCommand;
 import org.essentialss.implementation.command.nick.NicknameCommand;
 import org.essentialss.implementation.command.nick.WhoIsCommand;
+import org.essentialss.implementation.command.ping.PingCommand;
 import org.essentialss.implementation.command.point.PointCommand;
 import org.essentialss.implementation.command.point.list.ListSpawnCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
@@ -25,8 +29,9 @@ import org.essentialss.implementation.command.run.RunCommand;
 import org.essentialss.implementation.command.teleport.request.*;
 import org.essentialss.implementation.command.unban.UnbanCommands;
 import org.essentialss.implementation.config.SConfigManagerImpl;
-import org.essentialss.implementation.listeners.connection.AwayFromKeyboardListeners;
-import org.essentialss.implementation.listeners.connection.BanConnectionListeners;
+import org.essentialss.implementation.listeners.afk.AwayFromKeyboardListeners;
+import org.essentialss.implementation.listeners.ban.BanConnectionListeners;
+import org.essentialss.implementation.listeners.chat.MuteListener;
 import org.essentialss.implementation.listeners.connection.ConnectionListeners;
 import org.essentialss.implementation.messages.SMessageManagerImpl;
 import org.essentialss.implementation.player.SPlayerManagerImpl;
@@ -43,6 +48,10 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.LinkedTransferQueue;
+
 @Plugin("essentials-s")
 public class EssentialsSMain implements EssentialsSAPI {
 
@@ -54,6 +63,7 @@ public class EssentialsSMain implements EssentialsSAPI {
     private final Singleton<SPlayerManager> playerManager = new Singleton<>(SPlayerManagerImpl::new);
     private final Singleton<SBanManager> banManager = new Singleton<>(SBanManagerImpl::new);
     private final Singleton<MessageManager> messageManager = new Singleton<>(SMessageManagerImpl::new);
+    private final Collection<ParameterAdapter> parameterAdapters = new LinkedTransferQueue<>();
 
     @SuppressWarnings("AccessStaticViaInstance")
     @Inject
@@ -61,6 +71,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         this.plugin = this;
         this.container = container;
         this.logger = logger;
+        this.parameterAdapters.addAll(Arrays.asList(ParameterAdapters.values()));
     }
 
     @Override
@@ -84,6 +95,11 @@ public class EssentialsSMain implements EssentialsSAPI {
     }
 
     @Override
+    public @NotNull Collection<ParameterAdapter> parameterAdapters() {
+        return this.parameterAdapters;
+    }
+
+    @Override
     public @NotNull Singleton<SPlayerManager> playerManager() {
         return this.playerManager;
     }
@@ -102,6 +118,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         //misc
         event.register(this.container, RunCommand.createRunCommand(), "run", "execute");
         event.register(this.container, EssentialsSCommand.createEssentialsCommand(), "essentialss");
+        event.register(this.container, PingCommand.createPingCommand(), "ping");
 
         //inventory
         event.register(this.container, HatCommand.createHatCommand(), "hat");
@@ -115,18 +132,25 @@ public class EssentialsSMain implements EssentialsSAPI {
         //warp
         event.register(this.container, PointCommand.createWarpCommand(), "warp");
         event.register(this.container, ListWarpCommand.createWarpListCommand(), "warps");
+
         //spawn
         event.register(this.container, PointCommand.createSpawnCommand(), "spawn");
         event.register(this.container, ListSpawnCommand.createSpawnListCommand(), "spawns");
+
         //nickname
         event.register(this.container, NicknameCommand.createNicknameCommand(), "nickname", "nick");
         event.register(this.container, WhoIsCommand.createWhoIsCommand(), "whois", "realname");
+
+        //mute
+        event.register(this.container, MuteCommand.createMuteCommand(), "mute");
+
         //teleport
         event.register(this.container, TeleportRequestsCommand.createTeleportRequestsCommand(), "teleportrequests", "tprequests", "tpr");
         event.register(this.container, TeleportRequestToPlayerCommand.createTeleportRequestToPlayerCommand(), "teleportto", "tpto", "tpt");
         event.register(this.container, TeleportRequestHerePlayerCommand.createTeleportRequestHerePlayerCommand(), "teleporthere", "tphere", "tph");
         event.register(this.container, TeleportAcceptRequestCommand.createTeleportAcceptCommand(), "tpaccept", "tpa");
         event.register(this.container, TeleportDenyRequestCommand.createTeleportDenyCommand(), "tpdeny", "tpd");
+
         //ban
         BanConfig banConfig = this.banManager().get().banConfig().get();
         if (banConfig.useEssentialsSBanCommands().parseDefault(banConfig)) {
@@ -152,6 +176,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         eventManager.registerListeners(this.container, new ConnectionListeners());
         eventManager.registerListeners(this.container, new BanConnectionListeners());
         eventManager.registerListeners(this.container, new AwayFromKeyboardListeners());
+        eventManager.registerListeners(this.container, new MuteListener());
     }
 
     public static EssentialsSMain plugin() {

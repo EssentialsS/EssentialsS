@@ -35,6 +35,11 @@ public class LocationConfigValue implements SingleConfigValue<OfflineLocation> {
         return this.node;
     }
 
+    @Override
+    public @NotNull Class<OfflineLocation> type() {
+        return OfflineLocation.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable OfflineLocation parse(@NotNull ConfigurationNode root) {

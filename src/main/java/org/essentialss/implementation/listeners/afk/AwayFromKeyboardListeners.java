@@ -1,13 +1,16 @@
-package org.essentialss.implementation.listeners.connection;
+package org.essentialss.implementation.listeners.afk;
 
 import org.essentialss.api.config.configs.AwayFromKeyboardConfig;
 import org.essentialss.api.message.adapters.player.listener.afk.BackToKeyboardMessageAdapter;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.events.player.afk.PlayerBackFromKeyboardImpl;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.CollideBlockEvent;
@@ -26,9 +29,15 @@ import java.util.Optional;
 public class AwayFromKeyboardListeners {
 
 
-    private void onAction(@NotNull Player sPlayer) {
+    private void onAction(@NotNull Player sPlayer, @NotNull Cause cause) {
         SGeneralPlayerData player = EssentialsSMain.plugin().playerManager().get().dataFor(sPlayer);
         boolean isAfk = player.isShowingAwayFromKeyboard();
+
+        Cancellable event = new PlayerBackFromKeyboardImpl(player, cause);
+        if (event.isCancelled()) {
+            return;
+        }
+
         player.playerAction();
         if (!isAfk) {
             return;
@@ -99,7 +108,7 @@ public class AwayFromKeyboardListeners {
             event.setCancelled(true);
             return;
         }
-        this.onAction(player.spongePlayer());
+        this.onAction(player.spongePlayer(), event.cause());
     }
 
     @Listener
@@ -110,13 +119,13 @@ public class AwayFromKeyboardListeners {
         if (!(event.entity() instanceof Player)) {
             return;
         }
-        this.onAction((Player) event.entity());
+        this.onAction((Player) event.entity(), event.cause());
     }
 
     @Listener
     @Exclude(CollideBlockEvent.class)
     public void playerRootCause(Event event, @Root Player player) {
-        this.onAction(player);
+        this.onAction(player, event.cause());
     }
 
     @Listener
@@ -124,7 +133,7 @@ public class AwayFromKeyboardListeners {
         if (!(event.entity() instanceof Player)) {
             return;
         }
-        this.onAction((Player) event.entity());
+        this.onAction((Player) event.entity(), event.cause());
     }
 
 

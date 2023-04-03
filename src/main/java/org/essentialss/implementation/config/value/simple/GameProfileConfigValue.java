@@ -24,6 +24,11 @@ public class GameProfileConfigValue implements SingleConfigValue<GameProfile> {
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<GameProfile> type() {
+        return GameProfile.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable GameProfile parse(@NotNull ConfigurationNode root) throws SerializationException {

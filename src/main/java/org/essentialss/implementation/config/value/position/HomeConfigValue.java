@@ -60,4 +60,9 @@ public class HomeConfigValue implements SingleConfigValue<SHomeBuilder> {
 
 
     }
+
+    @Override
+    public @NotNull Class<?> type() {
+        return SHomeBuilder.class;
+    }
 }

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public enum SPermissions implements SPermission {
 
+    MUTE("essentialss.mute"),
     CONFIG_SET_MESSAGE("essentialss.config.message.set"),
     CONFIG_VIEW_MESSAGE("essentialss.config.message.view"),
     WARP_CREATE("essentialss.warp.create"),

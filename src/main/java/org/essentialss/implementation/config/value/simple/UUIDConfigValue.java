@@ -21,6 +21,11 @@ public class UUIDConfigValue implements SingleConfigValue<UUID> {
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<UUID> type() {
+        return UUID.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable UUID parse(@NotNull ConfigurationNode root) throws SerializationException {

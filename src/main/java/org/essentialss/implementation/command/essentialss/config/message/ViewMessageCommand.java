@@ -2,7 +2,7 @@ package org.essentialss.implementation.command.essentialss.config.message;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.essentialss.api.message.placeholder.MessageAdapter;
+import org.essentialss.api.message.adapters.MessageAdapter;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +12,9 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+
+import java.util.Collection;
+import java.util.function.Supplier;
 
 public final class ViewMessageCommand {
 
@@ -33,8 +36,8 @@ public final class ViewMessageCommand {
         throw new RuntimeException("Cannot run");
     }
 
-    public static Command.Parameterized createViewMessageCommand() {
-        Parameter.Value<MessageAdapter> adapter = SParameters.messageAdapter().key("type").build();
+    public static Command.Parameterized createViewMessageCommand(@NotNull Supplier<Collection<MessageAdapter>> supplier) {
+        Parameter.Value<MessageAdapter> adapter = SParameters.messageAdapter(supplier).key("type").build();
 
         return Command.builder().addParameter(adapter).executor(new Execute(adapter)).permission(SPermissions.CONFIG_VIEW_MESSAGE.node()).build();
     }

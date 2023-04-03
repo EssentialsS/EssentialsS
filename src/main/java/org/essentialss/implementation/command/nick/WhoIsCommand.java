@@ -4,6 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.utils.SParameters;
+import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -39,7 +40,8 @@ public final class WhoIsCommand {
     }
 
     public static CommandResult execute(@NotNull SGeneralUnloadedData data, @NotNull Audience audience) {
-        audience.sendMessage(Component.text(data.playerName() + " is ").append(data.displayName()));
+        Component message = EssentialsSMain.plugin().messageManager().get().adapters().whoIs().get().adaptMessage(data);
+        audience.sendMessage(message);
         return CommandResult.success();
     }
 

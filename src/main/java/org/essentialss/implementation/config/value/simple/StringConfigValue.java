@@ -19,6 +19,11 @@ public class StringConfigValue implements SingleConfigValue<String> {
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<String> type() {
+        return String.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable String parse(@NotNull ConfigurationNode root) {

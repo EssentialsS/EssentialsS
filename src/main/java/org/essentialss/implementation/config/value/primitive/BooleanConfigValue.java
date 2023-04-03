@@ -27,6 +27,11 @@ public class BooleanConfigValue extends SingleDefaultConfigValueImpl<Boolean> {
     }
 
     @Override
+    public @NotNull Class<?> type() {
+        return boolean.class;
+    }
+
+    @Override
     protected void setValue(ConfigurationNode to, @NotNull Boolean value) throws SerializationException {
         to.set(value);
     }

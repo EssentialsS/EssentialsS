@@ -1,7 +1,10 @@
 package org.essentialss.implementation.command.hat;
 
 import net.kyori.adventure.text.Component;
+import org.essentialss.api.player.data.SGeneralPlayerData;
+import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.events.player.hat.ChangeHatEventImpl;
+import org.essentialss.implementation.misc.CommandHelper;
 import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
@@ -13,7 +16,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -29,25 +31,17 @@ public final class HatCommand {
     private static final class Execute implements CommandExecutor {
 
         private final @NotNull Parameter.Value<ItemStackSnapshot> itemParameter;
-        private final @NotNull Parameter.Value<ServerPlayer> targetParameter;
+        private final @NotNull Parameter.Value<SGeneralPlayerData> targetParameter;
 
-        private Execute(@NotNull Parameter.Value<ServerPlayer> target, @NotNull Parameter.Value<ItemStackSnapshot> item) {
+        private Execute(@NotNull Parameter.Value<SGeneralPlayerData> target, @NotNull Parameter.Value<ItemStackSnapshot> item) {
             this.itemParameter = item;
             this.targetParameter = target;
         }
 
         @Override
         public CommandResult execute(CommandContext context) throws CommandException {
-            Optional<ServerPlayer> opPlayer = context.one(this.targetParameter);
-            Player player;
-            if (opPlayer.isPresent()) {
-                player = opPlayer.get();
-            } else if (context.subject() instanceof Player) {
-                player = (Player) context.subject();
-            } else {
-                throw new CommandException(Component.text("Player must be specified"));
-            }
-            final Player finalPlayer = player;
+            SGeneralPlayerData playerData = CommandHelper.playerDataOrTarget(context, this.targetParameter);
+            Player finalPlayer = playerData.spongePlayer();
             Optional<ItemStack> opItem = context.one(this.itemParameter).map(ItemStackSnapshot::createStack);
             ItemStack item;
             Integer hotbarClearItem = null;
@@ -77,20 +71,18 @@ public final class HatCommand {
     }
 
     public static Command.Parameterized createHatCommand() {
-        Parameter.Key<ItemStackSnapshot> itemKey = Parameter.key("hat", ItemStackSnapshot.class);
         Parameter.Value<ItemStackSnapshot> itemParameter = Parameter
                 .itemStackSnapshot()
-                .key(itemKey)
+                .key("hat")
                 .requiredPermission(SPermissions.HAT_CREATE_ITEM.node())
                 .optional()
                 .build();
 
-        Parameter.Key<ServerPlayer> playerKey = Parameter.key("player", ServerPlayer.class);
-        Parameter.Value<ServerPlayer> targetParameter = Parameter
-                .playerOrTarget()
-                .key(playerKey)
-                .requiredPermission(SPermissions.HAT_OTHER.node())
+        Parameter.Value<SGeneralPlayerData> targetParameter = SParameters
+                .onlinePlayer((PlayerData -> true))
+                .key("player")
                 .optional()
+                .requiredPermission(SPermissions.HAT_OTHER.node())
                 .build();
 
         return Command.builder().executor(new Execute(targetParameter, itemParameter)).addParameter(targetParameter).addParameter(itemParameter).build();

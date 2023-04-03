@@ -2,7 +2,7 @@ package org.essentialss.implementation.command.essentialss.config.message;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.essentialss.api.message.placeholder.MessageAdapter;
+import org.essentialss.api.message.adapters.MessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.utils.Constants;
 import org.essentialss.api.utils.SParameters;

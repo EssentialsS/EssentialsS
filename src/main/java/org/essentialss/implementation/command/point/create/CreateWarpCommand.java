@@ -1,8 +1,10 @@
 package org.essentialss.implementation.command.point.create;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.api.world.SWorldData;
+import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.api.world.points.warp.SWarpBuilder;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
@@ -90,10 +92,8 @@ public final class CreateWarpCommand {
             }
 
             String warpName = context.requireOne(this.warpNameParameter);
-            CommandResult result = CreateWarpCommand.execute(world.location(posX, posY, posZ), warpName, context.contextCause());
-            if (result.isSuccess()) {
-                context.cause().audience().sendMessage(Component.text("Created warp '" + warpName + "'"));
-            } else {
+            CommandResult result = CreateWarpCommand.execute(context.cause().audience(), world.location(posX, posY, posZ), warpName, context.contextCause());
+            if (!result.isSuccess()) {
                 context.cause().audience().sendMessage(Component.text("Could not register new warp"));
             }
             return result;
@@ -129,7 +129,7 @@ public final class CreateWarpCommand {
                 .build();
     }
 
-    public static CommandResult execute(@NotNull Location<?, ?> location, @NotNull String warpName, @NotNull Cause cause) {
+    public static CommandResult execute(@NotNull Audience audience, @NotNull Location<?, ?> location, @NotNull String warpName, @NotNull Cause cause) {
 
         SWorldData worldData = EssentialsSMain.plugin().worldManager().get().dataFor(location.world());
         try {
@@ -138,21 +138,24 @@ public final class CreateWarpCommand {
         } catch (ConfigurateException e) {
             return CommandResult.error(Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
         }
-        boolean added;
+        Optional<SWarp> added;
         try {
             added = worldData.register(new SWarpBuilder().setName(warpName).setPoint(location.position()), cause);
         } catch (IllegalArgumentException e) {
             return CommandResult.error(Component.text(e.getMessage()));
         }
-        if (added) {
-            try {
-                worldData.saveToConfig();
-            } catch (ConfigurateException e) {
-                return CommandResult.error(Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
-            }
-            return CommandResult.success();
+        if (!added.isPresent()) {
+            return CommandResult.error(Component.text("Could not register that warp"));
         }
-        return CommandResult.error(Component.text("Could not register that warp"));
-    }
+        try {
+            worldData.saveToConfig();
+        } catch (ConfigurateException e) {
+            return CommandResult.error(Component.text((null == e.getMessage()) ? e.getLocalizedMessage() : e.getMessage()));
+        }
 
+        Component component = EssentialsSMain.plugin().messageManager().get().adapters().createWarp().get().adaptMessage(added.get());
+        audience.sendMessage(component);
+        return CommandResult.success();
+    }
 }
+

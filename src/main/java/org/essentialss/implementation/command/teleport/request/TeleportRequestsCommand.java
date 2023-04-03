@@ -7,9 +7,9 @@ import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestDirection;
 import org.essentialss.api.utils.Constants;
-import org.essentialss.api.utils.FriendlyString;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
+import org.essentialss.api.utils.friendly.FriendlyStrings;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.misc.CommandPager;
 import org.essentialss.implementation.permissions.permission.SPermissions;
@@ -84,7 +84,7 @@ public final class TeleportRequestsCommand {
                 message = message.append(Component.text(" - Teleporting you to them"));
             }
             Duration ago = Duration.between(request.sentTime(), LocalDateTime.now());
-            message = message.append(Component.text(" - Sent " + FriendlyString.toString(ago) + " ago"));
+            message = message.append(Component.text(" - Sent " + FriendlyStrings.DURATION.toFriendlyString(ago) + " ago"));
             int redValue = Constants.UNSIGNED_BYTE_MAX;
             Optional<LocalDateTime> opExpireTime = request.expiresAt();
             if (opExpireTime.isPresent()) {
@@ -92,7 +92,7 @@ public final class TeleportRequestsCommand {
                 LocalDateTime expireTime = opExpireTime.get();
                 LocalDateTime localTime = LocalDateTime.now();
 
-                message = message.append(Component.text(" - Expires in: " + FriendlyString.toString(Duration.between(localTime, expireTime))));
+                message = message.append(Component.text(" - Expires in: " + FriendlyStrings.DURATION.toFriendlyString(Duration.between(localTime, expireTime))));
 
                 Duration totalTimeDuration = Duration.between(sentTime, expireTime);
                 long totalTime = totalTimeDuration.toNanos();
@@ -113,7 +113,6 @@ public final class TeleportRequestsCommand {
             return message;
         }, orderedRequests);
 
-        audience.sendMessage(Component.text());
         return CommandResult.success();
     }
 }

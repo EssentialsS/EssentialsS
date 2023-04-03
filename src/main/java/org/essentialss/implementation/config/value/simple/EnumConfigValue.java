@@ -48,4 +48,9 @@ public class EnumConfigValue<E extends Enum<E>> implements SingleConfigValue<E> 
         }
         node.set(value.name());
     }
+
+    @Override
+    public @NotNull Class<?> type() {
+        return this.values.iterator().next().getDeclaringClass();
+    }
 }

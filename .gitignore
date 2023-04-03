@@ -1,3 +1,5 @@
 /target
 /.idea/*.xml
 *.iml
+/.idea/artifacts/*
+.name

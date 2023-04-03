@@ -27,6 +27,11 @@ public class IntegerConfigValue extends SingleDefaultConfigValueImpl<Integer> {
     }
 
     @Override
+    public @NotNull Class<?> type() {
+        return int.class;
+    }
+
+    @Override
     protected void setValue(ConfigurationNode to, @NotNull Integer value) throws SerializationException {
         to.set(value);
     }

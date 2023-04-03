@@ -1,7 +1,9 @@
 package org.essentialss.implementation.config.configs;
 
 import org.essentialss.api.config.configs.MessageConfig;
-import org.essentialss.api.message.placeholder.MessageAdapter;
+import org.essentialss.api.config.value.ConfigValue;
+import org.essentialss.api.message.MessageAdapters;
+import org.essentialss.api.message.adapters.MessageAdapter;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
@@ -10,24 +12,38 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class SMessageConfigImpl implements MessageConfig {
     @Override
+    public @NotNull Collection<ConfigValue<?>> expectedNodes() {
+        return EssentialsSMain.plugin().messageManager().get().adapters().all().map(MessageAdapter::configValue).collect(Collectors.toList());
+    }
+
+    @Override
     public @NotNull File file() {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        return new File(folder, "messages.conf");
+        return new File(folder, "message/" + Locale.ENGLISH.toLanguageTag() + ".conf");
     }
 
     @Override
     public void update() throws ConfigurateException {
+        this.update(EssentialsSMain.plugin().messageManager().get().adapters());
+    }
+
+    public void update(@NotNull MessageAdapters messageAdapters) throws ConfigurateException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode root = loader.load();
 
-        List<MessageAdapter> adapters = EssentialsSMain.plugin().messageManager().get().adapters().all().collect(Collectors.toList());
+        List<MessageAdapter> adapters = messageAdapters.all().collect(Collectors.toList());
         for (MessageAdapter adapter : adapters) {
             adapter.configValue().setDefaultIfNotPresent(root);
         }
+        loader.save(root);
     }
+
+
 }

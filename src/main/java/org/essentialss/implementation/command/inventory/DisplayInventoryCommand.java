@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
-import org.essentialss.implementation.command.CommandUtils;
+import org.essentialss.implementation.misc.CommandHelper;
 import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
@@ -35,8 +35,7 @@ public final class DisplayInventoryCommand {
 
         @Override
         public CommandResult execute(CommandContext context) throws CommandException {
-            SGeneralPlayerData player = CommandUtils.getTarget(context, this.player,
-                                                               () -> new CommandException(Component.text("player needs to be specified")));
+            SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.player);
             if (!(player.spongePlayer() instanceof ServerPlayer)) {
                 return CommandResult.error(Component.text("server only command"));
             }

@@ -10,6 +10,7 @@ import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.implementation.config.configs.SMessageConfigImpl;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.util.Collection;
 import java.util.concurrent.LinkedTransferQueue;
@@ -19,7 +20,8 @@ public class SMessageManagerImpl implements MessageManager {
 
     private final MessageAdapters adapters;
     private final Collection<SPlaceHolder<?>> placeholders = new LinkedTransferQueue<>(SPlaceHolders.defaultValues());
-    private final MessageConfig config = new SMessageConfigImpl();
+    private final SMessageConfigImpl config = new SMessageConfigImpl();
+    private boolean hasUpdatedConfig;
 
     public SMessageManagerImpl() {
         this.adapters = new SMessageAdaptersImpl(this.config);
@@ -27,6 +29,14 @@ public class SMessageManagerImpl implements MessageManager {
 
     @Override
     public @NotNull MessageAdapters adapters() {
+        if (!this.hasUpdatedConfig) {
+            try {
+                this.config.update(this.adapters);
+                hasUpdatedConfig = true;
+            } catch (ConfigurateException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return this.adapters;
     }
 

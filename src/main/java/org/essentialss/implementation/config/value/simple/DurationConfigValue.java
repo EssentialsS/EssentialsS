@@ -21,6 +21,11 @@ public class DurationConfigValue implements SingleConfigValue<Duration> {
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<Duration> type() {
+        return Duration.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable Duration parse(@NotNull ConfigurationNode root) throws SerializationException {

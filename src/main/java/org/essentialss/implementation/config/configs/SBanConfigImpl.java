@@ -3,6 +3,7 @@ package org.essentialss.implementation.config.configs;
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.ban.BanMultiplayerScreenOptions;
 import org.essentialss.api.config.configs.BanConfig;
+import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
@@ -17,7 +18,12 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SBanConfigImpl implements BanConfig {
 
@@ -59,6 +65,26 @@ public class SBanConfigImpl implements BanConfig {
     @Override
     public SingleConfigValue.Default<Boolean> useEssentialsSBanCommands() {
         return USE_ESSENTIALS_S_BAN_COMMANDS;
+    }
+
+    @Override
+    public @NotNull Collection<ConfigValue<?>> expectedNodes() {
+        return Arrays
+                .stream(SBanConfigImpl.class.getDeclaredFields())
+                .filter(field -> Modifier.isPrivate(field.getModifiers()))
+                .filter(field -> Modifier.isFinal(field.getModifiers()))
+                .filter(field -> Modifier.isStatic(field.getModifiers()))
+                .filter(field -> ConfigValue.class.isAssignableFrom(field.getType()))
+                .map(field -> {
+                    try {
+                        return (ConfigValue<?>) field.get(null);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override

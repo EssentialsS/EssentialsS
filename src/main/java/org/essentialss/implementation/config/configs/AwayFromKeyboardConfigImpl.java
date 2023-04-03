@@ -2,11 +2,13 @@ package org.essentialss.implementation.config.configs;
 
 import org.essentialss.api.config.configs.AwayFromKeyboardConfig;
 import org.essentialss.api.config.value.CollectionConfigValue;
+import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.api.modifier.SPlayerModifier;
 import org.essentialss.api.modifier.SPlayerModifiers;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.ListDefaultConfigValueImpl;
+import org.essentialss.implementation.config.value.modifiers.RelyOnConfigValue;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.implementation.config.value.primitive.BooleanConfigValue;
 import org.essentialss.implementation.config.value.simple.DurationConfigValue;
@@ -18,8 +20,13 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
 
@@ -30,12 +37,13 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     private static final SingleConfigValue<Duration> DURATION_UNTIL_MODIFIERS = new DurationConfigValue("general", "duration", "modifier", "Delay");
     private static final SingleConfigValue.Default<Boolean> APPLY_MODIFIERS = new BooleanConfigValue("general", "duration", "modifier", "Apply");
     private static final SingleConfigValue.Default<Duration> DURATION_UNTIL_STATUS = new SingleDefaultConfigValueWrapper<>(
-            new DurationConfigValue("general", "duration", "Status"), Duration.ofSeconds(3));
+            new DurationConfigValue("general", "duration", "Status"), Duration.ofSeconds(5));
 
     private static final CollectionConfigValue<SPlayerModifier<?>> MODIFIERS = new ListDefaultConfigValueImpl<>(new PlayerModifierConfigValue(), "general",
                                                                                                                 "duration", "modifier", "Modifiers");
-    private static final SingleConfigValue<Duration> DURATION_UNTIL_KICK = new DurationConfigValue("general", "duration", "kick", "Delay");
     private static final SingleConfigValue.Default<Boolean> WILL_KICK_AFTER_DURATION = new BooleanConfigValue("general", "duration", "kick", "WillKick");
+    private static final RelyOnConfigValue<Duration, Boolean> DURATION_UNTIL_KICK = RelyOnConfigValue.ifFalse(
+            new DurationConfigValue("general", "duration", "kick", "Delay"), WILL_KICK_AFTER_DURATION, () -> null);
 
 
     @Override
@@ -44,7 +52,7 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     }
 
     @Override
-    public SingleConfigValue<Duration> durationUntilKick() {
+    public ConfigValue<Duration> durationUntilKick() {
         return DURATION_UNTIL_KICK;
     }
 
@@ -73,6 +81,26 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
         return SHOW_AFK_PLAYERS_ON_MULTIPLAYER_SCREEN;
     }
 
+
+    @Override
+    public @NotNull Collection<ConfigValue<?>> expectedNodes() {
+        return Arrays
+                .stream(AwayFromKeyboardConfigImpl.class.getDeclaredFields())
+                .filter(field -> Modifier.isPrivate(field.getModifiers()))
+                .filter(field -> Modifier.isFinal(field.getModifiers()))
+                .filter(field -> Modifier.isStatic(field.getModifiers()))
+                .filter(field -> ConfigValue.class.isAssignableFrom(field.getType()))
+                .map(field -> {
+                    try {
+                        return (ConfigValue<?>) field.get(null);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public @NotNull File file() {

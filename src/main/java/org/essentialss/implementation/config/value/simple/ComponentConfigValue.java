@@ -21,6 +21,11 @@ public class ComponentConfigValue implements SingleConfigValue<Component> {
         return this.nodes;
     }
 
+    @Override
+    public @NotNull Class<Component> type() {
+        return Component.class;
+    }
+
     @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable Component parse(@NotNull ConfigurationNode root) throws SerializationException {

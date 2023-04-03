@@ -50,4 +50,9 @@ public class ListDefaultConfigValueImpl<T> implements CollectionConfigValue<T> {
             listNode = listNode.appendListNode();
         }
     }
+
+    @Override
+    public @NotNull Class<?> type() {
+        return this.parse.type();
+    }
 }

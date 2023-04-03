@@ -1,4 +1,4 @@
-package org.essentialss.implementation.listeners.connection;
+package org.essentialss.implementation.listeners.ban;
 
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.ban.BanMultiplayerScreenOptions;

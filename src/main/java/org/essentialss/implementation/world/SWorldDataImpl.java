@@ -92,12 +92,12 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
-    public boolean register(@NotNull SSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
+    public Optional<SSpawnPoint> register(@NotNull SSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
         new Validator<>(builder.point()).notNull().validate();
-        SPoint spawnPoint = new SSpawnPointImpl(builder, this);
-        boolean register = this.register(spawnPoint, runEvent, cause);
-        if (!register) {
-            return false;
+        SSpawnPoint spawnPoint = new SSpawnPointImpl(builder, this);
+        Optional<SSpawnPoint> register = this.register(spawnPoint, runEvent, cause);
+        if (!register.isPresent()) {
+            return Optional.empty();
         }
         if (builder.spawnTypes().contains(SSpawnType.MAIN_SPAWN)) {
             //noinspection DataFlowIssue
@@ -105,7 +105,7 @@ public class SWorldDataImpl implements SWorldData {
             if (opWorld.isPresent()) {
                 Vector3d point = Objects.requireNonNull(builder.point());
                 opWorld.get().properties().setSpawnPosition(point.toInt());
-                return true;
+                return Optional.of(spawnPoint);
             }
             if (Sponge.isServerAvailable()) {
                 Sponge
@@ -115,11 +115,11 @@ public class SWorldDataImpl implements SWorldData {
                         .thenAccept(opProperties -> opProperties.ifPresent(properties -> properties.setSpawnPosition(spawnPoint.position().toInt())));
             }
         }
-        return true;
+        return Optional.of(spawnPoint);
     }
 
     @Override
-    public boolean register(@NotNull SWarpBuilder builder, boolean runEvent, @Nullable Cause cause) {
+    public Optional<SWarp> register(@NotNull SWarpBuilder builder, boolean runEvent, @Nullable Cause cause) {
         new Validator<>(builder.name()).notNull().validate();
 
         Optional<SWarp> opWarp = this.warps().parallelStream().filter(warp -> warp.position().equals(builder.point())).findAny();
@@ -134,7 +134,7 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
-    public boolean register(@NotNull SJailSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
+    public Optional<SJailSpawnPoint> register(@NotNull SJailSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
         throw new RuntimeException("Jail is not implemented");
     }
 
@@ -170,7 +170,7 @@ public class SWorldDataImpl implements SWorldData {
         return this.key.formatted();
     }
 
-    private boolean register(@NotNull SPoint point, boolean runEvents, @Nullable Cause cause) {
+    private <T extends SPoint> Optional<T> register(@NotNull T point, boolean runEvents, @Nullable Cause cause) {
         if (runEvents) {
             if (null == cause) {
                 throw new IllegalArgumentException("Cause cannot be null when running events");
@@ -178,7 +178,7 @@ public class SWorldDataImpl implements SWorldData {
             RegisterPointPreEventImpl preEvent = new RegisterPointPreEventImpl(point, cause);
             Sponge.eventManager().post(preEvent);
             if (preEvent.isCancelled()) {
-                return false;
+                return Optional.empty();
             }
         }
         boolean added = this.points.add(point);
@@ -186,7 +186,7 @@ public class SWorldDataImpl implements SWorldData {
             Event postEvent = new RegisterPointPostEventImpl(point, cause);
             Sponge.eventManager().post(postEvent);
         }
-        return added;
+        return added ? Optional.of(point) : Optional.empty();
 
     }
 

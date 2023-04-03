@@ -1,6 +1,7 @@
 package org.essentialss.implementation.player.data;
 
 import net.kyori.adventure.text.Component;
+import org.essentialss.api.message.MuteType;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.player.data.module.ModuleData;
 import org.essentialss.api.player.data.module.SerializableModuleData;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -34,6 +36,17 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     @Nullable
     private Component displayName;
     private boolean preventingTeleportRequests;
+    private MuteType[] muteTypes = new MuteType[0];
+
+    @Override
+    public @NotNull UnmodifiableCollection<MuteType> muteTypes() {
+        return new SingleUnmodifiableCollection<>(Arrays.asList(this.muteTypes));
+    }
+
+    @Override
+    public void setMuteTypes(@NotNull MuteType... types) {
+this.muteTypes = types;
+    }
 
     @Override
     public void addBackTeleportLocation(@NotNull OfflineLocation location) {

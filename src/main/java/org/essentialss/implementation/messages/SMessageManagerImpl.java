@@ -47,8 +47,17 @@ public class SMessageManagerImpl implements MessageManager {
 
     @Override
     public @NotNull <T> UnmodifiableCollection<SPlaceHolder<T>> mappedPlaceholdersFor(@NotNull Class<T> type) {
-        return new SingleUnmodifiableCollection<>(
-                this.placeholders.stream().filter(ph -> ph.type().isAssignableFrom(type)).map(ph -> (SPlaceHolder<T>) ph).collect(Collectors.toList()));
+        return new SingleUnmodifiableCollection<>(this.placeholders.stream().filter(ph -> {
+            Class<?> phType = ph.type();
+            return phType.isAssignableFrom(type);
+        }).map(ph -> (SPlaceHolder<T>) ph).collect(Collectors.toList()));
+    }
+
+    @Override
+    public @NotNull UnmodifiableCollection<SPlaceHolder<?>> placeholdersFor(@NotNull String tagType) {
+        return new SingleUnmodifiableCollection<>(this.placeholders.stream().filter(ph -> {
+            return ph.placeholderTagType().equals(tagType);
+        }).collect(Collectors.toList()));
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.essentialss.implementation.command.essentialss.config.SetConfigComman
 import org.essentialss.implementation.command.essentialss.config.ViewConfigCommand;
 import org.essentialss.implementation.command.essentialss.config.message.SetMessageCommand;
 import org.essentialss.implementation.command.essentialss.config.message.ViewMessageCommand;
+import org.essentialss.implementation.command.essentialss.update.CheckForUpdateCommand;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 
@@ -47,7 +48,11 @@ public final class EssentialsSCommand {
     }
 
     public static Command.Parameterized createEssentialsCommand() {
-        return Command.builder().addChild(createConfigCommand(), "config").build();
+        return Command.builder().addChild(createUpdateCommand(), "update").addChild(createConfigCommand(), "config").build();
+    }
+
+    private static Command.Parameterized createUpdateCommand() {
+        return Command.builder().addChild(CheckForUpdateCommand.createUpdateCheckCommand(), "check").build();
     }
 
 }

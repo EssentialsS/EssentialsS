@@ -9,6 +9,7 @@ import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -45,11 +46,17 @@ public final class UnmuteCommand {
         throw new RuntimeException("Should not run");
     }
 
-    public static Command.Parameterized createMuteCommand() {
+    public static Command.Parameterized createUnmuteCommand() {
         Parameter.Value<SGeneralUnloadedData> playerParameter = SParameters.offlinePlayersNickname(false, d -> true).key("player").build();
-        Parameter.Value<MuteType> muteParameter = Parameter.enumValue(MuteType.class).build();
+        Parameter.Value<MuteType> muteParameter = Parameter.enumValue(MuteType.class).key("mutetype").build();
         Parameter.Multi muteParameters = Parameter.seqBuilder(muteParameter).optional().build();
-        return Command.builder().addParameter(playerParameter).addParameter(muteParameters).executor(new Execute(playerParameter, muteParameter)).build();
+        return Command
+                .builder()
+                .permission(SPermissions.MUTE.node())
+                .addParameter(playerParameter)
+                .addParameter(muteParameters)
+                .executor(new Execute(playerParameter, muteParameter))
+                .build();
     }
 
     public static CommandResult execute(@NotNull Audience audience, @NotNull SGeneralUnloadedData data, @NotNull MuteType... types) {

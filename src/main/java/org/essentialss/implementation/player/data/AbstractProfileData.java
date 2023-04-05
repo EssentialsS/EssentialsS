@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,18 +36,9 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     private boolean canLooseItemsWhenUsed;
     @Nullable
     private Component displayName;
-    private boolean preventingTeleportRequests;
+    private boolean isCommandSpying;
     private MuteType[] muteTypes = new MuteType[0];
-
-    @Override
-    public @NotNull UnmodifiableCollection<MuteType> muteTypes() {
-        return new SingleUnmodifiableCollection<>(Arrays.asList(this.muteTypes));
-    }
-
-    @Override
-    public void setMuteTypes(@NotNull MuteType... types) {
-this.muteTypes = types;
-    }
+    private boolean preventingTeleportRequests;
 
     @Override
     public void addBackTeleportLocation(@NotNull OfflineLocation location) {
@@ -103,6 +95,16 @@ this.muteTypes = types;
     }
 
     @Override
+    public boolean isCommandSpying() {
+        return this.isCommandSpying;
+    }
+
+    @Override
+    public void setCommandSpying(boolean spying) {
+        this.isCommandSpying = spying;
+    }
+
+    @Override
     public boolean isInJail() {
         return this.isInJail;
     }
@@ -115,6 +117,11 @@ this.muteTypes = types;
     @Override
     public @NotNull UnmodifiableCollection<MailMessage> mailMessages() {
         return new SingleUnmodifiableCollection<>(this.mailMessages);
+    }
+
+    @Override
+    public @NotNull UnmodifiableCollection<MuteType> muteTypes() {
+        return new SingleUnmodifiableCollection<>(Arrays.asList(this.muteTypes));
     }
 
     @Override
@@ -170,12 +177,33 @@ this.muteTypes = types;
     }
 
     @Override
+    public void setMuteTypes(@NotNull MuteType... types) {
+        this.muteTypes = types;
+    }
+
+    @Override
     public void setPreventTeleportRequests(boolean prevent) {
         this.preventingTeleportRequests = prevent;
     }
 
     public void applyChangesFrom(@NotNull AbstractProfileData data) {
-        this.backTeleportLocations.addAll(data.backTeleportLocations);
+        try {
+            for (Field field : AbstractProfileData.class.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object thisValue = field.get(this);
+                Object otherValue = field.get(data);
+                if (thisValue instanceof Collection) {
+                    //noinspection unchecked,rawtypes
+                    ((Collection) thisValue).addAll((Collection) otherValue);
+                    continue;
+                }
+                field.set(this, otherValue);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        /*this.backTeleportLocations.addAll(data.backTeleportLocations);
         this.displayName = data.displayName;
         this.homes.addAll(data.homes);
         this.releaseFromJail = data.releaseFromJail;
@@ -184,5 +212,7 @@ this.muteTypes = types;
         this.mailMessages.addAll(data.mailMessages);
         this.moduleData.addAll(data.moduleData);
         this.preventingTeleportRequests = data.preventingTeleportRequests;
+        this.isCommandSpying = data.isCommandSpying;
+        this.muteTypes = data.muteTypes;*/
     }
 }

@@ -3,6 +3,7 @@ package org.essentialss.implementation.player.data;
 import net.kyori.adventure.text.Component;
 import org.essentialss.api.config.value.CollectionConfigValue;
 import org.essentialss.api.config.value.ConfigValue;
+import org.essentialss.api.message.MuteType;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHomeBuilder;
@@ -13,6 +14,7 @@ import org.essentialss.implementation.config.value.position.LocationConfigValue;
 import org.essentialss.implementation.config.value.primitive.BooleanConfigValue;
 import org.essentialss.implementation.config.value.simple.ComponentConfigValue;
 import org.essentialss.implementation.config.value.simple.DateTimeConfigValue;
+import org.essentialss.implementation.config.value.simple.EnumConfigValue;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -21,6 +23,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 final class UserDataSerializer {
@@ -30,6 +33,8 @@ final class UserDataSerializer {
     private static final BooleanConfigValue IS_IN_JAIL = new BooleanConfigValue(false, "jail", "In");
     private static final DateTimeConfigValue RELEASED_FROM_JAIL = new DateTimeConfigValue("jail", "ReleasedOn");
     private static final ComponentConfigValue DISPLAY_NAME = new ComponentConfigValue("other", "DisplayName");
+    private static final CollectionConfigValue<MuteType> MUTE_TYPES = new ListDefaultConfigValueImpl<>(
+            new EnumConfigValue<>(MuteType.class, "chat", "MuteTypes"));
 
     private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListDefaultConfigValueImpl<>(new LocationConfigValue("placement"),
                                                                                                                   "locations", "back");
@@ -65,6 +70,11 @@ final class UserDataSerializer {
         if (null != homes) {
             userData.setHomes(homes);
         }
+
+        List<MuteType> muteTypes = MUTE_TYPES.parse(root);
+        if (null != muteTypes) {
+            userData.setMuteTypes(muteTypes.toArray(new MuteType[0]));
+        }
     }
 
     @SuppressWarnings("DuplicateThrows")
@@ -79,6 +89,7 @@ final class UserDataSerializer {
         RELEASED_FROM_JAIL.set(root, userData.releasedFromJailTime().orElse(null));
         DISPLAY_NAME.set(root, userData.hasSetDisplayName() ? userData.displayName() : null);
         BACK_LOCATIONS.set(root, userData.backTeleportLocations());
+        MUTE_TYPES.set(root, new ArrayList<>(userData.muteTypes()));
         //HOMES.set(root, userData.homes().stream().map(SHome::builder).collect(Collectors.toList()));
 
         loader.save(root);

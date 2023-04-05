@@ -84,6 +84,7 @@ public final class SetConfigCommand {
                                                          .color(NamedTextColor.AQUA))
                                          .append(Component.text(" to "))
                                          .append(messageValue));
+            loader.save(root);
         } catch (ConfigurateException e) {
             e.printStackTrace();
             return CommandResult.error(Component.text(e.getLocalizedMessage()));

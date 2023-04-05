@@ -6,6 +6,7 @@ import org.essentialss.api.EssentialsSAPI;
 import org.essentialss.api.ban.SBanManager;
 import org.essentialss.api.config.SConfigManager;
 import org.essentialss.api.config.configs.BanConfig;
+import org.essentialss.api.config.configs.GeneralConfig;
 import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.utils.Singleton;
@@ -19,6 +20,7 @@ import org.essentialss.implementation.command.hat.HatCommand;
 import org.essentialss.implementation.command.inventory.DisplayInventoryCommand;
 import org.essentialss.implementation.command.invsee.InventorySeeCommand;
 import org.essentialss.implementation.command.mute.MuteCommand;
+import org.essentialss.implementation.command.mute.UnmuteCommand;
 import org.essentialss.implementation.command.nick.NicknameCommand;
 import org.essentialss.implementation.command.nick.WhoIsCommand;
 import org.essentialss.implementation.command.ping.PingCommand;
@@ -26,24 +28,30 @@ import org.essentialss.implementation.command.point.PointCommand;
 import org.essentialss.implementation.command.point.list.ListSpawnCommand;
 import org.essentialss.implementation.command.point.list.ListWarpCommand;
 import org.essentialss.implementation.command.run.RunCommand;
+import org.essentialss.implementation.command.spy.CommandSpyCommand;
+import org.essentialss.implementation.command.teleport.RandomTeleportCommand;
 import org.essentialss.implementation.command.teleport.request.*;
 import org.essentialss.implementation.command.unban.UnbanCommands;
 import org.essentialss.implementation.config.SConfigManagerImpl;
 import org.essentialss.implementation.listeners.afk.AwayFromKeyboardListeners;
 import org.essentialss.implementation.listeners.ban.BanConnectionListeners;
 import org.essentialss.implementation.listeners.chat.MuteListener;
+import org.essentialss.implementation.listeners.chat.SpyListener;
 import org.essentialss.implementation.listeners.connection.ConnectionListeners;
 import org.essentialss.implementation.messages.SMessageManagerImpl;
 import org.essentialss.implementation.player.SPlayerManagerImpl;
 import org.essentialss.implementation.schedules.AwayFromKeyboardCheckScheduler;
+import org.essentialss.implementation.schedules.UpdateCheck;
 import org.essentialss.implementation.world.SWorldManagerImpl;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -120,6 +128,9 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, EssentialsSCommand.createEssentialsCommand(), "essentialss");
         event.register(this.container, PingCommand.createPingCommand(), "ping");
 
+        //spy
+        event.register(this.container, CommandSpyCommand.createCommandSpyCommand(), "commandspy", "cspy");
+
         //inventory
         event.register(this.container, HatCommand.createHatCommand(), "hat");
         event.register(this.container, InventorySeeCommand.createInventorySeeCommand(), "inventorysee", "invsee");
@@ -143,6 +154,7 @@ public class EssentialsSMain implements EssentialsSAPI {
 
         //mute
         event.register(this.container, MuteCommand.createMuteCommand(), "mute");
+        event.register(this.container, UnmuteCommand.createUnmuteCommand(), "unmute");
 
         //teleport
         event.register(this.container, TeleportRequestsCommand.createTeleportRequestsCommand(), "teleportrequests", "tprequests", "tpr");
@@ -150,6 +162,8 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, TeleportRequestHerePlayerCommand.createTeleportRequestHerePlayerCommand(), "teleporthere", "tphere", "tph");
         event.register(this.container, TeleportAcceptRequestCommand.createTeleportAcceptCommand(), "tpaccept", "tpa");
         event.register(this.container, TeleportDenyRequestCommand.createTeleportDenyCommand(), "tpdeny", "tpd");
+
+        event.register(this.container, RandomTeleportCommand.createRandomTeleportCommand(), "randomteleport", "rtp");
 
         //ban
         BanConfig banConfig = this.banManager().get().banConfig().get();
@@ -162,8 +176,19 @@ public class EssentialsSMain implements EssentialsSAPI {
 
     @Listener
     public void onPluginBoot(ConstructPluginEvent event) {
+        if (!event.plugin().equals(this.container)) {
+            return;
+        }
         this.registerEvents();
         this.registerAsyncedSchedulers();
+    }
+
+    @Listener
+    public void onServerReady(StartedEngineEvent<Server> event) {
+        @NotNull GeneralConfig general = this.configManager().get().general().get();
+        if (general.checkForUpdatesOnStartup().parseDefault(general)) {
+            UpdateCheck.createDelay(Sponge.systemSubject());
+        }
     }
 
     private void registerAsyncedSchedulers() {
@@ -177,6 +202,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         eventManager.registerListeners(this.container, new BanConnectionListeners());
         eventManager.registerListeners(this.container, new AwayFromKeyboardListeners());
         eventManager.registerListeners(this.container, new MuteListener());
+        eventManager.registerListeners(this.container, new SpyListener());
     }
 
     public static EssentialsSMain plugin() {

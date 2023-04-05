@@ -38,7 +38,7 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     private static final SingleConfigValue<Duration> DURATION_UNTIL_MODIFIERS = new DurationConfigValue("general", "duration", "modifier", "Delay");
     private static final SingleConfigValue.Default<Boolean> APPLY_MODIFIERS = new BooleanConfigValue("general", "duration", "modifier", "Apply");
     private static final SingleConfigValue.Default<Duration> DURATION_UNTIL_STATUS = new SingleDefaultConfigValueWrapper<>(
-            new DurationConfigValue("general", "duration", "Status"), Duration.ofSeconds(5));
+            new DurationConfigValue("general", "duration", "Status"), Duration.ofSeconds(30));
 
     private static final CollectionConfigValue<SPlayerModifier<?>> MODIFIERS = new ListDefaultConfigValueImpl<>(new PlayerModifierConfigValue(), "general",
                                                                                                                 "duration", "modifier", "Modifiers");
@@ -108,7 +108,12 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
     @Override
     public @NotNull File file() {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        return new File(folder, "config/afk.conf");
+        File originalFile = new File(folder, "config/afk.conf");
+        if (originalFile.exists()) {
+            return originalFile;
+        }
+
+        return new File(folder, "config/AFK.conf");
     }
 
     @Override

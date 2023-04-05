@@ -4,9 +4,11 @@ import org.essentialss.api.config.configs.GeneralConfig;
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.implementation.EssentialsSMain;
+import org.essentialss.implementation.config.value.primitive.BooleanConfigValue;
 import org.essentialss.implementation.config.value.primitive.IntegerConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -21,6 +23,17 @@ import java.util.stream.Collectors;
 public class SGeneralConfigImpl implements GeneralConfig {
 
     private static final IntegerConfigValue PAGE_SIZE = new IntegerConfigValue(10, "misc", "ListPageSize");
+    private static final BooleanConfigValue CHECK_FOR_UPDATE_ON_LAUNCH = new BooleanConfigValue(false, "update", "CheckOnStartup");
+
+    @Override
+    public SingleConfigValue.Default<Boolean> checkForUpdatesOnStartup() {
+        return CHECK_FOR_UPDATE_ON_LAUNCH;
+    }
+
+    @Override
+    public SingleConfigValue.Default<Integer> pageSize() {
+        return PAGE_SIZE;
+    }
 
     @Override
     @SuppressWarnings("ReturnOfNull")
@@ -46,20 +59,15 @@ public class SGeneralConfigImpl implements GeneralConfig {
     @Override
     public @NotNull File file() {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        return new File(folder, "configs/general.conf");
+        return new File(folder, "config/General.conf");
     }
 
     @Override
-    public void update() throws SerializationException {
+    public void update() throws ConfigurateException, SerializationException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
-        ConfigurationNode node = loader.createNode();
-        if (node.node(PAGE_SIZE.nodes()).isNull()) {
-            PAGE_SIZE.set(node, PAGE_SIZE.defaultValue());
-        }
-    }
-
-    @Override
-    public SingleConfigValue.Default<Integer> pageSize() {
-        return PAGE_SIZE;
+        ConfigurationNode node = loader.load();
+        PAGE_SIZE.setDefaultIfNotPresent(node);
+        CHECK_FOR_UPDATE_ON_LAUNCH.setDefaultIfNotPresent(node);
+        loader.save(node);
     }
 }

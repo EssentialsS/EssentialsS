@@ -8,13 +8,19 @@
     {
       "id": "essentials-s",
       "name": "EssentialsS",
-      "version": "0.0.3",
+      "version": "0.0.4",
       "entrypoint": "org.essentialss.implementation.EssentialsSMain",
       "description": "One stop shop for all essential tools",
-      "branding": {},
       "links": {
+        "homepage": "https://ore.spongepowered.org/MoseMister/Essentials-S",
+        "source": "https://github.com/EssentialsS/Implementation",
+        "issues": "https://github.com/EssentialsS/Implementation/issues"
       },
       "contributors": [
+        {
+          "name": "mosemister",
+          "description": "Lead Developer"
+        }
       ],
       "dependencies": [
         {

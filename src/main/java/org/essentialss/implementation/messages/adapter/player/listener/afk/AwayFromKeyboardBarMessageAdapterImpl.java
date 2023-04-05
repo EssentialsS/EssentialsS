@@ -38,9 +38,7 @@ public class AwayFromKeyboardBarMessageAdapterImpl implements AwayFromKeyboardBa
     @Override
     public @NotNull Component adaptMessage(@NotNull Component messageToAdapt, @NotNull Duration left) {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
-        for (SPlaceHolder<Duration> placeholder : messageManager.mappedPlaceholdersFor(Duration.class)) {
-            messageToAdapt = placeholder.apply(messageToAdapt, left);
-        }
+        messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, left);
         return messageToAdapt;
     }
 

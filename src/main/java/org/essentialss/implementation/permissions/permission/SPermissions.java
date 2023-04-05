@@ -5,6 +5,11 @@ import org.jetbrains.annotations.NotNull;
 public enum SPermissions implements SPermission {
 
     MUTE("essentialss.mute"),
+    RANDOM_TELEPORT_SELF("essentialss.rtp.self"),
+    RANDOM_TELEPORT_OTHER("essentialss.rtp.other"),
+    RANDOM_TELEPORT_WORLD("essentialss.rtp.world"),
+    COMMAND_SPY_OTHER("essentialss.spy.command.other"),
+    COMMAND_SPY_SELF("essentialss.spy.command.self"),
     CONFIG_SET_MESSAGE("essentialss.config.message.set"),
     CONFIG_VIEW_MESSAGE("essentialss.config.message.view"),
     WARP_CREATE("essentialss.warp.create"),

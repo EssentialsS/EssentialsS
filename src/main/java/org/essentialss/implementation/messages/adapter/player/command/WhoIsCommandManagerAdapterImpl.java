@@ -5,12 +5,14 @@ import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.message.adapters.player.command.WhoIsMessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
+import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.implementation.config.value.simple.ComponentConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
@@ -33,10 +35,10 @@ public class WhoIsCommandManagerAdapterImpl implements WhoIsMessageAdapter {
     @Override
     public Component adaptMessage(@NotNull Component messageToAdapt, @NotNull SGeneralUnloadedData player) {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
-        for (SPlaceHolder<SGeneralUnloadedData> holder : messageManager.mappedPlaceholdersFor(SGeneralUnloadedData.class)) {
-            if (holder.canApply(messageToAdapt)) {
-                messageToAdapt = holder.apply(messageToAdapt, player);
-            }
+        messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, player);
+        if (player instanceof SGeneralPlayerData) {
+            Player spongePlayer = ((SGeneralPlayerData) player).spongePlayer();
+            messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, spongePlayer);
         }
         return messageToAdapt;
     }

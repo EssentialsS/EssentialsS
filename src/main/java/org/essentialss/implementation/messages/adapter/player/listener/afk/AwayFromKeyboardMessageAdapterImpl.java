@@ -39,12 +39,8 @@ public class AwayFromKeyboardMessageAdapterImpl implements AwayFromKeyboardMessa
     @Override
     public @NotNull Component adaptMessage(@NotNull Component messageToAdapt, @NotNull SGeneralPlayerData player) {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
-        for (SPlaceHolder<SGeneralPlayerData> placeholder : messageManager.mappedPlaceholdersFor(SGeneralPlayerData.class)) {
-            messageToAdapt = placeholder.apply(messageToAdapt, player);
-        }
-        for (SPlaceHolder<Player> placeHolder : messageManager.mappedPlaceholdersFor(Player.class)) {
-            messageToAdapt = placeHolder.apply(messageToAdapt, player.spongePlayer());
-        }
+        messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, player);
+        messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, player.spongePlayer());
         return messageToAdapt;
     }
 

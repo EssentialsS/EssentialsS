@@ -13,7 +13,6 @@ import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfig
 import org.essentialss.implementation.config.value.simple.ComponentConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -44,16 +43,9 @@ public class PingMessageAdapterImpl implements PingMessageAdapter {
     @Override
     public Component adaptMessage(@NotNull Component messageToAdapt, @NotNull SGeneralPlayerData player) {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
-        for(SPlaceHolder<SGeneralPlayerData> placeholder : messageManager.mappedPlaceholdersFor(SGeneralPlayerData.class)){
-            messageToAdapt = placeholder.apply(messageToAdapt, player);
-        }
-        Player sPlayer = player.spongePlayer();
-        if(sPlayer instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer) sPlayer;
-            for (SPlaceHolder<ServerPlayer> placeholder : messageManager.mappedPlaceholdersFor(ServerPlayer.class)) {
-                messageToAdapt = placeholder.apply(messageToAdapt, serverPlayer);
-            }
-        }
+
+        messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, player);
+        messageToAdapt = messageManager.adaptMessageFor(messageToAdapt, player.spongePlayer());
         return messageToAdapt;
     }
 

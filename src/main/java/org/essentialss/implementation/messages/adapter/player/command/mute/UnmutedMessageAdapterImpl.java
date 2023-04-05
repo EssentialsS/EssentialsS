@@ -8,12 +8,14 @@ import org.essentialss.api.message.adapters.player.command.mute.UnmutedMessageAd
 import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.message.placeholder.wrapper.collection.AndCollectionWrapperPlaceholder;
+import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.implementation.config.value.simple.ComponentConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -39,15 +41,15 @@ public class UnmutedMessageAdapterImpl implements UnmutedMessageAdapter {
     public @NotNull Component adaptMessage(@NotNull Component message, @NotNull SGeneralUnloadedData playerData, @NotNull MuteType... types) {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
 
-        for (SPlaceHolder<SGeneralUnloadedData> placeholder : messageManager.mappedPlaceholdersFor(SGeneralUnloadedData.class)) {
-            message = placeholder.apply(message, playerData);
+        message = messageManager.adaptMessageFor(message, playerData);
+        if (playerData instanceof SGeneralPlayerData) {
+            Player spongePlayer = ((SGeneralPlayerData) playerData).spongePlayer();
+            message = messageManager.adaptMessageFor(message, spongePlayer);
         }
 
         Optional<GameProfile> opProfile = playerData.profile();
         if (opProfile.isPresent()) {
-            for (SPlaceHolder<GameProfile> placeholder : messageManager.mappedPlaceholdersFor(GameProfile.class)) {
-                message = placeholder.apply(message, opProfile.get());
-            }
+            message = messageManager.adaptMessageFor(message, opProfile.get());
         }
 
         List<? extends AndCollectionWrapperPlaceholder<MuteType>> muteTypePlaceholders = messageManager

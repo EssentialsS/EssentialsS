@@ -35,6 +35,7 @@ import org.essentialss.implementation.command.unban.UnbanCommands;
 import org.essentialss.implementation.config.SConfigManagerImpl;
 import org.essentialss.implementation.listeners.afk.AwayFromKeyboardListeners;
 import org.essentialss.implementation.listeners.ban.BanConnectionListeners;
+import org.essentialss.implementation.listeners.chat.ChatListener;
 import org.essentialss.implementation.listeners.chat.MuteListener;
 import org.essentialss.implementation.listeners.chat.SpyListener;
 import org.essentialss.implementation.listeners.connection.ConnectionListeners;
@@ -203,6 +204,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         eventManager.registerListeners(this.container, new AwayFromKeyboardListeners());
         eventManager.registerListeners(this.container, new MuteListener());
         eventManager.registerListeners(this.container, new SpyListener());
+        eventManager.registerListeners(this.container, new ChatListener());
     }
 
     public static EssentialsSMain plugin() {

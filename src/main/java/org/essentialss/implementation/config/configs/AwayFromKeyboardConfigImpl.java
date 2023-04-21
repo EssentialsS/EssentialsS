@@ -8,8 +8,9 @@ import org.essentialss.api.modifier.SPlayerModifier;
 import org.essentialss.api.modifier.SPlayerModifiers;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.ListDefaultConfigValueImpl;
-import org.essentialss.implementation.config.value.modifiers.RelyOnConfigValue;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
+import org.essentialss.implementation.config.value.modifiers.rely.AbstractRelyOnConfigValue;
+import org.essentialss.implementation.config.value.modifiers.rely.NullableRelyOnConfigValue;
 import org.essentialss.implementation.config.value.primitive.BooleanConfigValue;
 import org.essentialss.implementation.config.value.simple.DurationConfigValue;
 import org.essentialss.implementation.config.value.simple.PlayerModifierConfigValue;
@@ -44,8 +45,8 @@ public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
                                                                                                                 "duration", "modifier", "Modifiers");
     private static final SingleConfigValue.Default<Boolean> WILL_KICK_AFTER_DURATION = new BooleanConfigValue("general", "duration", "kick", "WillKick");
     @SuppressWarnings("ReturnOfNull")
-    private static final RelyOnConfigValue<Duration, Boolean> DURATION_UNTIL_KICK = RelyOnConfigValue.ifFalse(
-            new DurationConfigValue("general", "duration", "kick", "Delay"), WILL_KICK_AFTER_DURATION, () -> null);
+    private static final AbstractRelyOnConfigValue<Duration, Boolean> DURATION_UNTIL_KICK = NullableRelyOnConfigValue.ifFalse(
+            new DurationConfigValue("general", "duration", "kick", "Delay"), WILL_KICK_AFTER_DURATION);
 
 
     @Override

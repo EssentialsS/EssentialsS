@@ -7,7 +7,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
-public class CheckForUpdateCommand {
+public final class CheckForUpdateCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -16,6 +16,10 @@ public class CheckForUpdateCommand {
             UpdateCheck.createDelay(context.cause().audience());
             return CommandResult.success();
         }
+    }
+
+    private CheckForUpdateCommand() {
+        throw new RuntimeException("Should not create");
     }
 
     public static Command.Parameterized createUpdateCheckCommand() {

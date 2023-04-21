@@ -1,4 +1,4 @@
-package org.essentialss.implementation.config.value.modifiers;
+package org.essentialss.implementation.config.value.modifiers.rely;
 
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.DefaultConfigValue;
@@ -9,20 +9,25 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-public class RelyOnConfigValue<O, R> implements ConfigValue<O> {
+public abstract class AbstractRelyOnConfigValue<O, R> implements ConfigValue<O> {
 
     private final ConfigValue<O> configValue;
     private final Predicate<R> condition;
     private final ConfigValue<R> relyOn;
-    private final Supplier<O> value;
 
-    public RelyOnConfigValue(@NotNull ConfigValue<O> configValue, @NotNull ConfigValue<R> relyOn, @NotNull Predicate<R> condition, Supplier<O> value) {
+    protected AbstractRelyOnConfigValue(@NotNull ConfigValue<O> configValue, @NotNull ConfigValue<R> relyOn, @NotNull Predicate<R> condition) {
         this.configValue = configValue;
         this.relyOn = relyOn;
-        this.value = value;
         this.condition = condition;
+    }
+
+    public ConfigValue<O> getMainNode() {
+        return this.configValue;
+    }
+
+    public ConfigValue<R> getRelyingOnNode() {
+        return this.relyOn;
     }
 
     @Override
@@ -30,12 +35,13 @@ public class RelyOnConfigValue<O, R> implements ConfigValue<O> {
         return this.configValue.nodes();
     }
 
+    @SuppressWarnings("allow-nullable")
     @Override
     public @Nullable O parse(@NotNull ConfigurationNode root) throws SerializationException {
         @Nullable R relyOnValue = OrElse.ifInstanceMapThrowable(SerializationException.class, this.relyOn, DefaultConfigValue.class,
                                                                 (v) -> (R) v.parseDefault(root), (v) -> v.parse(root));
         if (this.condition.test(relyOnValue)) {
-            return this.value.get();
+            return this.onFail();
         }
 
         return this.configValue.parse(root);
@@ -51,12 +57,5 @@ public class RelyOnConfigValue<O, R> implements ConfigValue<O> {
         return this.configValue.type();
     }
 
-    public static <O> RelyOnConfigValue<O, Boolean> ifFalse(@NotNull ConfigValue<O> value, ConfigValue<Boolean> relyOn, @NotNull Supplier<O> ifTrue) {
-        return new RelyOnConfigValue<>(value, relyOn, (v) -> !v, ifTrue);
-    }
-
-    public static <O> RelyOnConfigValue<O, Boolean> ifTrue(@NotNull ConfigValue<O> value, ConfigValue<Boolean> relyOn, @NotNull Supplier<O> ifFalse) {
-        return new RelyOnConfigValue<>(value, relyOn, (v) -> v, ifFalse);
-    }
-
+    protected abstract @Nullable O onFail();
 }

@@ -14,6 +14,7 @@ import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboard
 import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardForTooLongMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.afk.BackToKeyboardMessageAdapter;
+import org.essentialss.api.message.adapters.player.listener.chat.ChatMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.spy.CommandSpyMessageAdapter;
 import org.essentialss.api.message.adapters.warp.CreateWarpMessageAdapter;
 import org.essentialss.api.utils.Singleton;
@@ -28,6 +29,7 @@ import org.essentialss.implementation.messages.adapter.player.listener.afk.AwayF
 import org.essentialss.implementation.messages.adapter.player.listener.afk.AwayFromKeyboardForTooLongMessageAdapterImpl;
 import org.essentialss.implementation.messages.adapter.player.listener.afk.AwayFromKeyboardMessageAdapterImpl;
 import org.essentialss.implementation.messages.adapter.player.listener.afk.BackToKeyboardMessageAdapterImpl;
+import org.essentialss.implementation.messages.adapter.player.listener.chat.SChatMessageAdapterImpl;
 import org.essentialss.implementation.messages.adapter.player.listener.spy.CommandSpyMessageAdapterImpl;
 import org.essentialss.implementation.messages.adapter.warp.CreateWarpMessageAdapterImpl;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +54,7 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     private final Singleton<YouAreNowUnmutedMessageAdapter> youAreNowUnmuted = new Singleton<>(YouAreNowUnmutedMessageAdapterImpl::new);
     private final Singleton<PingMessageAdapter> ping = new Singleton<>(PingMessageAdapterImpl::new);
     private final Singleton<CommandSpyMessageAdapter> commandSpy = new Singleton<>(CommandSpyMessageAdapterImpl::new);
+    private final Singleton<ChatMessageAdapter> chat = new Singleton<>(SChatMessageAdapterImpl::new);
 
     private final @NotNull MessageConfig config;
 
@@ -95,6 +98,11 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     @Override
     public Singleton<BackToKeyboardMessageAdapter> backToKeyboard() {
         return this.backToKeyboard;
+    }
+
+    @Override
+    public Singleton<ChatMessageAdapter> chat() {
+        return this.chat;
     }
 
     @Override

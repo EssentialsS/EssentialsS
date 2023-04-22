@@ -8,7 +8,7 @@
     {
       "id": "essentials-s",
       "name": "EssentialsS",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "entrypoint": "org.essentialss.implementation.EssentialsSMain",
       "description": "One stop shop for all essential tools",
       "links": {

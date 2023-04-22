@@ -13,6 +13,8 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 final class SWorldDataSerializer {
 
@@ -22,7 +24,23 @@ final class SWorldDataSerializer {
 
     static void load(@NotNull SWorldData worldData) throws ConfigurateException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        File file = new File(folder, "data/world/" + worldData.identifier() + ".conf");
+        File file = new File(folder, "data/world/" + worldData.identifier().replaceAll(":", "/") + ".conf");
+        if (!System.getProperty("os.name").contains("Windows")) {
+            //backwards compatibility with 0.0.4-
+            File legacyFile = new File(folder, "data/world/" + worldData.identifier() + ".conf");
+            if (legacyFile.exists()) {
+                try {
+                    if (!file.exists()) {
+                        EssentialsSMain.plugin().logger().warn("Moving " + worldData.identifier() + " due to a Windows bug");
+                        file.getParentFile().mkdirs();
+                        file.createNewFile();
+                        Files.move(legacyFile.toPath(), file.toPath());
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
         CommentedConfigurationNode root = loader.load();
         worldData.clearPoints();
@@ -48,7 +66,7 @@ final class SWorldDataSerializer {
     @SuppressWarnings("DuplicateThrows")
     static void save(@NotNull SWorldData worldData) throws ConfigurateException, SerializationException {
         File folder = Sponge.configManager().pluginConfig(EssentialsSMain.plugin().container()).directory().toFile();
-        File file = new File(folder, "data/world/" + worldData.identifier() + ".conf");
+        File file = new File(folder, "data/world/" + worldData.identifier().replaceAll(":", "/") + ".conf");
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder().file(file).build();
         CommentedConfigurationNode root = loader.createNode();
 

@@ -6,7 +6,7 @@ import org.essentialss.api.player.data.SGeneralOfflineData;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.player.data.module.load.ModuleLoader;
-import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.implementation.player.data.AbstractProfileData;
 import org.essentialss.implementation.player.data.SPlayerDataImpl;
 import org.essentialss.implementation.player.data.SProfileDataImpl;

@@ -9,8 +9,9 @@ import org.essentialss.api.player.data.module.ModuleData;
 import org.essentialss.api.player.teleport.PlayerTeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestBuilder;
-import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.OrderedUnmodifiableCollection;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
@@ -35,7 +36,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     private final Collection<TeleportRequest> teleportRequests = new LinkedHashSet<>();
     private final @NotNull Collection<SPlayerModifier<?>> afkModifiers = new LinkedHashSet<>();
     private @Nullable BossBar afkBar;
-    private int backTeleportIndex;
+    private @Nullable Integer backTeleportIndex;
     private boolean isAfk;
     private LocalDateTime lastAction = LocalDateTime.now();
 
@@ -81,11 +82,12 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
 
     @Override
     public @NotNull OptionalInt backTeleportIndex() {
-        if (this.backTeleportLocations.isEmpty()) {
+        OrderedUnmodifiableCollection<OfflineLocation> locations = this.backTeleportLocations();
+        if (locations.isEmpty()) {
             return OptionalInt.empty();
         }
-        if (this.backTeleportIndex >= this.backTeleportLocations.size()) {
-            this.backTeleportIndex = this.backTeleportLocations.size() - 1;
+        if (null == this.backTeleportIndex) {
+            return OptionalInt.empty();
         }
         return OptionalInt.of(this.backTeleportIndex);
     }
@@ -159,8 +161,9 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
 
     @Override
     public void setBackTeleportIndex(int index) {
-        if (this.backTeleportLocations.isEmpty() || (this.backTeleportLocations.size() <= index)) {
-            throw new IndexOutOfBoundsException("Back teleport locations is " + this.backTeleportLocations.size());
+        OrderedUnmodifiableCollection<OfflineLocation> locations = this.backTeleportLocations();
+        if (locations.isEmpty() || (locations.size() <= index)) {
+            throw new IndexOutOfBoundsException("Back teleport locations is " + locations.size());
         }
         this.backTeleportIndex = index;
     }

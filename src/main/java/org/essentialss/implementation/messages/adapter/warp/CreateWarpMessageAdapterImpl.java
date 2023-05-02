@@ -6,7 +6,7 @@ import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.message.adapters.warp.CreateWarpMessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.message.placeholder.SPlaceHolders;
-import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.world.points.SPoint;
 import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.implementation.EssentialsSMain;

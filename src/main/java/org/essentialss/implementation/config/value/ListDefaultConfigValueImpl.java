@@ -2,6 +2,7 @@ package org.essentialss.implementation.config.value;
 
 import org.essentialss.api.config.value.CollectionConfigValue;
 import org.essentialss.api.config.value.ConfigValue;
+import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -31,7 +32,12 @@ public class ListDefaultConfigValueImpl<T> implements CollectionConfigValue<T> {
         ConfigurationNode node = root.node(this.nodes());
         List<T> list = new LinkedList<>();
         for (ConfigurationNode n : node.childrenList()) {
-            list.add(this.parse.parse(n));
+            T value = this.parse.parse(n);
+            if (null == value) {
+                EssentialsSMain.plugin().logger().error("Error reading value " + n.key() + " in list. Skipping");
+                continue;
+            }
+            list.add(value);
         }
         return list;
     }
@@ -43,11 +49,9 @@ public class ListDefaultConfigValueImpl<T> implements CollectionConfigValue<T> {
             node.set(null);
             return;
         }
-
-        ConfigurationNode listNode = node.appendListNode();
         for (T i : value) {
+            ConfigurationNode listNode = node.appendListNode();
             this.parse.set(listNode, i);
-            listNode = listNode.appendListNode();
         }
     }
 

@@ -7,6 +7,9 @@ import org.essentialss.implementation.command.essentialss.config.SetConfigComman
 import org.essentialss.implementation.command.essentialss.config.ViewConfigCommand;
 import org.essentialss.implementation.command.essentialss.config.message.SetMessageCommand;
 import org.essentialss.implementation.command.essentialss.config.message.ViewMessageCommand;
+import org.essentialss.implementation.command.essentialss.info.InformationCommand;
+import org.essentialss.implementation.command.essentialss.performance.PerformanceCommand;
+import org.essentialss.implementation.command.essentialss.plugins.PluginsCommand;
 import org.essentialss.implementation.command.essentialss.update.CheckForUpdateCommand;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
@@ -48,7 +51,14 @@ public final class EssentialsSCommand {
     }
 
     public static Command.Parameterized createEssentialsCommand() {
-        return Command.builder().addChild(createUpdateCommand(), "update").addChild(createConfigCommand(), "config").build();
+        return Command
+                .builder()
+                .addChild(createUpdateCommand(), "update")
+                .addChild(createConfigCommand(), "config")
+                .addChild(PluginsCommand.createPluginsCommand(), "plugins", "pl")
+                .addChild(PerformanceCommand.createPerformanceCommand(), "performance")
+                .addChild(InformationCommand.createInfoCommand(), "info")
+                .build();
     }
 
     private static Command.Parameterized createUpdateCommand() {

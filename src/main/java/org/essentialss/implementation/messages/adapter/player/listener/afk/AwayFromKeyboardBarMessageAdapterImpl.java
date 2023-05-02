@@ -6,7 +6,7 @@ import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardBarMessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.message.placeholder.SPlaceHolders;
-import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.implementation.EssentialsSMain;
 import org.essentialss.implementation.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.implementation.config.value.simple.ComponentConfigValue;

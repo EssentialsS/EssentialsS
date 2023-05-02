@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.essentialss</groupId>
-    <artifactId>implementation</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>essentialss</artifactId>
+    <version>0.0.6</version>
     <packaging>pom</packaging>
 
     <name>EssentialsSImpImplementation</name>
@@ -108,7 +108,7 @@
         <dependency>
             <groupId>org.essentialss</groupId>
             <artifactId>api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.6</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

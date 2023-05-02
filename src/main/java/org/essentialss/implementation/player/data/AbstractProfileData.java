@@ -7,8 +7,10 @@ import org.essentialss.api.player.data.module.ModuleData;
 import org.essentialss.api.player.data.module.SerializableModuleData;
 import org.essentialss.api.player.mail.MailMessage;
 import org.essentialss.api.player.mail.MailMessageBuilder;
-import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.OrderedUnmodifiableCollection;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleOrderedUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHome;
 import org.essentialss.api.world.points.home.SHomeBuilder;
@@ -27,8 +29,8 @@ import java.util.concurrent.LinkedTransferQueue;
 
 public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
-    final @NotNull LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
     final @NotNull LinkedTransferQueue<ModuleData<?>> moduleData = new LinkedTransferQueue<>();
+    private final @NotNull LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
     private final @NotNull LinkedList<MailMessage> mailMessages = new LinkedList<>();
     private final @NotNull LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
     boolean isInJail;
@@ -42,6 +44,15 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
     @Override
     public void addBackTeleportLocation(@NotNull OfflineLocation location) {
+        if (!this.backTeleportLocations.isEmpty()) {
+            OfflineLocation loc = this.backTeleportLocations.get(this.backTeleportLocations.size() - 1);
+            if (loc.equals(location)) {
+                return;
+            }
+
+            //used to put location later in the list
+            this.backTeleportLocations.remove(location);
+        }
         this.backTeleportLocations.add(location);
     }
 
@@ -51,8 +62,8 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
-    public @NotNull LinkedList<OfflineLocation> backTeleportLocations() {
-        return this.backTeleportLocations;
+    public @NotNull OrderedUnmodifiableCollection<OfflineLocation> backTeleportLocations() {
+        return new SingleOrderedUnmodifiableCollection<>(this.backTeleportLocations);
     }
 
     @Override
@@ -157,7 +168,9 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     @Override
     public void setBackTeleportLocations(Collection<OfflineLocation> locations) {
         this.backTeleportLocations.clear();
-        this.backTeleportLocations.addAll(locations);
+        for (OfflineLocation location : locations) {
+            this.addBackTeleportLocation(location);
+        }
     }
 
     @Override

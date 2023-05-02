@@ -1,10 +1,20 @@
 package org.essentialss.implementation.permissions.permission;
 
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.registry.RegistryTypes;
 
 public enum SPermissions implements SPermission {
 
     MUTE("essentialss.mute"),
+    BACK_SELF("essentialss.back.self"),
+    BACK_OTHER("essentialss.back.other"),
+    BACK_SPACES("essentialss.back.spaces"),
+    GAMEMODE_SELF("essentialss.gamemode.self"),
+    GAMEMODE_SURVIVAL("essentialss.gamemode.survival"),
+    GAMEMODE_CREATIVE("essentialss.gamemode.creative"),
+    GAMEMODE_OTHER("essentialss.gamemode.other"),
     RANDOM_TELEPORT_SELF("essentialss.rtp.self"),
     RANDOM_TELEPORT_OTHER("essentialss.rtp.other"),
     RANDOM_TELEPORT_WORLD("essentialss.rtp.world"),
@@ -21,9 +31,7 @@ public enum SPermissions implements SPermission {
     VIEW_TELEPORT_REQUESTS_OTHER("essentialss.teleport.requests.other"),
     TELEPORT_REQUEST_TO_PLAYER_SELF("essentailss.teleport.request.to.self", true),
     TELEPORT_REQUEST_TO_PLAYER_OTHER("essentailss.teleport.request.to.other"),
-
     TELEPORT_REQUEST_HERE_SELF("essentialss.teleport.request.here.self", true),
-
     TELEPORT_REQUEST_HERE_OTHER("essentialss.teleport.request.here.other"),
     SPAWN_CREATE_DISTANCE("essentialss.spawn.create.distance"),
     SPAWN_CREATE_FIRST("essentialss.spawn.create.first"),
@@ -46,9 +54,10 @@ public enum SPermissions implements SPermission {
     FURNACE_OTHER("essentialss.inv.furnace.other"),
     BLAST_FURNACE_SELF("essentialss.inv.blastfurnace.self"),
     BLAST_FURNACE_OTHER("essentialss.inv.blastfurnace.other"),
-
     ANVIL_SELF("essentialss.inv.anvil.self"),
     ANVIL_OTHER("essentialss.inv.anvil.other"),
+    ESSENTIALSS_PERFORMANCE("essentialss.performance"),
+    ESSENTIALSS_PLUGINS("essentialss.plugins"),
     BREW_SELF("essentialss.inv.anvil.self"),
     BREW_OTHER("essentialss.inv.anvil.other");
 
@@ -72,5 +81,15 @@ public enum SPermissions implements SPermission {
     @Override
     public boolean shouldApplyToDefault() {
         return this.shouldApplyToDefault;
+    }
+
+    public static SPermissions getPermissionForGamemode(@NotNull GameMode gamemode) {
+        if (gamemode.equals(GameModes.SURVIVAL.get())) {
+            return SPermissions.GAMEMODE_SURVIVAL;
+        }
+        if (gamemode.equals(GameModes.CREATIVE.get())) {
+            return SPermissions.GAMEMODE_CREATIVE;
+        }
+        throw new IllegalStateException("No permission found for gamemode of " + gamemode.key(RegistryTypes.GAME_MODE));
     }
 }

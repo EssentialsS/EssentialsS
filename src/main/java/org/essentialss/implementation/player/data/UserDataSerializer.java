@@ -24,6 +24,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 final class UserDataSerializer {
@@ -88,7 +89,7 @@ final class UserDataSerializer {
         CAN_LOOSE_ITEMS_WHEN_USED.set(root, userData.canLooseItemsWhenUsed());
         RELEASED_FROM_JAIL.set(root, userData.releasedFromJailTime().orElse(null));
         DISPLAY_NAME.set(root, userData.hasSetDisplayName() ? userData.displayName() : null);
-        BACK_LOCATIONS.set(root, userData.backTeleportLocations());
+        BACK_LOCATIONS.set(root, new LinkedList<>(userData.backTeleportLocations()));
         MUTE_TYPES.set(root, new ArrayList<>(userData.muteTypes()));
         //HOMES.set(root, userData.homes().stream().map(SHome::builder).collect(Collectors.toList()));
 

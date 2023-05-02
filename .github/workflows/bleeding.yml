@@ -1,0 +1,30 @@
+name: bleeding
+
+on:
+  pull_request:
+    branches:
+    - bleeding
+    
+jobs:
+  versionCheck:
+    name: version check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: specified version
+      id: specified
+      run: echo "SPECIFIED_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+    - name: specified version string
+      run: echo ${{ steps.specified.outputs.SPECIFIED_VERSION }}
+    - name: clone current bleeding
+      run: git clone https://github.com/EssentialsS/API.git
+    - name: current version
+      id: current
+      run: echo "CURRENT_VERSION=$(mvn -f API/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+    - name: current version string
+      run: echo ${{ steps.current.outputs.CURRENT_VERSION }}
+    - name: versions
+      run: exit 1
+      if:  ${{ steps.current.outputs.CURRENT_VERSION == steps.specified.outputs.SPECIFIED_VERSION }}
+        
+      

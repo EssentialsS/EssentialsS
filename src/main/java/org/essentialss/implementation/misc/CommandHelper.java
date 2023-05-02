@@ -4,16 +4,20 @@ import net.kyori.adventure.text.Component;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.implementation.EssentialsSMain;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.world.Locatable;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public final class CommandHelper {
@@ -44,12 +48,11 @@ public final class CommandHelper {
         if (opValue.isPresent()) {
             return opValue.get();
         }
-        Subject subject = context.subject();
-        if (!(subject instanceof Locatable)) {
-            throw new CommandException(notLocatable);
+        Optional<ServerLocation> opLocation = context.cause().location();
+        if (opLocation.isPresent()) {
+            return mapTo.apply(opLocation.get());
         }
-        Locatable locatable = (Locatable) subject;
-        return mapTo.apply(locatable.location());
+        throw new CommandException(notLocatable);
     }
 
     public static <T extends SGeneralUnloadedData> T playerDataOrTarget(CommandContext context, Parameter.Value<T> playerParameter) throws CommandException {
@@ -67,11 +70,28 @@ public final class CommandHelper {
         if (opPlayer.isPresent()) {
             return opPlayer.get();
         }
-        Subject subject = context.subject();
-        if (!(subject instanceof Player)) {
+        return playerDataTarget(context, noPlayer);
+    }
+
+    public static <T extends SGeneralUnloadedData> T playerDataTarget(CommandContext context) throws CommandException {
+        return playerDataTarget(context, "Player only command");
+    }
+
+    public static <T extends SGeneralUnloadedData> T playerDataTarget(CommandContext context, String noPlayer) throws CommandException {
+        return playerDataTarget(context, Component.text(noPlayer));
+    }
+
+    public static <T extends SGeneralUnloadedData> T playerDataTarget(CommandContext context, Component noPlayer) throws CommandException {
+        EventContext eventContext = context.cause().context();
+        Optional<UUID> opTargetPlayerId = eventContext.get(EventContextKeys.CREATOR);
+        if (!opTargetPlayerId.isPresent()) {
             throw new CommandException(noPlayer);
         }
-        return (T) EssentialsSMain.plugin().playerManager().get().dataFor((Player) subject);
+        Optional<ServerPlayer> opTargetPlayer = Sponge.server().player(opTargetPlayerId.get());
+        if (!opTargetPlayer.isPresent()) {
+            throw new CommandException(noPlayer);
+        }
+        return (T) EssentialsSMain.plugin().playerManager().get().dataFor(opTargetPlayer.get());
     }
 
     public static <T extends Player> T playerOrTarget(@NotNull CommandContext context, Parameter.Value<T> parameter, Component noPlayer)
@@ -80,8 +100,14 @@ public final class CommandHelper {
         if (opPlayer.isPresent()) {
             return opPlayer.get();
         }
-        if (context.subject() instanceof Player) {
-            return (T) context.subject();
+
+        Optional<UUID> opTargetPlayerId = context.cause().context().get(EventContextKeys.CREATOR);
+        if (!opTargetPlayerId.isPresent()) {
+            throw new CommandException(noPlayer);
+        }
+        Optional<ServerPlayer> opTargetPlayer = Sponge.server().player(opTargetPlayerId.get());
+        if (opTargetPlayer.isPresent()) {
+            return (T) opTargetPlayer.get();
         }
         throw new CommandException(noPlayer);
 

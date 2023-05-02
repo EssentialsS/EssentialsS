@@ -1,6 +1,6 @@
 package org.essentialss.implementation.world;
 
-import org.essentialss.api.utils.arrays.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.utils.validation.ValidationRules;
 import org.essentialss.api.utils.validation.Validator;

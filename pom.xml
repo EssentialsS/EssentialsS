@@ -9,7 +9,7 @@
     <version>0.0.6</version>
     <packaging>pom</packaging>
 
-    <name>EssentialsSImpImplementation</name>
+    <name>EssentialsS</name>
 
     <modules>
         <module>./api</module>

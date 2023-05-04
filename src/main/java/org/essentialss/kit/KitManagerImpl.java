@@ -58,45 +58,53 @@ public class KitManagerImpl implements KitManager {
     @Override
     public void reloadKits() {
         File folder = this.kitFolder();
-        File[] files = folder.listFiles((file, s) -> s.endsWith(".conf"));
-        if (null == files) {
+        File[] pluginFolders = folder.listFiles();
+        if (null == pluginFolders) {
             EssentialsSMain.plugin().logger().warn("0 kits loaded. No folder detected");
             return;
         }
 
-        for (File file : files) {
-            String idName = file.getName().substring(0, file.getName().length() - 5);
-            String pluginId = file.getParentFile().getName();
-            Optional<PluginContainer> opContainer = Sponge.pluginManager().plugin(pluginId);
-            if (!opContainer.isPresent()) {
-                EssentialsSMain.plugin().logger().error("Could not load kit of " + idName + ". As plugin '" + pluginId + "' cannot be found. Skipping");
+        for (File pluginFolder : pluginFolders) {
+            File[] files = pluginFolder.listFiles((file, s) -> s.endsWith(".conf"));
+            if (null == files) {
                 continue;
             }
-            HoconConfigurationLoader loader = TypeLoaders.applyAll(HoconConfigurationLoader.builder().file(file)).build();
-            try {
-                ConfigurationNode node = loader.load();
-                String displayName = node.node(DISPLAY_NAME_NODE).getString();
-                Supplier<Collection<KitSlot>> kitSlots = () -> node.node(ITEMS_NODE).childrenList().stream().map(nodeIndex -> {
-                    ConfigurationNode slotIndexNode = nodeIndex.node(ITEM_SLOT_NODE);
-                    Integer index = null;
-                    if (!slotIndexNode.isNull()) {
-                        index = slotIndexNode.getInt();
-                    }
-                    try {
-                        ItemStack item = node.node(ITEM_NODE).get(ItemStack.class);
-                        if (null == item) {
-                            throw new RuntimeException("Could not read item");
+            for (File file : files) {
+                String idName = file.getName().substring(0, file.getName().length() - 5);
+                String pluginId = pluginFolder.getName();
+                Optional<PluginContainer> opContainer = Sponge.pluginManager().plugin(pluginId);
+                if (!opContainer.isPresent()) {
+                    EssentialsSMain.plugin().logger().error("Could not load kit of " + idName + ". As plugin '" + pluginId + "' cannot be found. Skipping");
+                    continue;
+                }
+                HoconConfigurationLoader loader = TypeLoaders.applyAll(HoconConfigurationLoader.builder().file(file)).build();
+                try {
+                    ConfigurationNode node = loader.load();
+                    String displayName = node.node(DISPLAY_NAME_NODE).getString();
+                    Supplier<Collection<KitSlot>> kitSlots = () -> node.node(ITEMS_NODE).childrenList().stream().map(nodeIndex -> {
+                        ConfigurationNode slotIndexNode = nodeIndex.node(ITEM_SLOT_NODE);
+                        Integer index = null;
+                        if (!slotIndexNode.isNull()) {
+                            index = slotIndexNode.getInt();
                         }
-                        ItemStackSnapshot snapshot = item.createSnapshot();
-                        return new KitSlotImpl(snapshot, index);
-                    } catch (SerializationException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList());
-            } catch (ConfigurateException e) {
-                throw new RuntimeException(e);
+                        try {
+                            ItemStack item = nodeIndex.node(ITEM_NODE).get(ItemStack.class);
+                            if (null == item) {
+                                throw new RuntimeException("Could not read item: " + nodeIndex.node(ITEM_NODE).path().toString());
+                            }
+                            ItemStackSnapshot snapshot = item.createSnapshot();
+                            return new KitSlotImpl(snapshot, index);
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList());
+                    this.kits.add(new KitImpl(opContainer.get(), idName, displayName, kitSlots));
+                } catch (ConfigurateException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
+        EssentialsSMain.plugin().logger().info("Loaded " + this.kits.size() + " kits");
     }
 
     @Override

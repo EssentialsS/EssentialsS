@@ -30,7 +30,7 @@ public class KitImpl implements Kit {
              () -> builder.kitSlots().entrySet().stream().map(entry -> new KitSlotImpl(entry.getKey(), entry.getValue())).collect(Collectors.toList()));
     }
 
-    private KitImpl(@NotNull PluginContainer container, @NotNull String idName, @Nullable String displayName, @NotNull Supplier<Collection<KitSlot>> slots) {
+    KitImpl(@NotNull PluginContainer container, @NotNull String idName, @Nullable String displayName, @NotNull Supplier<Collection<KitSlot>> slots) {
         this(container, idName, displayName, new Singleton<>(() -> new SingleUnmodifiableCollection<>(slots.get())));
     }
 

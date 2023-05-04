@@ -8,6 +8,12 @@ import org.spongepowered.api.registry.RegistryTypes;
 public enum SPermissions implements SPermission {
 
     MUTE("essentialss.mute"),
+    KIT_OTHER("essentialss.kit.other"),
+    KIT_SELF("essentialss.kit.self"),
+    ABSTRACT_KIT_TYPE("essentialss.kit.type."),
+    ADD_KIT_SELF("essentialss.kit.self"),
+    ADD_KIT_OTHER("essentialss.kit.other"),
+    KIT_LIST("essentialss.kit.list"),
     BACK_SELF("essentialss.back.self"),
     BACK_OTHER("essentialss.back.other"),
     BACK_SPACES("essentialss.back.spaces"),

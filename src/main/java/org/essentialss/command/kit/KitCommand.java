@@ -5,6 +5,7 @@ import org.essentialss.api.kit.Kit;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.misc.CommandHelper;
+import org.essentialss.permissions.permission.SPermissions;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
@@ -37,13 +38,26 @@ public class KitCommand {
     }
 
     private static Command.Builder createGenericCommand(boolean equip) {
-        Parameter.Value<SGeneralPlayerData> player = SParameters.onlinePlayer(p -> true).key("player").optional().build();
-        Parameter.Value<Kit> kit = SParameters.kitParameter().key("kit").build();
+        Parameter.Value<SGeneralPlayerData> player = SParameters
+                .onlinePlayer(p -> true)
+                .key("player")
+                .requiredPermission(SPermissions.KIT_OTHER.node())
+                .optional()
+                .build();
+        Parameter.Value<Kit> kit = SParameters
+                .kitParameter((context, thisKit) -> context.hasPermission(
+                        SPermissions.ABSTRACT_KIT_TYPE.node() + thisKit.plugin().metadata().id() + "." + thisKit.name()))
+                .key("kit")
+                .build();
         return Command.builder().executor(new Execute(player, kit, equip)).addParameter(kit).addParameter(player);
     }
 
     public static Command.Parameterized createKitCommand() {
-        return createGenericCommand(true).addChild(createGenericCommand(true).build(), "equip").addChild(createGenericCommand(false).build(), "open").build();
+        return createGenericCommand(true)
+                .addChild(AddKitCommand.createAddKitCommand(), "add", "register")
+                .addChild(createGenericCommand(true).build(), "equip")
+                .addChild(createGenericCommand(false).build(), "open")
+                .build();
     }
 
 

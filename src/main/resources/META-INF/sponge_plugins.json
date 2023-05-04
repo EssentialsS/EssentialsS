@@ -9,7 +9,7 @@
       "id": "essentials-s",
       "name": "EssentialsS",
       "version": "0.0.6",
-      "entrypoint": "org.essentialss.implementation.EssentialsSMain",
+      "entrypoint": "org.essentialss.EssentialsSMain",
       "description": "One stop shop for all essential tools",
       "links": {
         "homepage": "https://ore.spongepowered.org/MoseMister/Essentials-S",

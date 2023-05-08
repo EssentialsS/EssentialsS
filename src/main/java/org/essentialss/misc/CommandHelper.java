@@ -1,8 +1,9 @@
 package org.essentialss.misc;
 
 import net.kyori.adventure.text.Component;
-import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.EssentialsSMain;
+import org.essentialss.api.player.data.SGeneralUnloadedData;
+import org.essentialss.api.world.SWorldData;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
@@ -15,6 +16,8 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -26,8 +29,32 @@ public final class CommandHelper {
         throw new RuntimeException("Should not create");
     }
 
+    public static Vector3i chunkOrTarget(CommandContext context, Parameter.Value<Vector3i> chunkParameter) throws CommandException {
+        return chunkOrTarget(context, chunkParameter, createDefaultString(chunkParameter));
+    }
+
+    public static Vector3i chunkOrTarget(CommandContext context, Parameter.Value<Vector3i> playerParameter, String noPlayer) throws CommandException {
+        return chunkOrTarget(context, playerParameter, Component.text(noPlayer));
+    }
+
+    public static Vector3i chunkOrTarget(CommandContext context, Parameter.Value<Vector3i> chunkParameter, Component notLocatable) throws CommandException {
+        Optional<Vector3i> opValue = context.one(chunkParameter);
+        if (opValue.isPresent()) {
+            return opValue.get();
+        }
+        Optional<Vector3i> opLocation = context.cause().location().map(Location::chunkPosition);
+        if (opLocation.isPresent()) {
+            return opLocation.get();
+        }
+        throw new CommandException(notLocatable);
+    }
+
+    private static String createDefaultString(Parameter.Value<?> parameter) {
+        return parameter.key().key() + " must be specified";
+    }
+
     public static Location<?, ?> locationOrTarget(CommandContext context, Parameter.Value<? extends Location<?, ?>> playerParameter) throws CommandException {
-        return locationOrTarget(context, playerParameter, "Player must be specified");
+        return locationOrTarget(context, playerParameter, createDefaultString(playerParameter));
     }
 
     public static Location<?, ?> locationOrTarget(CommandContext context, Parameter.Value<? extends Location<?, ?>> playerParameter, String noPlayer)
@@ -56,7 +83,7 @@ public final class CommandHelper {
     }
 
     public static <T extends SGeneralUnloadedData> T playerDataOrTarget(CommandContext context, Parameter.Value<T> playerParameter) throws CommandException {
-        return playerDataOrTarget(context, playerParameter, "Player must be specified");
+        return playerDataOrTarget(context, playerParameter, createDefaultString(playerParameter));
     }
 
     public static <T extends SGeneralUnloadedData> T playerDataOrTarget(CommandContext context, Parameter.Value<T> playerParameter, String noPlayer)
@@ -113,8 +140,30 @@ public final class CommandHelper {
 
     }
 
+    public static SWorldData worldDataOrTarget(CommandContext context, Parameter.Value<SWorldData> worldDataParameter) throws CommandException {
+        return worldDataOrTarget(context, worldDataParameter, createDefaultString(worldDataParameter));
+    }
+
+    public static SWorldData worldDataOrTarget(CommandContext context, Parameter.Value<SWorldData> worldDataParameter, String noPlayer)
+            throws CommandException {
+        return worldDataOrTarget(context, worldDataParameter, Component.text(noPlayer));
+    }
+
+    public static SWorldData worldDataOrTarget(CommandContext context, Parameter.Value<SWorldData> worldDataParameter, Component notLocatable)
+            throws CommandException {
+        Optional<SWorldData> opValue = context.one(worldDataParameter);
+        if (opValue.isPresent()) {
+            return opValue.get();
+        }
+        Optional<ServerWorld> opLocation = context.cause().location().map(Location::world);
+        if (opLocation.isPresent()) {
+            return EssentialsSMain.plugin().worldManager().get().dataFor(opLocation.get());
+        }
+        throw new CommandException(notLocatable);
+    }
+
     public static World<?, ?> worldOrTarget(CommandContext context, Parameter.Value<? extends World<?, ?>> worldParameter) throws CommandException {
-        return worldOrTarget(context, worldParameter, "Player must be specified");
+        return worldOrTarget(context, worldParameter, createDefaultString(worldParameter));
     }
 
     public static World<?, ?> worldOrTarget(CommandContext context, Parameter.Value<? extends World<?, ?>> worldParameter, String noPlayer)

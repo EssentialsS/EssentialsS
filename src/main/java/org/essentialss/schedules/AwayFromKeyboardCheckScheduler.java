@@ -43,12 +43,13 @@ public class AwayFromKeyboardCheckScheduler implements Runnable {
             return;
         }
         players.stream().filter(SGeneralPlayerData::isShowingAwayFromKeyboard).forEach(p -> {
-
             LocalDateTime lastAction = p.lastPlayerAction();
             Duration current = Duration.between(lastAction, LocalDateTime.now());
             Duration left = duration.minus(current);
             AwayFromKeyboardBarMessageAdapter adapter = EssentialsSMain.plugin().messageManager().get().adapters().awayFromKeyboardBar().get();
-
+            if (!adapter.isEnabled()) {
+                return;
+            }
 
             float percent = Math.min(((float) current.toNanos()) / duration.toNanos(), 1.0f);
             Optional<BossBar> opBar = p.barUntilKick();
@@ -79,7 +80,7 @@ public class AwayFromKeyboardCheckScheduler implements Runnable {
                 .filter(p -> LocalDateTime.now().isAfter(p.lastPlayerAction().plus(duration)))
                 .filter(p -> p.spongePlayer() instanceof ServerPlayer)
                 .forEach(p -> {
-                    Component banMessage = messageAdapter.adaptMessage(p);
+                    Component banMessage = messageAdapter.isEnabled() ? messageAdapter.adaptMessage(p) : null;
                     Cause cause = Cause.of(EventContext
                                                    .builder()
                                                    .add(EventContextKeys.PLUGIN, EssentialsSMain.plugin().container())
@@ -89,7 +90,9 @@ public class AwayFromKeyboardCheckScheduler implements Runnable {
                     if (event.isCancelled()) {
                         return;
                     }
-                    ((ServerPlayer) p.spongePlayer()).kick(event.kickMessage());
+                    event.kickAdaptedMessage().ifPresent(c -> {
+                        ((ServerPlayer) p.spongePlayer()).kick();
+                    });
                 });
     }
 

@@ -2,12 +2,17 @@ package org.essentialss.config.configs;
 
 import org.essentialss.EssentialsSMain;
 import org.essentialss.api.config.configs.GeneralConfig;
+import org.essentialss.api.config.value.CollectionConfigValue;
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
-import org.essentialss.config.value.primitive.IntegerConfigValue;
+import org.essentialss.config.value.ListDefaultConfigValueImpl;
 import org.essentialss.config.value.primitive.BooleanConfigValue;
+import org.essentialss.config.value.primitive.IntegerConfigValue;
+import org.essentialss.config.value.simple.RegistryConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
@@ -22,12 +27,29 @@ import java.util.stream.Collectors;
 
 public class SGeneralConfigImpl implements GeneralConfig {
 
-    private static final IntegerConfigValue PAGE_SIZE = new IntegerConfigValue(10, "misc", "ListPageSize");
-    private static final BooleanConfigValue CHECK_FOR_UPDATE_ON_LAUNCH = new BooleanConfigValue(false, "update", "CheckOnStartup");
+    private static final IntegerConfigValue PAGE_SIZE;
+    private static final BooleanConfigValue CHECK_FOR_UPDATE_ON_LAUNCH;
+    private static final ListDefaultConfigValueImpl<DamageType> DEMI_GOD_IMMUNE_TO;
+
+    static {
+        PAGE_SIZE = new IntegerConfigValue(10, "misc", "ListPageSize");
+        CHECK_FOR_UPDATE_ON_LAUNCH = new BooleanConfigValue(false, "update", "CheckOnStartup");
+        DEMI_GOD_IMMUNE_TO = new ListDefaultConfigValueImpl<>(RegistryConfigValue.damageType(), () -> DamageTypes
+                .registry()
+                .stream()
+                .filter(type -> !type.equals(DamageTypes.ATTACK.get()))
+                .filter(type -> !type.equals(DamageTypes.VOID.get()))
+                .collect(Collectors.toList()), "demigod", "ImmuneFrom");
+    }
 
     @Override
     public SingleConfigValue.Default<Boolean> checkForUpdatesOnStartup() {
         return CHECK_FOR_UPDATE_ON_LAUNCH;
+    }
+
+    @Override
+    public CollectionConfigValue.Default<DamageType> demiGodImmuneTo() {
+        return DEMI_GOD_IMMUNE_TO;
     }
 
     @Override

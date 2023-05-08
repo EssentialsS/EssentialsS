@@ -10,31 +10,28 @@ import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractEnabledMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 
-public class CommandSpyMessageAdapterImpl implements CommandSpyMessageAdapter {
+public class CommandSpyMessageAdapterImpl extends AbstractEnabledMessageAdapter implements CommandSpyMessageAdapter {
 
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "spy", "Command"), Component.text(
-            SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " used the command of /" + SPlaceHolders.COMMAND_FULL.formattedPlaceholderTag()));
-    private final @Nullable Component message;
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue messageAdapter = new ComponentConfigValue("player", "spy", "command", "Message");
+        Component defaultMessage = Component.text(
+                SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " used the command of /" + SPlaceHolders.COMMAND_FULL.formattedPlaceholderTag());
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(messageAdapter, defaultMessage);
+    }
 
     public CommandSpyMessageAdapterImpl() {
-        Component com;
-        try {
-            com = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            com = null;
-        }
-        this.message = com;
+        super(true, CONFIG_VALUE);
     }
 
     @Override
@@ -72,13 +69,5 @@ public class CommandSpyMessageAdapterImpl implements CommandSpyMessageAdapter {
         placeholders.addAll(messageManager.placeholdersFor(SGeneralPlayerData.class));
         placeholders.addAll(messageManager.placeholdersFor(SPlaceHolders.COMMAND));
         return placeholders;
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return CONFIG_VALUE.defaultValue();
-        }
-        return this.message;
     }
 }

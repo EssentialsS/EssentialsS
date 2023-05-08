@@ -7,13 +7,13 @@ import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.api.modifier.SPlayerModifier;
 import org.essentialss.api.modifier.SPlayerModifiers;
-import org.essentialss.config.value.ListDefaultConfigValueImpl;
+import org.essentialss.config.value.ListConfigValueImpl;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.modifiers.rely.AbstractRelyOnConfigValue;
 import org.essentialss.config.value.modifiers.rely.NullableRelyOnConfigValue;
+import org.essentialss.config.value.primitive.BooleanConfigValue;
 import org.essentialss.config.value.simple.DurationConfigValue;
 import org.essentialss.config.value.simple.PlayerModifierConfigValue;
-import org.essentialss.config.value.primitive.BooleanConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurateException;
@@ -32,21 +32,27 @@ import java.util.stream.Collectors;
 
 public class AwayFromKeyboardConfigImpl implements AwayFromKeyboardConfig {
 
-    private static final SingleConfigValue.Default<Boolean> CAN_JOIN_IN_PLACE_OF_AFK_PLAYER = new BooleanConfigValue(true, "join", "KickIfServerIsFull");
-    private static final SingleConfigValue.Default<Boolean> SHOW_AFK_PLAYERS_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue("join",
-                                                                                                                            "ShowAfkPlayersOnMultiplayerScreen");
-    private static final SingleConfigValue.Default<Boolean> LOCKED_POSITION = new BooleanConfigValue("general", "LockPosition");
-    private static final SingleConfigValue<Duration> DURATION_UNTIL_MODIFIERS = new DurationConfigValue("general", "duration", "modifier", "Delay");
-    private static final SingleConfigValue.Default<Boolean> APPLY_MODIFIERS = new BooleanConfigValue("general", "duration", "modifier", "Apply");
-    private static final SingleConfigValue.Default<Duration> DURATION_UNTIL_STATUS = new SingleDefaultConfigValueWrapper<>(
-            new DurationConfigValue("general", "duration", "Status"), Duration.ofSeconds(30));
+    private static final SingleConfigValue.Default<Boolean> CAN_JOIN_IN_PLACE_OF_AFK_PLAYER;
+    private static final SingleConfigValue.Default<Boolean> SHOW_AFK_PLAYERS_ON_MULTIPLAYER_SCREEN;
+    private static final SingleConfigValue.Default<Boolean> LOCKED_POSITION;
+    private static final SingleConfigValue<Duration> DURATION_UNTIL_MODIFIERS;
+    private static final SingleConfigValue.Default<Boolean> APPLY_MODIFIERS;
+    private static final SingleConfigValue.Default<Duration> DURATION_UNTIL_STATUS;
+    private static final CollectionConfigValue<SPlayerModifier<?>> MODIFIERS;
+    private static final SingleConfigValue.Default<Boolean> WILL_KICK_AFTER_DURATION;
+    private static final AbstractRelyOnConfigValue<Duration, Boolean> DURATION_UNTIL_KICK;
 
-    private static final CollectionConfigValue<SPlayerModifier<?>> MODIFIERS = new ListDefaultConfigValueImpl<>(new PlayerModifierConfigValue(), "general",
-                                                                                                                "duration", "modifier", "Modifiers");
-    private static final SingleConfigValue.Default<Boolean> WILL_KICK_AFTER_DURATION = new BooleanConfigValue("general", "duration", "kick", "WillKick");
-    @SuppressWarnings("ReturnOfNull")
-    private static final AbstractRelyOnConfigValue<Duration, Boolean> DURATION_UNTIL_KICK = NullableRelyOnConfigValue.ifFalse(
-            new DurationConfigValue("general", "duration", "kick", "Delay"), WILL_KICK_AFTER_DURATION);
+    static {
+        CAN_JOIN_IN_PLACE_OF_AFK_PLAYER = new BooleanConfigValue(true, "join", "KickIfServerIsFull");
+        SHOW_AFK_PLAYERS_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue("join", "ShowAfkPlayersOnMultiplayerScreen");
+        LOCKED_POSITION = new BooleanConfigValue("general", "LockPosition");
+        DURATION_UNTIL_MODIFIERS = new DurationConfigValue("general", "duration", "modifier", "Delay");
+        APPLY_MODIFIERS = new BooleanConfigValue("general", "duration", "modifier", "Apply");
+        DURATION_UNTIL_STATUS = new SingleDefaultConfigValueWrapper<>(new DurationConfigValue("general", "duration", "Status"), Duration.ofSeconds(30));
+        MODIFIERS = new ListConfigValueImpl<>(new PlayerModifierConfigValue(), "general", "duration", "modifier", "Modifiers");
+        WILL_KICK_AFTER_DURATION = new BooleanConfigValue("general", "duration", "kick", "WillKick");
+        DURATION_UNTIL_KICK = NullableRelyOnConfigValue.ifFalse(new DurationConfigValue("general", "duration", "kick", "Delay"), WILL_KICK_AFTER_DURATION);
+    }
 
 
     @Override

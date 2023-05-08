@@ -5,6 +5,7 @@ import org.essentialss.api.config.configs.MessageConfig;
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.message.MessageAdapters;
 import org.essentialss.api.message.adapters.MessageAdapter;
+import org.essentialss.api.message.adapters.vanilla.VanillaMessageAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurateException;
@@ -42,6 +43,14 @@ public class SMessageConfigImpl implements MessageConfig {
         List<MessageAdapter> adapters = messageAdapters.all().collect(Collectors.toList());
         for (MessageAdapter adapter : adapters) {
             adapter.configValue().setDefaultIfNotPresent(root);
+            if (adapter instanceof MessageAdapter.Enabled) {
+                MessageAdapter.Enabled enabledMessageAdapter = (MessageAdapter.Enabled) adapter;
+                enabledMessageAdapter.enabledValue().setDefaultIfNotPresent(root);
+            }
+            if(adapter instanceof VanillaMessageAdapter){
+                VanillaMessageAdapter vanillaMessageAdapter = (VanillaMessageAdapter) adapter;
+                vanillaMessageAdapter.useVanilla().setDefaultIfNotPresent(root);
+            }
         }
         loader.save(root);
     }

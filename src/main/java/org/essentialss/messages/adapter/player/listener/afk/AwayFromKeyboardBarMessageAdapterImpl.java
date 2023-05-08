@@ -10,29 +10,25 @@ import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractEnabledMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class AwayFromKeyboardBarMessageAdapterImpl implements AwayFromKeyboardBarMessageAdapter {
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "interaction", "AwayFromKeyboardBar"),
-            Component.text(SPlaceHolders.DURATION.formattedPlaceholderTag() + " until you are kicked"));
-    private final @Nullable Component message;
+public class AwayFromKeyboardBarMessageAdapterImpl extends AbstractEnabledMessageAdapter implements AwayFromKeyboardBarMessageAdapter {
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue messageConfigValue = new ComponentConfigValue("player", "interaction", "awayFromKeyboardBar", "Message");
+        Component defaultMessage = Component.text(SPlaceHolders.DURATION.formattedPlaceholderTag() + " until you are kicked");
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(messageConfigValue, defaultMessage);
+    }
 
     public AwayFromKeyboardBarMessageAdapterImpl() {
-        Component com;
-        try {
-            com = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            com = null;
-        }
-        this.message = com;
+        super(true, CONFIG_VALUE);
     }
 
     @Override
@@ -52,13 +48,5 @@ public class AwayFromKeyboardBarMessageAdapterImpl implements AwayFromKeyboardBa
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
         List<SPlaceHolder<?>> placeHolders = new ArrayList<>(messageManager.placeholdersFor(Duration.class));
         return new SingleUnmodifiableCollection<>(placeHolders);
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

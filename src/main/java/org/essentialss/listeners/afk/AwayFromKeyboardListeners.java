@@ -46,7 +46,9 @@ public class AwayFromKeyboardListeners {
             return;
         }
         BackToKeyboardMessageAdapter messageAdapter = EssentialsSMain.plugin().messageManager().get().adapters().backToKeyboard().get();
-        Sponge.server().broadcastAudience().sendMessage(messageAdapter.adaptMessage(player));
+        if(messageAdapter.isEnabled()) {
+            Sponge.server().broadcastAudience().sendMessage(messageAdapter.adaptMessage(player));
+        }
     }
 
     @Listener

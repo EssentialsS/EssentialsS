@@ -8,14 +8,16 @@ import org.essentialss.api.message.MuteType;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHomeBuilder;
-import org.essentialss.config.value.ListDefaultConfigValueImpl;
+import org.essentialss.config.value.ListConfigValueImpl;
 import org.essentialss.config.value.position.HomeConfigValue;
 import org.essentialss.config.value.position.LocationConfigValue;
+import org.essentialss.config.value.primitive.BooleanConfigValue;
 import org.essentialss.config.value.simple.ComponentConfigValue;
 import org.essentialss.config.value.simple.DateTimeConfigValue;
 import org.essentialss.config.value.simple.EnumConfigValue;
-import org.essentialss.config.value.primitive.BooleanConfigValue;
+import org.essentialss.config.value.simple.RegistryConfigValue;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -34,13 +36,12 @@ final class UserDataSerializer {
     private static final BooleanConfigValue IS_IN_JAIL = new BooleanConfigValue(false, "jail", "In");
     private static final DateTimeConfigValue RELEASED_FROM_JAIL = new DateTimeConfigValue("jail", "ReleasedOn");
     private static final ComponentConfigValue DISPLAY_NAME = new ComponentConfigValue("other", "DisplayName");
-    private static final CollectionConfigValue<MuteType> MUTE_TYPES = new ListDefaultConfigValueImpl<>(
+    private static final CollectionConfigValue<MuteType> MUTE_TYPES = new ListConfigValueImpl<>(
             new EnumConfigValue<>(MuteType.class, "chat", "MuteTypes"));
-
-    private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListDefaultConfigValueImpl<>(new LocationConfigValue("placement"),
-                                                                                                                  "locations", "back");
-
-    private static final CollectionConfigValue<SHomeBuilder> HOMES = new ListDefaultConfigValueImpl<>(new HomeConfigValue(), "homes");
+    private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListConfigValueImpl<>(new LocationConfigValue("placement"),
+                                                                                                           "locations", "back");
+    private static final CollectionConfigValue<SHomeBuilder> HOMES = new ListConfigValueImpl<>(new HomeConfigValue(), "homes");
+    private static final CollectionConfigValue<DamageType> IMMUNE_TO = new ListConfigValueImpl<>(RegistryConfigValue.damageType(), "immune_to");
 
     private UserDataSerializer() {
         throw new RuntimeException("Should not create");
@@ -76,6 +77,11 @@ final class UserDataSerializer {
         if (null != muteTypes) {
             userData.setMuteTypes(muteTypes.toArray(new MuteType[0]));
         }
+
+        List<DamageType> immuneTo = IMMUNE_TO.parse(root);
+        if (null != immuneTo) {
+            userData.setImmuneTo(immuneTo);
+        }
     }
 
     @SuppressWarnings("DuplicateThrows")
@@ -92,7 +98,7 @@ final class UserDataSerializer {
         BACK_LOCATIONS.set(root, new LinkedList<>(userData.backTeleportLocations()));
         MUTE_TYPES.set(root, new ArrayList<>(userData.muteTypes()));
         //HOMES.set(root, userData.homes().stream().map(SHome::builder).collect(Collectors.toList()));
-
+        IMMUNE_TO.set(root, new LinkedList<>(userData.immuneTo()));
         loader.save(root);
     }
 }

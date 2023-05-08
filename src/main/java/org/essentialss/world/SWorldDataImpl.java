@@ -1,9 +1,11 @@
 package org.essentialss.world;
 
-import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
+import net.kyori.adventure.audience.Audience;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.utils.validation.ValidationRules;
 import org.essentialss.api.utils.validation.Validator;
+import org.essentialss.api.world.SPreGenData;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.SPoint;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
@@ -24,20 +26,24 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class SWorldDataImpl implements SWorldData {
 
     private final @Nullable ResourceKey key;
     private final @Nullable String id;
     private final Collection<SPoint> points = new LinkedHashSet<>();
+    private @Nullable SPreGenDataImpl preGen;
 
-    public SWorldDataImpl(@NotNull SWorldDataBuilder builder) {
+    SWorldDataImpl(@NotNull SWorldDataBuilder builder) {
         this.key = builder.worldKey();
         this.id = builder.worldId();
         if ((null == this.key) && (null == this.id)) {
@@ -70,11 +76,34 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
+    public Optional<SPreGenData> generatingChunkData() {
+        return Optional.ofNullable(this.preGen);
+    }
+
+    @Override
     public boolean isWorld(@NotNull World<?, ?> world) {
         if ((world instanceof ServerWorld) && ((ServerWorld) world).key().equals(this.key)) {
             return true;
         }
         return world.context().toString().equalsIgnoreCase(this.id);
+    }
+
+    @Override
+    public @NotNull Optional<CompletableFuture<World<?, ?>>> loadWorld() {
+        if ((null != this.key) && Sponge.isServerAvailable()) {
+            CompletableFuture<World<?, ?>> future = Sponge.server().worldManager().loadWorld(this.key).thenApply(w -> w);
+            return Optional.of(future);
+        }
+        if ((null != this.id) && Sponge.isClientAvailable()) {
+            CompletableFuture<World<?, ?>> future = new CompletableFuture<>();
+            Optional<ClientWorld> opWorld = Sponge.client().world().filter(world -> world.context().toString().equalsIgnoreCase(this.id));
+            if (!opWorld.isPresent()) {
+                return Optional.empty();
+            }
+            future.complete(opWorld.get());
+            return Optional.of(future);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -140,6 +169,11 @@ public class SWorldDataImpl implements SWorldData {
     }
 
     @Override
+    public Optional<SPreGenData> setPreGeneratingData(@NotNull Vector3i center, double radius, @Nullable Audience audience) {
+        return Optional.of(new SPreGenDataImpl(this, center, radius, audience));
+    }
+
+    @Override
     public @NotNull Optional<World<?, ?>> spongeWorld() {
         if ((null != this.key) && Sponge.isServerAvailable()) {
             return Sponge.server().worldManager().world(this.key).map(sWorld -> sWorld);
@@ -199,5 +233,14 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public void saveToConfig() throws ConfigurateException, SerializationException {
         SWorldDataSerializer.save(this);
+    }
+
+    public Optional<SPreGenData> setGeneratingChunkData(@NotNull SPreGenDataImpl preGen) {
+        if (null != this.preGen) {
+            return Optional.empty();
+        }
+        this.preGen = preGen;
+        preGen.start();
+        return Optional.of(this.preGen);
     }
 }

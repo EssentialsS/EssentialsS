@@ -50,6 +50,7 @@ import org.essentialss.listeners.ban.BanConnectionListeners;
 import org.essentialss.listeners.chat.ChatListener;
 import org.essentialss.listeners.chat.MuteListener;
 import org.essentialss.listeners.chat.SpyListener;
+import org.essentialss.listeners.chat.VanillaMessageListener;
 import org.essentialss.listeners.connection.ConnectionListeners;
 import org.essentialss.listeners.data.DataListeners;
 import org.essentialss.messages.SMessageManagerImpl;
@@ -247,6 +248,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         eventManager.registerListeners(this.container, new SpyListener());
         eventManager.registerListeners(this.container, new ChatListener());
         eventManager.registerListeners(this.container, new DataListeners());
+        eventManager.registerListeners(this.container, new VanillaMessageListener());
     }
 
     public static EssentialsSMain plugin() {

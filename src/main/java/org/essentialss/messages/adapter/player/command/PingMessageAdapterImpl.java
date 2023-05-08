@@ -9,35 +9,41 @@ import org.essentialss.api.message.adapters.player.command.PingMessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.player.data.SGeneralPlayerData;
+import org.essentialss.api.utils.Singleton;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class PingMessageAdapterImpl implements PingMessageAdapter {
+public class PingMessageAdapterImpl extends AbstractMessageAdapter implements PingMessageAdapter {
 
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "command", "Ping"),
-            Component.text(SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " has a ping of " + SPlaceHolders.PLAYER_PING.formattedPlaceholderTag()));
-    private final @Nullable Component message;
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue configValue = new ComponentConfigValue("player", "command", "Ping");
+        Component defaultValue = Component.text(
+                SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " has a ping of " + SPlaceHolders.PLAYER_PING.formattedPlaceholderTag());
+
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(configValue, defaultValue);
+    }
 
     public PingMessageAdapterImpl() {
-        this(EssentialsSMain.plugin().messageManager().get().config().get());
+        super(CONFIG_VALUE);
     }
 
     public PingMessageAdapterImpl(@NotNull MessageConfig config) {
-        Component com;
-        try {
-            com = CONFIG_VALUE.parse(config);
-        } catch (SerializationException e) {
-            com = null;
-        }
-        this.message = com;
+        super(new Singleton<>(() -> {
+            try {
+                return CONFIG_VALUE.parse(config);
+            } catch (SerializationException e) {
+                return null;
+            }
+        }));
     }
 
     @Override
@@ -62,13 +68,5 @@ public class PingMessageAdapterImpl implements PingMessageAdapter {
         collection.addAll(messageManager.placeholdersFor(SGeneralPlayerData.class));
 
         return collection;
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

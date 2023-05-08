@@ -12,10 +12,8 @@ import org.essentialss.api.message.placeholder.SPlaceHolder;
 import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
-import org.essentialss.config.value.modifiers.rely.AbstractRelyOnConfigValue;
-import org.essentialss.config.value.modifiers.rely.NullableRelyOnConfigValue;
 import org.essentialss.config.value.simple.ComponentConfigValue;
-import org.essentialss.config.value.primitive.BooleanConfigValue;
+import org.essentialss.messages.adapter.AbstractEnabledMessageAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
@@ -25,14 +23,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SChatMessageAdapterImpl implements ChatMessageAdapter {
+public class SChatMessageAdapterImpl extends AbstractEnabledMessageAdapter implements ChatMessageAdapter {
 
-    private static final BooleanConfigValue ENABLED_VALUE = new BooleanConfigValue("player", "chat", "Enabled");
-    private static final SingleDefaultConfigValueWrapper<Component> MAIN_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "chat", "ChatFormat"),
-            Component.text(SPlaceHolders.DURATION.formattedPlaceholderTag() + " until you are kicked"));
-    private static final AbstractRelyOnConfigValue<Component, Boolean> CONFIG_VALUE = NullableRelyOnConfigValue.ifTrue(MAIN_VALUE, ENABLED_VALUE);
+    private static final SingleDefaultConfigValueWrapper<Component> MAIN_VALUE;
     private final Collection<ChatFormat> formatters = new LinkedList<>(Arrays.asList(ChatFormats.values()));
+
+    static {
+        ComponentConfigValue component = new ComponentConfigValue("player", "chat", "chatFormat", "Message");
+        Component defaultValue = Component.text(
+                "[" + SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + "] " + SPlaceHolders.MESSAGE_TEXT.formattedPlaceholderTag());
+
+        MAIN_VALUE = new SingleDefaultConfigValueWrapper<>(component, defaultValue);
+    }
+
+    public SChatMessageAdapterImpl() {
+        super(false, MAIN_VALUE);
+    }
+
 
     @Override
     public Component adaptMessage(@NotNull Component unformatted, @NotNull ServerPlayer player, @NotNull Audience receiver, @NotNull Component message) {
@@ -69,11 +76,6 @@ public class SChatMessageAdapterImpl implements ChatMessageAdapter {
         this.formatters.add(chatFormat);
     }
 
-    @Override
-    public boolean shouldUseComponentOverride() {
-        return ENABLED_VALUE.parseDefault(EssentialsSMain.plugin().configManager().get().message().get());
-    }
-
     @NotNull
     @Override
     public SingleConfigValue.Default<Component> configValue() {
@@ -88,10 +90,5 @@ public class SChatMessageAdapterImpl implements ChatMessageAdapter {
                 .stream()
                 .filter(placeholder -> Component.class.isAssignableFrom(placeholder.type()))
                 .collect(Collectors.toCollection(LinkedList::new));
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        return MAIN_VALUE.defaultValue();
     }
 }

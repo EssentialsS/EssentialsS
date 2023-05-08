@@ -11,28 +11,26 @@ import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.message.placeholder.wrapper.collection.AndCollectionWrapperPlaceholder;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class YouAreNowMutedMessageAdapterImpl implements YouAreNowMutedMessageAdapter {
+public class YouAreNowMutedMessageAdapterImpl extends AbstractMessageAdapter implements YouAreNowMutedMessageAdapter {
 
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "command", "mute", "YouAreNowMuted"),
-            Component.text("You are now muted with %" + SPlaceHolders.MUTE_TYPE.placeholderTag() + "'s%"));
-    private @Nullable Component message;
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue configValue = new ComponentConfigValue("player", "command", "mute", "YouAreNowMuted");
+        Component defaultValue = Component.text("You are now muted with %" + SPlaceHolders.MUTE_TYPE.placeholderTag() + "'s%");
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(configValue, defaultValue);
+    }
 
     public YouAreNowMutedMessageAdapterImpl() {
-        try {
-            this.message = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            this.message = null;
-        }
+        super(CONFIG_VALUE);
     }
 
     @Override
@@ -64,13 +62,5 @@ public class YouAreNowMutedMessageAdapterImpl implements YouAreNowMutedMessageAd
                 .stream()
                 .map(placeholder -> (SPlaceHolder<?>) new AndCollectionWrapperPlaceholder<>(placeholder))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

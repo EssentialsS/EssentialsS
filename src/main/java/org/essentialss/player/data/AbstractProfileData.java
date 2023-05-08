@@ -18,6 +18,7 @@ import org.essentialss.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.stream.Collectors;
 
 public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
@@ -33,6 +35,7 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     private final @NotNull LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
     private final @NotNull LinkedList<MailMessage> mailMessages = new LinkedList<>();
     private final @NotNull LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
+    private final LinkedTransferQueue<DamageType> immuneTo = new LinkedTransferQueue<>();
     boolean isInJail;
     @Nullable LocalDateTime releaseFromJail;
     private boolean canLooseItemsWhenUsed;
@@ -116,6 +119,11 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
+    public UnmodifiableCollection<DamageType> immuneTo() {
+        return new SingleUnmodifiableCollection<>(this.immuneTo);
+    }
+
+    @Override
     public boolean isInJail() {
         return this.isInJail;
     }
@@ -187,6 +195,12 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     public void setHomes(@NotNull Collection<SHomeBuilder> homes) {
         this.homes.clear();
         homes.forEach(this::register);
+    }
+
+    @Override
+    public void setImmuneTo(Collection<DamageType> immuneTo) {
+        this.immuneTo.clear();
+        this.immuneTo.addAll(immuneTo.stream().distinct().collect(Collectors.toList()));
     }
 
     @Override

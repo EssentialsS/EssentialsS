@@ -3,13 +3,14 @@ package org.essentialss.command.essentialss;
 import org.essentialss.EssentialsSMain;
 import org.essentialss.api.config.SConfig;
 import org.essentialss.api.config.SConfigManager;
-import org.essentialss.command.essentialss.performance.PerformanceCommand;
 import org.essentialss.command.essentialss.config.SetConfigCommand;
 import org.essentialss.command.essentialss.config.ViewConfigCommand;
 import org.essentialss.command.essentialss.config.message.SetMessageCommand;
 import org.essentialss.command.essentialss.config.message.ViewMessageCommand;
 import org.essentialss.command.essentialss.info.InformationCommand;
+import org.essentialss.command.essentialss.performance.PerformanceCommand;
 import org.essentialss.command.essentialss.plugins.PluginsCommand;
+import org.essentialss.command.essentialss.pregen.PreGenCommand;
 import org.essentialss.command.essentialss.update.CheckForUpdateCommand;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
@@ -58,6 +59,7 @@ public final class EssentialsSCommand {
                 .addChild(PluginsCommand.createPluginsCommand(), "plugins", "pl")
                 .addChild(PerformanceCommand.createPerformanceCommand(), "performance")
                 .addChild(InformationCommand.createInfoCommand(), "info")
+                .addChild(PreGenCommand.createPreGenCommand(), "pregen")
                 .build();
     }
 

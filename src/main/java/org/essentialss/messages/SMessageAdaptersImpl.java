@@ -16,6 +16,7 @@ import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboard
 import org.essentialss.api.message.adapters.player.listener.afk.BackToKeyboardMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.chat.ChatMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.spy.CommandSpyMessageAdapter;
+import org.essentialss.api.message.adapters.vanilla.player.PlayerJoinMessageAdapter;
 import org.essentialss.api.message.adapters.warp.CreateWarpMessageAdapter;
 import org.essentialss.api.utils.Singleton;
 import org.essentialss.messages.adapter.player.command.PingMessageAdapterImpl;
@@ -31,6 +32,7 @@ import org.essentialss.messages.adapter.player.listener.afk.AwayFromKeyboardMess
 import org.essentialss.messages.adapter.player.listener.afk.BackToKeyboardMessageAdapterImpl;
 import org.essentialss.messages.adapter.player.listener.chat.SChatMessageAdapterImpl;
 import org.essentialss.messages.adapter.player.listener.spy.CommandSpyMessageAdapterImpl;
+import org.essentialss.messages.adapter.vanilla.player.PlayerJoinMessageAdapterImpl;
 import org.essentialss.messages.adapter.warp.CreateWarpMessageAdapterImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,6 +57,7 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     private final Singleton<PingMessageAdapter> ping = new Singleton<>(PingMessageAdapterImpl::new);
     private final Singleton<CommandSpyMessageAdapter> commandSpy = new Singleton<>(CommandSpyMessageAdapterImpl::new);
     private final Singleton<ChatMessageAdapter> chat = new Singleton<>(SChatMessageAdapterImpl::new);
+    private final Singleton<PlayerJoinMessageAdapter> playerJoin = new Singleton<>(PlayerJoinMessageAdapterImpl::new);
 
     private final @NotNull MessageConfig config;
 
@@ -123,6 +126,11 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     @Override
     public Singleton<PingMessageAdapter> ping() {
         return this.ping;
+    }
+
+    @Override
+    public Singleton<PlayerJoinMessageAdapter> playerJoin() {
+        return this.playerJoin;
     }
 
     @Override

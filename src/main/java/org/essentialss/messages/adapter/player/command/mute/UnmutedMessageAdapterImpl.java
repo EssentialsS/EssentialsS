@@ -13,28 +13,26 @@ import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class UnmutedMessageAdapterImpl implements UnmutedMessageAdapter {
+public class UnmutedMessageAdapterImpl extends AbstractMessageAdapter implements UnmutedMessageAdapter {
 
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "command", "mute", "Unmuted"),
-            Component.text("You unmuted " + SPlaceHolders.PLAYER_NAME.formattedPlaceholderTag()));
-    private @Nullable Component message;
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue messageConfigValue = new ComponentConfigValue("player", "command", "mute", "Unmuted");
+        Component defaultValue = Component.text("You unmuted " + SPlaceHolders.PLAYER_NAME.formattedPlaceholderTag());
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(messageConfigValue, defaultValue);
+    }
 
     public UnmutedMessageAdapterImpl() {
-        try {
-            this.message = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            this.message = null;
-        }
+        super(CONFIG_VALUE);
     }
 
     @Override
@@ -82,13 +80,5 @@ public class UnmutedMessageAdapterImpl implements UnmutedMessageAdapter {
                                     .map(placeholder -> (SPlaceHolder<?>) new AndCollectionWrapperPlaceholder<>(placeholder))
                                     .collect(Collectors.toList()));
         return placeholders;
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

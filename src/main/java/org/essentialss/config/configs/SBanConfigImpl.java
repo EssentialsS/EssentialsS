@@ -7,9 +7,9 @@ import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
+import org.essentialss.config.value.primitive.BooleanConfigValue;
 import org.essentialss.config.value.simple.ComponentConfigValue;
 import org.essentialss.config.value.simple.EnumConfigValue;
-import org.essentialss.config.value.primitive.BooleanConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurateException;
@@ -27,15 +27,24 @@ import java.util.stream.Collectors;
 
 public class SBanConfigImpl implements BanConfig {
 
-    private static final SingleConfigValue.Default<BanMultiplayerScreenOptions> SHOW_BAN_ON_MULTIPLAYER_SCREEN = new SingleDefaultConfigValueWrapper<>(
-            new EnumConfigValue<>(BanMultiplayerScreenOptions.class, "messages", "ShowOnMultiplayerScreen"), BanMultiplayerScreenOptions.DEFAULT);
-    private static final SingleConfigValue.Default<Boolean> SHOW_FULL_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue("messages", "ShowFullOnMultiplayerScreen");
-    private static final SingleConfigValue.Default<Component> BAN_MESSAGE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("messages", "BannedMessage"), Component.text("You are banned from this server"));
-    private static final ComponentConfigValue TEMP_BAN_MESSAGE = new ComponentConfigValue("messages", "TempBannedMessage");
-    private static final SingleConfigValue.Default<Boolean> USE_BAN_MESSAGE_FOR_TEMP_BAN = new BooleanConfigValue(true, "messages", "UseBanMessageForTempBan");
-    private static final SingleConfigValue.Default<Boolean> USE_ESSENTIALS_S_BAN_COMMANDS = new BooleanConfigValue(true, "enabled", "banCommands",
-                                                                                                                   "EssentialsSBanCommands");
+    private static final SingleConfigValue.Default<BanMultiplayerScreenOptions> SHOW_BAN_ON_MULTIPLAYER_SCREEN;
+    private static final SingleConfigValue.Default<Boolean> SHOW_FULL_ON_MULTIPLAYER_SCREEN;
+    private static final SingleConfigValue.Default<Component> BAN_MESSAGE;
+    private static final ComponentConfigValue TEMP_BAN_MESSAGE;
+    private static final SingleConfigValue.Default<Boolean> USE_BAN_MESSAGE_FOR_TEMP_BAN;
+    private static final SingleConfigValue.Default<Boolean> USE_ESSENTIALS_S_BAN_COMMANDS;
+
+    static {
+        SHOW_BAN_ON_MULTIPLAYER_SCREEN = new SingleDefaultConfigValueWrapper<>(
+                new EnumConfigValue<>(BanMultiplayerScreenOptions.class, "messages", "ShowOnMultiplayerScreen"), BanMultiplayerScreenOptions.DEFAULT);
+        SHOW_FULL_ON_MULTIPLAYER_SCREEN = new BooleanConfigValue("messages", "ShowFullOnMultiplayerScreen");
+        BAN_MESSAGE = new SingleDefaultConfigValueWrapper<>(new ComponentConfigValue("messages", "BannedMessage"),
+                                                            Component.text("You are banned from this server"));
+        TEMP_BAN_MESSAGE = new ComponentConfigValue("messages", "TempBannedMessage");
+        USE_BAN_MESSAGE_FOR_TEMP_BAN = new BooleanConfigValue(true, "messages", "UseBanMessageForTempBan");
+        USE_ESSENTIALS_S_BAN_COMMANDS = new BooleanConfigValue(true, "enabled", "banCommands", "EssentialsSBanCommands");
+
+    }
 
     @Override
     public SingleConfigValue.Default<Component> banMessage() {

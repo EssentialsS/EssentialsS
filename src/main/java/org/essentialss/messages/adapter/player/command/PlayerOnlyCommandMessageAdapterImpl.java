@@ -5,29 +5,35 @@ import org.essentialss.api.config.configs.MessageConfig;
 import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.api.message.adapters.player.command.PlayerOnlyCommandMessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
+import org.essentialss.api.utils.Singleton;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
 import java.util.Collections;
 
-public class PlayerOnlyCommandMessageAdapterImpl implements PlayerOnlyCommandMessageAdapter {
+public class PlayerOnlyCommandMessageAdapterImpl extends AbstractMessageAdapter implements PlayerOnlyCommandMessageAdapter {
 
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "command", "PlayerOnlyCommand"), Component.text("Sorry. This command can only be ran as a player"));
-    private final @Nullable Component message;
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue configValue = new ComponentConfigValue("player", "command", "PlayerOnlyCommand");
+        Component defaultValue = Component.text("Sorry. This command can only be ran as a player");
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(configValue, defaultValue);
+        ;
+    }
 
     public PlayerOnlyCommandMessageAdapterImpl(@NotNull MessageConfig config) {
-        Component com;
-        try {
-            com = CONFIG_VALUE.parse(config);
-        } catch (SerializationException e) {
-            com = null;
-        }
-        this.message = com;
+        super(new Singleton<>(() -> {
+            try {
+                return CONFIG_VALUE.parse(config);
+            } catch (SerializationException e) {
+                return null;
+            }
+        }));
     }
 
     @Override
@@ -43,13 +49,5 @@ public class PlayerOnlyCommandMessageAdapterImpl implements PlayerOnlyCommandMes
     @Override
     public @NotNull Collection<SPlaceHolder<?>> supportedPlaceholders() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

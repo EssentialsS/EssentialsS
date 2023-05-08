@@ -10,29 +10,25 @@ import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractEnabledMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class AwayFromKeyboardForTooLongMessageAdapterImpl implements AwayFromKeyboardForTooLongMessageAdapter {
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "kick", "afkTooLong"),
-            Component.text("You have been removed from the server to make space for idling for too long"));
-    private final @Nullable Component message;
+public class AwayFromKeyboardForTooLongMessageAdapterImpl extends AbstractEnabledMessageAdapter implements AwayFromKeyboardForTooLongMessageAdapter {
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue messageConfigValue = new ComponentConfigValue("player", "kick", "afkTooLong", "Message");
+        Component defaultValue = Component.text("You have been removed from the server to make space for idling for too long");
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(messageConfigValue, defaultValue);
+    }
 
     public AwayFromKeyboardForTooLongMessageAdapterImpl() {
-        Component com;
-        try {
-            com = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            com = null;
-        }
-        this.message = com;
+        super(true, CONFIG_VALUE);
     }
 
     @Override
@@ -55,13 +51,5 @@ public class AwayFromKeyboardForTooLongMessageAdapterImpl implements AwayFromKey
         placeHolders.addAll(messageManager.placeholdersFor(SGeneralPlayerData.class));
         placeHolders.addAll(messageManager.placeholdersFor(Player.class));
         return new SingleUnmodifiableCollection<>(placeHolders);
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

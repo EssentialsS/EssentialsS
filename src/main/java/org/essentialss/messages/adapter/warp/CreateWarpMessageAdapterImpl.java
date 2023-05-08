@@ -12,29 +12,25 @@ import org.essentialss.api.world.points.SPoint;
 import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CreateWarpMessageAdapterImpl implements CreateWarpMessageAdapter {
+public class CreateWarpMessageAdapterImpl extends AbstractMessageAdapter implements CreateWarpMessageAdapter {
 
-    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("warp", "Create"),
-            Component.text("created warp of " + SPlaceHolders.POINT_NAME.copyWithTagType("warp").formattedPlaceholderTag()));
-    private final @Nullable Component message;
+    private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
+
+    static {
+        ComponentConfigValue messageConfigValue = new ComponentConfigValue("warp", "Create");
+        Component defaultMessage = Component.text("created warp of " + SPlaceHolders.POINT_NAME.copyWithTagType("warp").formattedPlaceholderTag());
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(messageConfigValue, defaultMessage);
+    }
 
     public CreateWarpMessageAdapterImpl() {
-        Component com;
-        try {
-            com = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            com = null;
-        }
-        this.message = com;
+        super(CONFIG_VALUE);
     }
 
     @Override
@@ -60,13 +56,5 @@ public class CreateWarpMessageAdapterImpl implements CreateWarpMessageAdapter {
         List<SPlaceHolder<?>> placeHolders = new ArrayList<>(messageManager.placeholdersFor(SWarp.class));
         placeHolders.addAll(messageManager.placeholdersFor(SPoint.class));
         return new SingleUnmodifiableCollection<>(placeHolders);
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.message) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.message;
     }
 }

@@ -6,30 +6,30 @@ import org.essentialss.api.config.value.SingleConfigValue;
 import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.message.adapters.player.command.WhoIsMessageAdapter;
 import org.essentialss.api.message.placeholder.SPlaceHolder;
+import org.essentialss.api.message.placeholder.SPlaceHolders;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.config.value.modifiers.SingleDefaultConfigValueWrapper;
 import org.essentialss.config.value.simple.ComponentConfigValue;
+import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
 
-public class WhoIsCommandManagerAdapterImpl implements WhoIsMessageAdapter {
+public class WhoIsCommandManagerAdapterImpl extends AbstractMessageAdapter implements WhoIsMessageAdapter {
 
-    private static final SingleConfigValue.Default<Component> CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(
-            new ComponentConfigValue("player", "command", "WhoIsCommand"), Component.text("%% is %%"));
+    private static final SingleConfigValue.Default<Component> CONFIG_VALUE;
 
-    private @Nullable Component component;
+    static {
+        ComponentConfigValue configValue = new ComponentConfigValue("player", "command", "WhoIsCommand");
+        Component defaultValue = Component.text(
+                SPlaceHolders.PLAYER_NICKNAME.formattedPlaceholderTag() + " is " + SPlaceHolders.PLAYER_NAME.formattedPlaceholderTag());
+        CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(configValue, defaultValue);
+    }
 
     public WhoIsCommandManagerAdapterImpl() {
-        try {
-            this.component = CONFIG_VALUE.parse(EssentialsSMain.plugin().messageManager().get().config().get());
-        } catch (SerializationException e) {
-            this.component = null;
-        }
+        super(CONFIG_VALUE);
     }
 
     @Override
@@ -52,13 +52,5 @@ public class WhoIsCommandManagerAdapterImpl implements WhoIsMessageAdapter {
     public @NotNull Collection<SPlaceHolder<?>> supportedPlaceholders() {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
         return messageManager.placeholdersFor(SGeneralUnloadedData.class);
-    }
-
-    @Override
-    public @NotNull Component unadaptedMessage() {
-        if (null == this.component) {
-            return this.defaultUnadaptedMessage();
-        }
-        return this.component;
     }
 }

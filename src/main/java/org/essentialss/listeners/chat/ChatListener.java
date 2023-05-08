@@ -19,7 +19,7 @@ public class ChatListener {
 
         event.setChatFormatter((player, target, message, originalMessage) -> {
             message = chatAdapter.formatMessage(player, target, message, originalMessage);
-            if (!chatAdapter.shouldUseComponentOverride()) {
+            if (!chatAdapter.isEnabled()) {
                 try {
                     return formatter.format(player, target, message, originalMessage);
                 } catch (Throwable e) {

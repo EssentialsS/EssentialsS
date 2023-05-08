@@ -7,15 +7,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.event.Cause;
 
+import java.util.Optional;
+
 public class PlayerKickedForIdlingImpl implements PlayerKickedForIdlingEvent {
 
     private final Cause cause;
     private final SGeneralPlayerData player;
-    private final Component originalMessage;
+    private final @Nullable Component originalMessage;
     private boolean isCancelled;
     private @Nullable Component newMessage;
 
-    public PlayerKickedForIdlingImpl(@NotNull Component kickMessage, @NotNull SGeneralPlayerData player, @NotNull Cause cause) {
+    public PlayerKickedForIdlingImpl(@Nullable Component kickMessage, @NotNull SGeneralPlayerData player, @NotNull Cause cause) {
         this.cause = cause;
         this.player = player;
         this.originalMessage = kickMessage;
@@ -37,16 +39,16 @@ public class PlayerKickedForIdlingImpl implements PlayerKickedForIdlingEvent {
     }
 
     @Override
-    public @NotNull Component kickMessage() {
-        if (null == this.newMessage) {
-            return this.originalMessage;
+    public Optional<Component> kickAdaptedMessage() {
+        if (null != this.newMessage) {
+            return Optional.of(this.newMessage);
         }
-        return this.newMessage;
+        return this.originalKickAdaptedMessage();
     }
 
     @Override
-    public @NotNull Component originalKickMessage() {
-        return this.originalMessage;
+    public Optional<Component> originalKickAdaptedMessage() {
+        return Optional.ofNullable(this.originalMessage);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class PlayerKickedForIdlingImpl implements PlayerKickedForIdlingEvent {
     }
 
     @Override
-    public void setKickMessage(@NotNull Component kickMessage) {
+    public void setKickMessage(@Nullable Component kickMessage) {
         this.newMessage = kickMessage;
     }
 }

@@ -2,7 +2,6 @@ package org.essentialss.listeners.afk;
 
 import org.essentialss.EssentialsSMain;
 import org.essentialss.api.config.configs.AwayFromKeyboardConfig;
-import org.essentialss.api.message.adapters.player.listener.afk.BackToKeyboardMessageAdapter;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.events.player.afk.PlayerBackFromKeyboardImpl;
 import org.jetbrains.annotations.NotNull;
@@ -39,16 +38,6 @@ public class AwayFromKeyboardListeners {
         }
 
         player.playerAction();
-        if (!isAfk) {
-            return;
-        }
-        if (!Sponge.isServerAvailable()) {
-            return;
-        }
-        BackToKeyboardMessageAdapter messageAdapter = EssentialsSMain.plugin().messageManager().get().adapters().backToKeyboard().get();
-        if(messageAdapter.isEnabled()) {
-            Sponge.server().broadcastAudience().sendMessage(messageAdapter.adaptMessage(player));
-        }
     }
 
     @Listener

@@ -36,10 +36,9 @@ final class UserDataSerializer {
     private static final BooleanConfigValue IS_IN_JAIL = new BooleanConfigValue(false, "jail", "In");
     private static final DateTimeConfigValue RELEASED_FROM_JAIL = new DateTimeConfigValue("jail", "ReleasedOn");
     private static final ComponentConfigValue DISPLAY_NAME = new ComponentConfigValue("other", "DisplayName");
-    private static final CollectionConfigValue<MuteType> MUTE_TYPES = new ListConfigValueImpl<>(
-            new EnumConfigValue<>(MuteType.class, "chat", "MuteTypes"));
-    private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListConfigValueImpl<>(new LocationConfigValue("placement"),
-                                                                                                           "locations", "back");
+    private static final CollectionConfigValue<MuteType> MUTE_TYPES = new ListConfigValueImpl<>(new EnumConfigValue<>(MuteType.class, "chat", "MuteTypes"));
+    private static final CollectionConfigValue<OfflineLocation> BACK_LOCATIONS = new ListConfigValueImpl<>(new LocationConfigValue("placement"), "locations",
+                                                                                                           "back");
     private static final CollectionConfigValue<SHomeBuilder> HOMES = new ListConfigValueImpl<>(new HomeConfigValue(), "homes");
     private static final CollectionConfigValue<DamageType> IMMUNE_TO = new ListConfigValueImpl<>(RegistryConfigValue.damageType(), "immune_to");
 
@@ -58,8 +57,8 @@ final class UserDataSerializer {
         if (isInJail && (userData instanceof AbstractProfileData)) {
             AbstractProfileData apd = ((AbstractProfileData) userData);
             LocalDateTime releasedFromJailTime = RELEASED_FROM_JAIL.parse(root);
-            apd.isInJail = true;
-            apd.releaseFromJail = releasedFromJailTime;
+            apd.isInJail.setValue(true);
+            apd.releasedFromJail.setValue(releasedFromJailTime);
         }
 
         Component displayName = DISPLAY_NAME.parse(root);

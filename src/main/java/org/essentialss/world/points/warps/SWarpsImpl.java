@@ -18,8 +18,8 @@ public class SWarpsImpl implements SWarp {
     }
 
     @Override
-    public @NotNull String identifier() {
-        return this.warpName;
+    public SWarpBuilder builder() {
+        return new SWarpBuilder().setName(this.warpName).setPoint(this.location.position());
     }
 
     @Override
@@ -48,8 +48,8 @@ public class SWarpsImpl implements SWarp {
     }
 
     @Override
-    public SWarpBuilder builder() {
-        return new SWarpBuilder().setName(this.warpName).setPoint(this.location.position());
+    public @NotNull String identifier() {
+        return this.warpName;
     }
 
     @Override

@@ -1,9 +1,12 @@
 package org.essentialss.world;
 
+import org.essentialss.EssentialsSMain;
 import org.essentialss.api.world.SWorldData;
+import org.essentialss.api.world.points.spawn.SSpawnPoint;
+import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
 import org.essentialss.api.world.points.warp.SWarp;
 import org.essentialss.api.world.points.warp.SWarpBuilder;
-import org.essentialss.EssentialsSMain;
+import org.essentialss.world.points.spawn.SSpawnPointImpl;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -15,6 +18,7 @@ import org.spongepowered.math.vector.Vector3d;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
 
 final class SWorldDataSerializer {
 
@@ -60,6 +64,9 @@ final class SWorldDataSerializer {
                 }
                 worldData.register(new SWarpBuilder().setName(warpName).setPoint(new Vector3d(x, y, z)), false, null);
             }
+            if (type.equalsIgnoreCase("Spawn")) {
+                worldData.register(new SSpawnPointBuilder().setPosition(new Vector3d(x, y, z)), false, null);
+            }
         });
     }
 
@@ -79,7 +86,13 @@ final class SWorldDataSerializer {
             points.node("y").set(warp.position().y());
             points.node("z").set(warp.position().z());
         }
-
+        for (SSpawnPoint spawnPoint : worldData.spawnPoints().stream().filter(s -> s instanceof SSpawnPointImpl).collect(Collectors.toList())) {
+            CommentedConfigurationNode points = pointNode.appendListNode();
+            points.node("type").set("Spawn");
+            points.node("x").set(spawnPoint.position().x());
+            points.node("y").set(spawnPoint.position().y());
+            points.node("z").set(spawnPoint.position().z());
+        }
         loader.save(root);
 
     }

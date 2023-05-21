@@ -22,29 +22,30 @@ import java.util.UUID;
 
 public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflineData {
 
-    private final @NotNull User user;
+    private final User user;
 
-
-    public SUserDataImpl(@NotNull User user) {
+    public SUserDataImpl(User user) {
         this.user = user;
     }
 
+    @NotNull
     @Override
-    public @NotNull String playerName() {
+    public String playerName() {
         return this.user.name();
     }
 
+    @NotNull
     @Override
-    public @NotNull UUID uuid() {
+    public UUID uuid() {
         return this.user.uniqueId();
     }
 
     @Override
-    public void releaseFromJail(@NotNull OfflineLocation spawnTo) {
-        this.isInJail = false;
-        this.releaseFromJail = null;
-        Location<?, ?> location = spawnTo.location().orElseThrow(() -> new RuntimeException("Server must be active to modify offline players"));
-        Optional<ServerLocation> serverLocation = location.onServer();
+    public void releaseFromJail(@NotNull OfflineLocation location) {
+        this.isInJail.setValue(false);
+        this.releasedFromJail.setValue(null);
+        Location<?, ?> spawnTo = location.location().orElseThrow(() -> new RuntimeException("Server must be active to modify offline players"));
+        Optional<ServerLocation> serverLocation = spawnTo.onServer();
         if (serverLocation.isPresent()) {
             this.user.setLocation(serverLocation.get().worldKey(), serverLocation.get().position());
             return;
@@ -68,13 +69,12 @@ public class SUserDataImpl extends AbstractProfileData implements SGeneralOfflin
             throw new IllegalStateException("Cannot get world key for " + point.worldData().identifier());
         }
         this.user.setLocation(opWorldKey.get(), point.position());
-        this.isInJail = true;
+        this.isInJail.setValue(true);
         if (null != length) {
-            this.releaseFromJail = LocalDateTime.now().plus(length);
+            this.releasedFromJail.setValue(LocalDateTime.now().plus(length));
         }
     }
 
-    @SuppressWarnings("DuplicateThrows")
     @Override
     public void reloadFromConfig() throws ConfigurateException, SerializationException {
         UserDataSerializer.load(this);

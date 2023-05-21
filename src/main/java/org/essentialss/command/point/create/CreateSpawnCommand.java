@@ -117,7 +117,16 @@ public final class CreateSpawnCommand {
     }
 
     public static CommandResult execute(@NotNull OfflineLocation location, @NotNull SSpawnType type, @NotNull Cause cause) {
-        Optional<SSpawnPoint> result = location.worldData().register(new SSpawnPointBuilder().setSpawnTypes(type).setPoint(location.position()), cause);
+        if (SSpawnType.MAIN_SPAWN == type) {
+            Optional<World<?, ?>> opWorld = location.world();
+            if (!opWorld.isPresent()) {
+                return CommandResult.error(Component.text("Cannot set main world spawn on a unloaded world"));
+            }
+            opWorld.get().properties().setSpawnPosition(location.position().toInt());
+            return CommandResult.success();
+        }
+
+        Optional<SSpawnPoint> result = location.worldData().register(new SSpawnPointBuilder().setSpawnTypes(type).setPosition(location.position()), cause);
         return result.isPresent() ? CommandResult.success() : CommandResult.error(Component.text("Could not create spawn"));
     }
 }

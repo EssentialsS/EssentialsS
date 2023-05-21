@@ -7,7 +7,6 @@ import org.essentialss.api.player.SPlayerManager;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.player.SPlayerManagerImpl;
 import org.essentialss.player.data.AbstractProfileData;
-import org.essentialss.player.data.SPlayerDataImpl;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.configurate.ConfigurateException;
@@ -18,8 +17,7 @@ public class ConnectionListeners {
     public void onPlayerJoinServer(ServerSideConnectionEvent.Join event) {
         SGeneralPlayerData playerData = EssentialsSMain.plugin().playerManager().get().dataFor(event.player());
         if (!playerData.mailMessages().isEmpty()) {
-            Component message = Component.text(
-                    "You have " + playerData.mailMessages().size() + " messages in your inbox");
+            Component message = Component.text("You have " + playerData.mailMessages().size() + " messages in your inbox");
             playerData.sendMessageTo(new MessageData(message));
         }
     }
@@ -32,7 +30,7 @@ public class ConnectionListeners {
         } catch (ConfigurateException e) {
             e.printStackTrace();
         }
-        if (!(playerData instanceof SPlayerDataImpl)) {
+        if (!(playerData instanceof AbstractProfileData)) {
             return;
         }
         SPlayerManager playerManager = EssentialsSMain.plugin().playerManager().get();

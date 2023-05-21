@@ -7,14 +7,11 @@ import org.essentialss.api.config.configs.AwayFromKeyboardConfig;
 import org.essentialss.api.events.player.afk.PlayerKickedForIdlingEvent;
 import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardBarMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardForTooLongMessageAdapter;
-import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardMessageAdapter;
 import org.essentialss.api.player.data.SGeneralPlayerData;
-import org.essentialss.api.utils.Singleton;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.events.player.afk.PlayerAwayFromKeyboardImpl;
 import org.essentialss.events.player.afk.PlayerKickedForIdlingImpl;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
@@ -116,29 +113,18 @@ public class AwayFromKeyboardCheckScheduler implements Runnable {
             return;
         }
 
-        final Duration finalDuration = duration;
-
-        Singleton<AwayFromKeyboardMessageAdapter> messageAdapter = EssentialsSMain.plugin().messageManager().get().adapters().awayFromKeyboard();
-        players
-                .stream()
-                .filter(p -> !p.isShowingAwayFromKeyboard())
-                .filter(p -> LocalDateTime.now().isAfter(p.lastPlayerAction().plus(finalDuration)))
-                .forEach(p -> {
-                    Cause cause = Cause.of(EventContext
-                                                   .builder()
-                                                   .add(EventContextKeys.PLUGIN, EssentialsSMain.plugin().container())
-                                                   .add(EventContextKeys.PLAYER, p.spongePlayer())
-                                                   .build(), p);
-                    Cancellable event = new PlayerAwayFromKeyboardImpl(p, cause);
-                    if (event.isCancelled()) {
-                        return;
-                    }
-
-                    p.setAwayFromKeyboard();
-                    if (Sponge.isServerAvailable()) {
-                        Sponge.server().broadcastAudience().sendMessage(messageAdapter.get().adaptMessage(p));
-                    }
-                });
+        players.stream().filter(SGeneralPlayerData::isShowingAwayFromKeyboard).filter(p -> !p.hasShownAwayFromKeyboardMessage()).forEach(p -> {
+            Cause cause = Cause.of(EventContext
+                                           .builder()
+                                           .add(EventContextKeys.PLUGIN, EssentialsSMain.plugin().container())
+                                           .add(EventContextKeys.PLAYER, p.spongePlayer())
+                                           .build(), p);
+            Cancellable event = new PlayerAwayFromKeyboardImpl(p, cause);
+            if (event.isCancelled()) {
+                return;
+            }
+            p.setAwayFromKeyboard();
+        });
     }
 
     public static Task createTask() {

@@ -2,7 +2,6 @@ package org.essentialss.world.points.spawn;
 
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
-import org.essentialss.api.utils.validation.ValidationRules;
 import org.essentialss.api.utils.validation.Validator;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
@@ -10,33 +9,30 @@ import org.essentialss.api.world.points.spawn.SSpawnPoint;
 import org.essentialss.api.world.points.spawn.SSpawnPointBuilder;
 import org.essentialss.api.world.points.spawn.SSpawnType;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-public class SSpawnPointImpl implements SSpawnPoint {
+public class SSpawnWrapperImpl implements SSpawnPoint {
 
     private final @NotNull SWorldData world;
-    private final @NotNull Supplier<Vector3d> position;
     private final @NotNull Collection<SSpawnType> types;
 
-    public SSpawnPointImpl(@NotNull SSpawnPointBuilder builder, @NotNull SWorldData data) {
-        this.position = Objects.requireNonNull(builder.position());
+    public SSpawnWrapperImpl(@NotNull Collection<SSpawnType> types, @NotNull SWorldData data) {
         this.world = data;
-        this.types = new Validator<>(
-                (Collection<SSpawnType>) builder.spawnTypes().stream().filter(type -> SSpawnType.MAIN_SPAWN != type).collect(Collectors.toList()))
-                .notNull()
-                .rule(ValidationRules.isSizeGreaterThan(0))
-                .validate();
+        this.types = new Validator<>(new ArrayList<>(types)).notNull().validate();
+        this.types.add(SSpawnType.MAIN_SPAWN);
+
     }
 
     @Override
     public @NotNull OfflineLocation location() {
-        return new OfflineLocation(this.world, this.position.get());
+        Vector3i position = this.world
+                .spongeWorld()
+                .map(w -> w.properties().spawnPosition())
+                .orElseThrow(() -> new IllegalStateException("World needs to be loaded"));
+        return new OfflineLocation(this.world, position.toDouble());
     }
 
     @Override
@@ -47,6 +43,12 @@ public class SSpawnPointImpl implements SSpawnPoint {
 
     @Override
     public SSpawnPointBuilder builder() {
-        return new SSpawnPointBuilder().setPosition(this.position).setSpawnTypes(this.types);
+        return new SSpawnPointBuilder()
+                .setPosition(() -> this.world
+                        .spongeWorld()
+                        .map(w -> w.properties().spawnPosition())
+                        .orElseThrow(() -> new IllegalStateException("World needs to be loaded"))
+                        .toDouble())
+                .setSpawnTypes(this.types);
     }
 }

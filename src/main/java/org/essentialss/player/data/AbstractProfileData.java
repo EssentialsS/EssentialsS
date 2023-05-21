@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import org.essentialss.api.message.MuteType;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.player.data.module.ModuleData;
-import org.essentialss.api.player.data.module.SerializableModuleData;
 import org.essentialss.api.player.mail.MailMessage;
 import org.essentialss.api.player.mail.MailMessageBuilder;
 import org.essentialss.api.utils.arrays.OrderedUnmodifiableCollection;
@@ -16,47 +15,53 @@ import org.essentialss.api.world.points.home.SHome;
 import org.essentialss.api.world.points.home.SHomeBuilder;
 import org.essentialss.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.api.ResourceKey;
+import org.mose.property.CollectionProperty;
+import org.mose.property.Property;
+import org.mose.property.impl.WritePropertyImpl;
+import org.mose.property.impl.collection.WriteCollectionPropertyImpl;
+import org.mose.property.impl.nevernull.WriteNeverNullPropertyImpl;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.stream.Collectors;
 
 public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
-    final @NotNull LinkedTransferQueue<ModuleData<?>> moduleData = new LinkedTransferQueue<>();
-    private final @NotNull LinkedList<OfflineLocation> backTeleportLocations = new LinkedList<>();
-    private final @NotNull LinkedList<MailMessage> mailMessages = new LinkedList<>();
-    private final @NotNull LinkedTransferQueue<SHome> homes = new LinkedTransferQueue<>();
-    private final LinkedTransferQueue<DamageType> immuneTo = new LinkedTransferQueue<>();
-    boolean isInJail;
-    @Nullable LocalDateTime releaseFromJail;
-    private boolean canLooseItemsWhenUsed;
-    @Nullable
-    private Component displayName;
-    private boolean isCommandSpying;
-    private MuteType[] muteTypes = new MuteType[0];
-    private boolean preventingTeleportRequests;
+    protected final WriteNeverNullPropertyImpl<Boolean, Boolean> isInJail = WriteNeverNullPropertyImpl.bool();
+    protected final Property.Write<LocalDateTime, LocalDateTime> releasedFromJail = new WritePropertyImpl<>(t -> t, null);
+    private final WriteNeverNullPropertyImpl<Boolean, Boolean> canLooseItemsWhenUsed = WriteNeverNullPropertyImpl.bool(true);
+    private final Property.Write<Component, Component> displayName = new WritePropertyImpl<>(t -> t, null);
+    private final WriteNeverNullPropertyImpl<Boolean, Boolean> isCommandSpying = WriteNeverNullPropertyImpl.bool();
+    private final WriteNeverNullPropertyImpl<Boolean, Boolean> isPreventingTeleportRequests = WriteNeverNullPropertyImpl.bool();
+    private final WriteNeverNullPropertyImpl<Boolean, Boolean> unlimitedFood = WriteNeverNullPropertyImpl.bool();
+    private final CollectionProperty.Write<OfflineLocation, OrderedUnmodifiableCollection<OfflineLocation>> backTeleportLocations;
+    private final CollectionProperty.Write<MailMessage, UnmodifiableCollection<MailMessage>> mailMessages;
+    private final CollectionProperty.Write<SHome, UnmodifiableCollection<SHome>> homes;
+    private final CollectionProperty.Write<DamageType, UnmodifiableCollection<DamageType>> immuneTo;
+    private final CollectionProperty.Write<MuteType, UnmodifiableCollection<MuteType>> muteTypes;
+    private final CollectionProperty.Write<ModuleData<?>, LinkedTransferQueue<ModuleData<?>>> moduleData;
 
-    @Override
-    public void addBackTeleportLocation(@NotNull OfflineLocation location) {
-        if (!this.backTeleportLocations.isEmpty()) {
-            OfflineLocation loc = this.backTeleportLocations.get(this.backTeleportLocations.size() - 1);
-            if (loc.equals(location)) {
-                return;
-            }
+    private final Map<Property.Write<?, ?>, Property.ReadOnly<?, ?>> readOnlyProperties = new ConcurrentHashMap<>();
 
-            //used to put location later in the list
-            this.backTeleportLocations.remove(location);
-        }
-        this.backTeleportLocations.add(location);
+    protected AbstractProfileData() {
+        this.backTeleportLocations = this.orderedCollectionProperty(new LinkedTransferQueue<>());
+        this.mailMessages = this.collectionProperty(new LinkedTransferQueue<>());
+        this.homes = this.collectionProperty(new LinkedTransferQueue<>());
+        this.immuneTo = this.collectionProperty(new LinkedTransferQueue<>());
+        this.moduleData = new WriteCollectionPropertyImpl<>(LinkedTransferQueue::new, LinkedTransferQueue::new, new LinkedTransferQueue<>());
+        this.muteTypes = this.collectionProperty(new LinkedTransferQueue<>());
+
+        this.moduleData.registerCollectionAddEvent((collectionProperty, before, adding) -> {
+            List<ModuleData<?>> toRemove = adding
+                    .stream()
+                    .filter(data -> before.stream().anyMatch(data2 -> data2.key().equals(data.key())))
+                    .collect(Collectors.toList());
+            this.moduleData.removeAll(toRemove);
+        });
     }
 
     @Override
@@ -65,13 +70,13 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
-    public @NotNull OrderedUnmodifiableCollection<OfflineLocation> backTeleportLocations() {
-        return new SingleOrderedUnmodifiableCollection<>(this.backTeleportLocations);
+    public @NotNull CollectionProperty.Write<OfflineLocation, OrderedUnmodifiableCollection<OfflineLocation>> backTeleportLocationsProperty() {
+        return this.backTeleportLocations;
     }
 
     @Override
-    public boolean canLooseItemsWhenUsed() {
-        return this.canLooseItemsWhenUsed;
+    public <P extends Property.Write<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P canLooseItemsWhenUsedProperty() {
+        return (P) this.canLooseItemsWhenUsed;
     }
 
     @Override
@@ -80,92 +85,59 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
-    public void deregisterData(@NotNull ResourceKey key) {
-        this.moduleData.parallelStream().filter(d -> d.key().equals(key)).forEach(this.moduleData::remove);
-    }
-
-    @Override
-    public @NotNull Component displayName() {
-        if (null == this.displayName) {
-            return Component.text(this.playerName());
-        }
+    public @NotNull Property.Write<Component, Component> displayNameProperty() {
         return this.displayName;
-
     }
 
     @Override
-    public <T extends ModuleData<?>> Optional<T> getData(@NotNull ResourceKey key) {
-        return this.moduleData.parallelStream().filter(moduleData -> moduleData.key().equals(key)).findAny().map(data -> (T) data);
+    public CollectionProperty.ReadOnly<SHome, UnmodifiableCollection<SHome>> homesProperty() {
+        return this.getReadOnly(this.homes);
     }
 
     @Override
-    public boolean hasSetDisplayName() {
-        return null != this.displayName;
+    public CollectionProperty.Write<DamageType, UnmodifiableCollection<DamageType>> immuneToProperty() {
+        return this.immuneTo;
     }
 
     @Override
-    public @NotNull UnmodifiableCollection<SHome> homes() {
-        throw new RuntimeException("homes not implemented yet");
+    public <P extends Property.Write<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P isCommandSpyingProperty() {
+        return (P) this.isCommandSpying;
     }
 
     @Override
-    public boolean isCommandSpying() {
-        return this.isCommandSpying;
+    public <P extends Property.ReadOnly<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P isInJailProperty() {
+        return this.getReadOnly(this.isInJail);
     }
 
     @Override
-    public void setCommandSpying(boolean spying) {
-        this.isCommandSpying = spying;
+    public <P extends Property.Write<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P isPreventingTeleportRequestsProperty() {
+        return (P) this.isPreventingTeleportRequests;
     }
 
     @Override
-    public UnmodifiableCollection<DamageType> immuneTo() {
-        return new SingleUnmodifiableCollection<>(this.immuneTo);
+    public CollectionProperty.ReadOnly<MailMessage, UnmodifiableCollection<MailMessage>> mailMessagesProperty() {
+        return this.getReadOnly(this.mailMessages);
     }
 
     @Override
-    public boolean isInJail() {
-        return this.isInJail;
+    public CollectionProperty.Write<ModuleData<?>, LinkedTransferQueue<ModuleData<?>>> moduleDataProperty() {
+        return this.moduleData;
     }
 
     @Override
-    public boolean isPreventingTeleportRequests() {
-        return this.preventingTeleportRequests;
-    }
-
-    @Override
-    public @NotNull UnmodifiableCollection<MailMessage> mailMessages() {
-        return new SingleUnmodifiableCollection<>(this.mailMessages);
-    }
-
-    @Override
-    public @NotNull UnmodifiableCollection<MuteType> muteTypes() {
-        return new SingleUnmodifiableCollection<>(Arrays.asList(this.muteTypes));
+    public CollectionProperty.Write<MuteType, UnmodifiableCollection<MuteType>> muteTypesProperty() {
+        return this.muteTypes;
     }
 
     @Override
     public void register(@NotNull SHomeBuilder builder) {
         SHome home = new SHomeImpl(builder);
-        if (this.homes.parallelStream().anyMatch(h -> h.identifier().equalsIgnoreCase(builder.home()))) {
-            throw new IllegalArgumentException("House already registered");
-        }
         this.homes.add(home);
     }
 
     @Override
-    public void registerOfflineData(@NotNull SerializableModuleData<?> moduleData) {
-        this.deregisterData(moduleData);
-        this.moduleData.add(moduleData);
-    }
-
-    @Override
-    public Optional<LocalDateTime> releasedFromJailTime() {
-        return Optional.ofNullable(this.releaseFromJail);
-    }
-
-    @Override
-    public void removeBackTeleportLocation(@NotNull OfflineLocation location) {
-        this.backTeleportLocations.remove(location);
+    public Property.ReadOnly<LocalDateTime, LocalDateTime> releasedFromJailTimeProperty() {
+        return this.getReadOnly(this.releasedFromJail);
     }
 
     @Override
@@ -174,43 +146,14 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
-    public void setBackTeleportLocations(Collection<OfflineLocation> locations) {
-        this.backTeleportLocations.clear();
-        for (OfflineLocation location : locations) {
-            this.addBackTeleportLocation(location);
-        }
-    }
-
-    @Override
-    public void setCanLooseItemsWhenUsed(boolean check) {
-        this.canLooseItemsWhenUsed = check;
-    }
-
-    @Override
-    public void setDisplayName(@Nullable Component component) {
-        this.displayName = component;
-    }
-
-    @Override
     public void setHomes(@NotNull Collection<SHomeBuilder> homes) {
-        this.homes.clear();
-        homes.forEach(this::register);
+        List<SHome> homeSet = homes.stream().map(SHomeImpl::new).collect(Collectors.toList());
+        this.homes.setValue(homeSet);
     }
 
     @Override
-    public void setImmuneTo(Collection<DamageType> immuneTo) {
-        this.immuneTo.clear();
-        this.immuneTo.addAll(immuneTo.stream().distinct().collect(Collectors.toList()));
-    }
-
-    @Override
-    public void setMuteTypes(@NotNull MuteType... types) {
-        this.muteTypes = types;
-    }
-
-    @Override
-    public void setPreventTeleportRequests(boolean prevent) {
-        this.preventingTeleportRequests = prevent;
+    public <P extends Property.Write<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P unlimitedFoodProperty() {
+        return (P) this.unlimitedFood;
     }
 
     public void applyChangesFrom(@NotNull AbstractProfileData data) {
@@ -219,6 +162,17 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
                 field.setAccessible(true);
                 Object thisValue = field.get(this);
                 Object otherValue = field.get(data);
+                //properties
+                if (thisValue instanceof CollectionProperty.Write) {
+                    Collection<?> otherCollectionValue = ((Property<Collection<?>, ? extends Collection<?>>) otherValue).value().get();
+                    ((CollectionProperty.Write) thisValue).addAll(otherCollectionValue);
+                }
+                if (thisValue instanceof Property.Write) {
+                    Optional<?> opOtherValue = ((Property<?, ?>) otherValue).value();
+                    opOtherValue.ifPresent(oValue -> this.applyPropertyFrom((Property.Write<?, ?>) thisValue, oValue));
+                }
+
+
                 if (thisValue instanceof Collection) {
                     //noinspection unchecked,rawtypes
                     ((Collection) thisValue).addAll((Collection) otherValue);
@@ -229,17 +183,29 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
 
-        /*this.backTeleportLocations.addAll(data.backTeleportLocations);
-        this.displayName = data.displayName;
-        this.homes.addAll(data.homes);
-        this.releaseFromJail = data.releaseFromJail;
-        this.canLooseItemsWhenUsed = data.canLooseItemsWhenUsed;
-        this.isInJail = data.isInJail;
-        this.mailMessages.addAll(data.mailMessages);
-        this.moduleData.addAll(data.moduleData);
-        this.preventingTeleportRequests = data.preventingTeleportRequests;
-        this.isCommandSpying = data.isCommandSpying;
-        this.muteTypes = data.muteTypes;*/
+    private <T> void applyPropertyFrom(Property.Write<?, ?> property, T value) {
+        ((Property.Write<T, ?>) property).setValue(value);
+    }
+
+    private <X> WriteCollectionPropertyImpl<X, UnmodifiableCollection<X>> collectionProperty(Collection<X> collection) {
+        return new WriteCollectionPropertyImpl<>(SingleUnmodifiableCollection::new, () -> new SingleUnmodifiableCollection<>(Collections.emptyList()),
+                                                 collection);
+    }
+
+    protected <T, D, P extends Property.ReadOnly<T, D>> P getReadOnly(Property.Write<T, D> writable) {
+        Property.ReadOnly<?, ?> readOnly = this.readOnlyProperties.get(writable);
+        if (null != readOnly) {
+            return (P) readOnly;
+        }
+        Property.ReadOnly<T, D> newProp = writable.createBoundReadOnly();
+        this.readOnlyProperties.put(writable, newProp);
+        return (P) newProp;
+    }
+
+    protected <X> WriteCollectionPropertyImpl<X, OrderedUnmodifiableCollection<X>> orderedCollectionProperty(Collection<X> collection) {
+        return new WriteCollectionPropertyImpl<>(SingleOrderedUnmodifiableCollection::new,
+                                                 () -> new SingleOrderedUnmodifiableCollection<>(Collections.emptyList()), collection);
     }
 }

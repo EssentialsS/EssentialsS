@@ -2,24 +2,38 @@ package org.essentialss.player.data;
 
 import net.kyori.adventure.bossbar.BossBar;
 import org.essentialss.EssentialsSMain;
+import org.essentialss.api.config.configs.AwayFromKeyboardConfig;
 import org.essentialss.api.message.MessageData;
+import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboardMessageAdapter;
+import org.essentialss.api.message.adapters.player.listener.afk.BackToKeyboardMessageAdapter;
 import org.essentialss.api.modifier.SPlayerModifier;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
-import org.essentialss.api.player.data.module.ModuleData;
 import org.essentialss.api.player.teleport.PlayerTeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequest;
 import org.essentialss.api.player.teleport.TeleportRequestBuilder;
+import org.essentialss.api.utils.Singleton;
 import org.essentialss.api.utils.arrays.OrderedUnmodifiableCollection;
-import org.essentialss.api.utils.arrays.UnmodifiableCollection;
-import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
+import org.essentialss.api.utils.arrays.impl.SingleOrderedUnmodifiableCollection;
 import org.essentialss.api.world.SWorldData;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.jail.SJailSpawnPoint;
+import org.essentialss.events.player.afk.PlayerAwayFromKeyboardImpl;
 import org.essentialss.player.teleport.PlayerTeleportRequestImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mose.property.CollectionProperty;
+import org.mose.property.Property;
+import org.mose.property.impl.WritePropertyImpl;
+import org.mose.property.impl.collection.WriteCollectionPropertyImpl;
+import org.mose.property.impl.nevernull.ReadOnlyNeverNullPropertyImpl;
+import org.mose.property.impl.nevernull.WriteNeverNullPropertyImpl;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.configurate.ConfigurateException;
@@ -28,25 +42,84 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.LinkedTransferQueue;
 import java.util.stream.Collectors;
 
 public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlayerData {
 
-    private final @NotNull Player player;
-    private final Collection<TeleportRequest> teleportRequests = new LinkedHashSet<>();
-    private final @NotNull Collection<SPlayerModifier<?>> afkModifiers = new LinkedHashSet<>();
-    private @Nullable BossBar afkBar;
-    private @Nullable Integer backTeleportIndex;
-    private boolean isAfk;
-    private LocalDateTime lastAction = LocalDateTime.now();
+    private final Player player;
+    private final Property.Write<BossBar, BossBar> barUntilKick = new WritePropertyImpl<>(t -> t, null);
+    private final CollectionProperty.Write<TeleportRequest, OrderedUnmodifiableCollection<TeleportRequest>> teleportRequests;
+    private final CollectionProperty.Write<SPlayerModifier<?>, Collection<SPlayerModifier<?>>> afkModifier;
+    private final Property.Write<Integer, Integer> backTeleportIndex;
+    private final Property.Write<LocalDateTime, LocalDateTime> lastAction;
+    private final ReadOnlyNeverNullPropertyImpl<Boolean, Boolean> isAfk;
+    private final WriteNeverNullPropertyImpl<Boolean, Boolean> shownAfk;
 
-    public SPlayerDataImpl(@NotNull Player player) {
+    public SPlayerDataImpl(Player player) {
         this.player = player;
+
+        this.afkModifier = new WriteCollectionPropertyImpl<>(t -> t, LinkedTransferQueue::new);
+        this.backTeleportIndex = new WritePropertyImpl<>(t -> t, null);
+        this.shownAfk = WriteNeverNullPropertyImpl.bool();
+        this.lastAction = new WritePropertyImpl<>(t -> t, LocalDateTime.now());
+        this.isAfk = new ReadOnlyNeverNullPropertyImpl<>(t -> t, () -> false, null);
+        this.teleportRequests = new WriteCollectionPropertyImpl<>(t -> {
+            List<TeleportRequest> requests = new LinkedList<>(t);
+            requests.sort(Comparator.comparing(req -> req.expiresAt().orElse(LocalDateTime.MAX)));
+            return new SingleOrderedUnmodifiableCollection<>(requests);
+        }, SingleOrderedUnmodifiableCollection::new, new LinkedTransferQueue<>());
+        this.isAfk.bindTo(this.lastAction, localDateTime -> {
+            AwayFromKeyboardConfig config = EssentialsSMain.plugin().configManager().get().awayFromKeyboard().get();
+            Duration duration;
+            try {
+                duration = config.durationUntilStatus().parse(config);
+            } catch (SerializationException e) {
+                return false;
+            }
+            if (duration == null) {
+                return false;
+            }
+            LocalDateTime willBeAfk = localDateTime.plus(duration);
+            return LocalDateTime.now().isAfter(willBeAfk);
+        });
+        this.isAfk.registerValueChangeEvent((property, oldValue, valueSetType, newValue) -> {
+            if (newValue) {
+                return;
+            }
+            SPlayerDataImpl.this.shownAfk.setValue(false);
+        });
+        this.shownAfk.registerValueChangeEvent((property, oldValue, valueSetType, newValue) -> {
+            if (!Sponge.isServerAvailable()) {
+                return;
+            }
+            if (!newValue) {
+                BackToKeyboardMessageAdapter messageAdapter = EssentialsSMain.plugin().messageManager().get().adapters().backToKeyboard().get();
+                if (messageAdapter.isEnabled()) {
+                    Sponge.server().broadcastAudience().sendMessage(messageAdapter.adaptMessage(SPlayerDataImpl.this));
+                }
+                return;
+            }
+            Singleton<AwayFromKeyboardMessageAdapter> messageAdapter = EssentialsSMain.plugin().messageManager().get().adapters().awayFromKeyboard();
+            Cause cause = Cause.of(EventContext
+                                           .builder()
+                                           .add(EventContextKeys.PLUGIN, EssentialsSMain.plugin().container())
+                                           .add(EventContextKeys.PLAYER, SPlayerDataImpl.this.spongePlayer())
+                                           .build(), SPlayerDataImpl.this);
+            Cancellable event = new PlayerAwayFromKeyboardImpl(SPlayerDataImpl.this, cause);
+            if (event.isCancelled()) {
+                return;
+            }
+
+            if (Sponge.isServerAvailable()) {
+                Sponge.server().broadcastAudience().sendMessage(messageAdapter.get().adaptMessage(SPlayerDataImpl.this));
+            }
+        });
     }
 
     @Override
-    public PlayerTeleportRequest acceptTeleportRequest(@NotNull UUID other) throws IllegalStateException {
-        Optional<PlayerTeleportRequest> opRequest = this.playerTeleportRequest(other);
+    public PlayerTeleportRequest acceptTeleportRequest(@NotNull UUID playerId) throws IllegalStateException {
+        Optional<PlayerTeleportRequest> opRequest = this.playerTeleportRequest(playerId);
         if (!opRequest.isPresent()) {
             throw new IllegalStateException("No request to accept");
         }
@@ -63,7 +136,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
                         .plugin()
                         .playerManager()
                         .get()
-                        .dataFor(other)
+                        .dataFor(playerId)
                         .orElseThrow(() -> new IllegalStateException("UUID does not match any player"));
                 if (!(playerData instanceof SGeneralPlayerData)) {
                     throw new IllegalStateException("Player is not online");
@@ -76,30 +149,23 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
-    public Collection<SPlayerModifier<?>> appliedAwayFromKeyboardModifiers() {
-        return this.afkModifiers;
+    public CollectionProperty.Write<SPlayerModifier<?>, Collection<SPlayerModifier<?>>> awayFromKeyboardModifierProperties() {
+        return this.afkModifier;
     }
 
     @Override
-    public @NotNull OptionalInt backTeleportIndex() {
-        OrderedUnmodifiableCollection<OfflineLocation> locations = this.backTeleportLocations();
-        if (locations.isEmpty()) {
-            return OptionalInt.empty();
-        }
-        if (null == this.backTeleportIndex) {
-            return OptionalInt.empty();
-        }
-        return OptionalInt.of(this.backTeleportIndex);
+    public Property.Write<Integer, Integer> backTeleportIndexProperty() {
+        return this.backTeleportIndex;
     }
 
     @Override
-    public Optional<BossBar> barUntilKick() {
-        return Optional.ofNullable(this.afkBar);
+    public Property.ReadOnly<BossBar, BossBar> barUntilKickedProperty() {
+        return this.getReadOnly(this.barUntilKick);
     }
 
     @Override
-    public PlayerTeleportRequest declineTeleportRequest(@NotNull UUID other) {
-        Optional<PlayerTeleportRequest> opRequest = this.playerTeleportRequest(other);
+    public PlayerTeleportRequest declineTeleportRequest(@NotNull UUID playerId) throws IllegalStateException {
+        Optional<PlayerTeleportRequest> opRequest = this.playerTeleportRequest(playerId);
         if (!opRequest.isPresent()) {
             throw new IllegalStateException("No request to decline");
         }
@@ -108,90 +174,69 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
-    public boolean isShowingAwayFromKeyboard() {
-        return this.isAfk;
+    public <P extends Property.Write<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P hasShownAwayFromKeyboardMessageProperty() {
+        return (P) this.shownAfk;
     }
 
     @Override
-    public LocalDateTime lastPlayerAction() {
+    public <P extends Property.ReadOnly<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P isShowingAwayFromKeyboardProperty() {
+        return (P) this.isAfk;
+    }
+
+    @Override
+    public Property.Write<LocalDateTime, LocalDateTime> lastActionProperty() {
         return this.lastAction;
     }
 
+    @NotNull
     @Override
-    public void playerAction() {
-        this.lastAction = LocalDateTime.now();
-        this.isAfk = false;
-        if (null != this.afkBar) {
-            this.spongePlayer().hideBossBar(this.afkBar);
-        }
-    }
-
-    @Override
-    public @NotNull TeleportRequest register(@NotNull TeleportRequestBuilder builder) {
+    public TeleportRequest register(@NotNull TeleportRequestBuilder builder) {
         TeleportRequest teleportRequest = new PlayerTeleportRequestImpl(builder);
         this.teleportRequests.add(teleportRequest);
         return teleportRequest;
     }
 
     @Override
-    public void registerData(@NotNull ModuleData<?> moduleData) {
-        this.moduleData.add(moduleData);
-    }
-
-    @Override
-    public void releaseFromJail() {
-        this.releaseFromJail(this.world().spawnPoint(this.player.position()).location());
-    }
-
-    @Override
     public void sendMessageTo(@NotNull MessageData data) {
-        //noinspection allow-raw-message
         this.player.sendMessage(data.formattedMessage());
     }
 
     @Override
-    public void setAwayFromKeyboardSince(@Nullable LocalDateTime since, @NotNull Collection<SPlayerModifier<?>> modifiers) {
+    public void setAwayFromKeyboardSince(@Nullable LocalDateTime since, Collection<SPlayerModifier<?>> modifiers) {
         if (null != since) {
-            this.lastAction = since;
+            this.lastAction.setValue(since);
         }
-        this.isAfk = true;
-        this.afkModifiers.clear();
-        this.afkModifiers.addAll(modifiers);
-    }
-
-    @Override
-    public void setBackTeleportIndex(int index) {
-        OrderedUnmodifiableCollection<OfflineLocation> locations = this.backTeleportLocations();
-        if (locations.isEmpty() || (locations.size() <= index)) {
-            throw new IndexOutOfBoundsException("Back teleport locations is " + locations.size());
-        }
-        this.backTeleportIndex = index;
+        boolean isAfk = this.isAfk.value().orElse(false);
+        this.shownAfk.setValue(isAfk);
+        this.afkModifier.setValue(modifiers);
     }
 
     @Override
     public void setBarUntilKick(@Nullable BossBar bar) {
-        this.afkBar = bar;
+        this.barUntilKick.setValue(bar);
     }
 
     @Override
     public void setNextToKeyboard() {
-        this.isAfk = false;
-        this.afkModifiers.clear();
+        this.shownAfk.setValue(false);
+        this.afkModifier.setValue(Collections.emptyList());
     }
 
+    @NotNull
     @Override
-    public @NotNull Player spongePlayer() {
+    public Player spongePlayer() {
         return this.player;
     }
 
     @Override
-    public @NotNull UnmodifiableCollection<TeleportRequest> teleportRequests() {
+    public CollectionProperty.ReadOnly<TeleportRequest, OrderedUnmodifiableCollection<TeleportRequest>> teleportRequestsProperty() {
         this.updateTeleportRequests();
-        return new SingleUnmodifiableCollection<>(this.teleportRequests);
+        return this.getReadOnly(this.teleportRequests);
     }
 
+    @NotNull
     @Override
-    public @NotNull SWorldData world() {
+    public SWorldData world() {
         return EssentialsSMain.plugin().worldManager().get().dataFor(this.player.world());
     }
 
@@ -200,27 +245,23 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
         super.applyChangesFrom(data);
         if (data instanceof SPlayerDataImpl) {
             SPlayerDataImpl pData = (SPlayerDataImpl) data;
-            this.isAfk = pData.isAfk;
-            this.teleportRequests.addAll(pData.teleportRequests);
-            this.backTeleportIndex = pData.backTeleportIndex;
+            this.shownAfk.setValue(pData.shownAfk.value().orElse(false));
+            this.teleportRequests.addAll(pData.teleportRequests.value().orElseGet(SingleOrderedUnmodifiableCollection::new));
+            this.backTeleportIndex.setValue(pData.backTeleportIndex.value().orElse(0));
         }
     }
 
+    @NotNull
     @Override
-    public @NotNull String playerName() {
+    public String playerName() {
         return this.player.name();
     }
 
     @Override
-    public @NotNull UUID uuid() {
-        return this.player.uniqueId();
-    }
-
-    @Override
-    public void releaseFromJail(@NotNull OfflineLocation spawnTo) {
-        this.isInJail = false;
-        this.releaseFromJail = null;
-        Optional<Location<?, ?>> opLoc = spawnTo.location();
+    public void releaseFromJail(@NotNull OfflineLocation location) {
+        this.isInJail.setValue(false);
+        this.releasedFromJail.setValue(null);
+        Optional<Location<?, ?>> opLoc = location.location();
         if (!opLoc.isPresent()) {
             throw new IllegalArgumentException("Cannot get location");
         }
@@ -231,7 +272,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
         if (!this.player.world().equals(loc.world())) {
             throw new IllegalStateException("World has not loaded. Cannot release from jail");
         }
-        this.player.setPosition(spawnTo.position());
+        this.player.setPosition(location.position());
     }
 
     @Override
@@ -239,9 +280,9 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
         Location<?, ?> location = point.location().location().orElseThrow(() -> new IllegalStateException("World has not loaded"));
         if (location.onServer().isPresent()) {
             this.player.setLocation(location.onServer().get());
-            this.isInJail = true;
+            this.isInJail.setValue(true);
             if (null != length) {
-                this.releaseFromJail = LocalDateTime.now().plus(length);
+                this.releasedFromJail.setValue(LocalDateTime.now().plus(length));
             }
         }
         World<?, ?> world = location.world();
@@ -249,13 +290,12 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
             throw new IllegalStateException("World has not loaded. Cannot send to jail");
         }
         this.player.setPosition(point.position());
-        this.isInJail = true;
+        this.isInJail.setValue(true);
         if (null != length) {
-            this.releaseFromJail = LocalDateTime.now().plus(length);
+            this.releasedFromJail.setValue(LocalDateTime.now().plus(length));
         }
     }
 
-    @SuppressWarnings("DuplicateThrows")
     @Override
     public void reloadFromConfig() throws ConfigurateException, SerializationException {
         UserDataSerializer.load(this);
@@ -270,6 +310,8 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     private void updateTeleportRequests() {
         LocalDateTime currentTime = LocalDateTime.now();
         List<TeleportRequest> toRemove = this.teleportRequests
+                .value()
+                .orElseGet(() -> new SingleOrderedUnmodifiableCollection<>(Collections.emptyList()))
                 .parallelStream()
                 .filter(r -> r.expiresAt().isPresent())
                 .filter(r -> currentTime.isAfter(r.expiresAt().orElseThrow(() -> new RuntimeException("Broken logic"))))

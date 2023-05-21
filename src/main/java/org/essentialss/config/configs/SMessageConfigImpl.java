@@ -20,6 +20,13 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class SMessageConfigImpl implements MessageConfig {
+
+    private @NotNull Locale locale;
+
+    public SMessageConfigImpl(@NotNull Locale locale) {
+        this.locale = locale;
+    }
+
     @Override
     public @NotNull Collection<ConfigValue<?>> expectedNodes() {
         return EssentialsSMain.plugin().messageManager().get().adapters().all().map(MessageAdapter::configValue).collect(Collectors.toList());
@@ -36,6 +43,11 @@ public class SMessageConfigImpl implements MessageConfig {
         this.update(EssentialsSMain.plugin().messageManager().get().adapters());
     }
 
+    @Override
+    public @NotNull Locale locale() {
+        return this.locale;
+    }
+
     public void update(@NotNull MessageAdapters messageAdapters) throws ConfigurateException, SerializationException {
         ConfigurationLoader<? extends ConfigurationNode> loader = this.configurationLoader();
         ConfigurationNode root = loader.load();
@@ -47,7 +59,7 @@ public class SMessageConfigImpl implements MessageConfig {
                 MessageAdapter.Enabled enabledMessageAdapter = (MessageAdapter.Enabled) adapter;
                 enabledMessageAdapter.enabledValue().setDefaultIfNotPresent(root);
             }
-            if(adapter instanceof VanillaMessageAdapter){
+            if (adapter instanceof VanillaMessageAdapter) {
                 VanillaMessageAdapter vanillaMessageAdapter = (VanillaMessageAdapter) adapter;
                 vanillaMessageAdapter.useVanilla().setDefaultIfNotPresent(root);
             }

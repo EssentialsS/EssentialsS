@@ -18,6 +18,7 @@ import org.essentialss.api.world.points.warp.SWarpBuilder;
 import org.essentialss.events.point.register.RegisterPointPostEventImpl;
 import org.essentialss.events.point.register.RegisterPointPreEventImpl;
 import org.essentialss.world.points.spawn.SSpawnPointImpl;
+import org.essentialss.world.points.spawn.SSpawnWrapperImpl;
 import org.essentialss.world.points.warps.SWarpsImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,7 @@ public class SWorldDataImpl implements SWorldData {
     private final @Nullable ResourceKey key;
     private final @Nullable String id;
     private final Collection<SPoint> points = new LinkedHashSet<>();
+    private final Collection<SSpawnType> mainSpawnType = new ArrayList<>();
     private @Nullable SPreGenDataImpl preGen;
 
     SWorldDataImpl(@NotNull SWorldDataBuilder builder) {
@@ -53,6 +55,8 @@ public class SWorldDataImpl implements SWorldData {
             throw new IllegalStateException("Server can be used. Use ResourceKey");
         }
         this.points.addAll(new Validator<>(builder.points()).rule(ValidationRules.notNull()).validate());
+        this.mainSpawnType.addAll(new Validator<>(builder.mainSpawnTypes()).validate());
+
     }
 
     @Override
@@ -109,15 +113,8 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public @NotNull UnmodifiableCollection<SPoint> points() {
         LinkedList<SPoint> list = new LinkedList<>(this.points);
-        if (list
-                .parallelStream()
-                .filter(point -> point instanceof SSpawnPoint)
-                .noneMatch(point -> ((SSpawnPoint) point).types().contains(SSpawnType.MAIN_SPAWN))) {
-            this
-                    .spongeWorld()
-                    .ifPresent(sWorld -> list.add(new SSpawnPointImpl(
-                            new SSpawnPointBuilder().setPoint(sWorld.properties().spawnPosition().toDouble()).setSpawnTypes(SSpawnType.MAIN_SPAWN), this)));
-        }
+        list.add(new SSpawnWrapperImpl(this.mainSpawnType, this));
+
         return new SingleUnmodifiableCollection<>(list);
     }
 

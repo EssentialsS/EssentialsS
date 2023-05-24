@@ -1,31 +1,36 @@
 package org.essentialss.misc;
 
+import org.essentialss.api.utils.Constants;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
 
 import java.util.function.Supplier;
 
-public class InventoryHelper {
+public final class InventoryHelper {
+
+    private InventoryHelper() {
+        throw new RuntimeException("Should not generate");
+    }
 
     public static Supplier<ContainerType> preferredGenericContainer(int itemCount) {
-        if (9 >= itemCount) {
+        if (Constants.ONE_ROW_INVENTORY >= itemCount) {
             return ContainerTypes.GENERIC_9X1;
         }
-        if (18 >= itemCount) {
+        if (Constants.TWO_ROW_INVENTORY >= itemCount) {
             return ContainerTypes.GENERIC_9X2;
         }
-        if (27 >= itemCount) {
+        if (Constants.THREE_ROW_INVENTORY >= itemCount) {
             return ContainerTypes.GENERIC_9X3;
         }
-        if (36 >= itemCount) {
+        if (Constants.FOUR_ROW_INVENTORY >= itemCount) {
             return ContainerTypes.GENERIC_9X4;
         }
-        if (45 >= itemCount) {
+        if (Constants.FIVE_ROW_INVENTORY >= itemCount) {
             return ContainerTypes.GENERIC_9X5;
         }
-        if (54 >= itemCount) {
+        if (Constants.SIX_ROW_INVENTORY >= itemCount) {
             return ContainerTypes.GENERIC_9X6;
         }
-        throw new IndexOutOfBoundsException("Cannot be greater then 54. itemCount was " + itemCount);
+        throw new IndexOutOfBoundsException("Cannot be greater then " + Constants.SIX_ROW_INVENTORY + ". itemCount was " + itemCount);
     }
 }

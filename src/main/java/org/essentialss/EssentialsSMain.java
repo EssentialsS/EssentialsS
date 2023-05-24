@@ -22,8 +22,10 @@ import org.essentialss.command.back.ForwardListCommand;
 import org.essentialss.command.ban.BanCommands;
 import org.essentialss.command.essentialss.EssentialsSCommand;
 import org.essentialss.command.essentialss.plugins.PluginsCommand;
+import org.essentialss.command.feed.FeedCommand;
 import org.essentialss.command.flame.GlowCommand;
 import org.essentialss.command.gamemode.GamemodeCommand;
+import org.essentialss.command.god.GodModeCommand;
 import org.essentialss.command.hat.HatCommand;
 import org.essentialss.command.inventory.DisplayInventoryCommand;
 import org.essentialss.command.invsee.InventorySeeCommand;
@@ -43,6 +45,8 @@ import org.essentialss.command.teleport.request.*;
 import org.essentialss.command.unban.UnbanCommands;
 import org.essentialss.command.vanish.UnvanishCommand;
 import org.essentialss.command.vanish.VanishCommand;
+import org.essentialss.command.world.ListWorldsCommand;
+import org.essentialss.command.world.WorldCommand;
 import org.essentialss.config.SConfigManagerImpl;
 import org.essentialss.kit.KitManagerImpl;
 import org.essentialss.listeners.afk.AwayFromKeyboardListeners;
@@ -53,6 +57,7 @@ import org.essentialss.listeners.chat.SpyListener;
 import org.essentialss.listeners.chat.VanillaMessageListener;
 import org.essentialss.listeners.connection.ConnectionListeners;
 import org.essentialss.listeners.data.DataListeners;
+import org.essentialss.listeners.data.GodListeners;
 import org.essentialss.messages.SMessageManagerImpl;
 import org.essentialss.player.SPlayerManagerImpl;
 import org.essentialss.schedules.AwayFromKeyboardCheckScheduler;
@@ -150,6 +155,9 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, PingCommand.createPingCommand(), "ping");
         event.register(this.container, PluginsCommand.createPluginsCommand(), "plugins", "pl");
         event.register(this.container, GlowCommand.createGlowCommand(), "glow");
+        event.register(this.container, FeedCommand.createFeedCommand(), "feed");
+        event.register(this.container, WorldCommand.createWorldCommand(), "world");
+        event.register(this.container, ListWorldsCommand.createListCommand(), "worlds");
 
         //overrides
         event.register(this.container, GamemodeCommand.createGamemodeCommand(), "gamemode", "gm");
@@ -215,6 +223,10 @@ public class EssentialsSMain implements EssentialsSAPI {
         event.register(this.container, VanishCommand.createVanishCommand(), "vanish", "invisible");
         event.register(this.container, UnvanishCommand.createUnvanishCommand(), "unvanish", "visible");
 
+        //god
+        event.register(this.container, GodModeCommand.createGodModeCommand(), "god");
+        event.register(this.container, GodModeCommand.createDemiGodModeCommand(), "demigod");
+
     }
 
     @Listener
@@ -249,6 +261,7 @@ public class EssentialsSMain implements EssentialsSAPI {
         eventManager.registerListeners(this.container, new ChatListener());
         eventManager.registerListeners(this.container, new DataListeners());
         eventManager.registerListeners(this.container, new VanillaMessageListener());
+        eventManager.registerListeners(this.container, new GodListeners());
     }
 
     public static EssentialsSMain plugin() {

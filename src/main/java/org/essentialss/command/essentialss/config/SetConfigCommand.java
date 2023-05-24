@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.essentialss.EssentialsSMain;
 import org.essentialss.api.config.SConfig;
+import org.essentialss.api.config.value.CollectionConfigValue;
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.api.utils.friendly.FriendlyStrings;
@@ -18,9 +19,10 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public final class SetConfigCommand {
@@ -43,6 +45,38 @@ public final class SetConfigCommand {
         }
     }
 
+    private static final class ExecuteCollection<T> implements CommandExecutor {
+
+        private final @NotNull CollectionConfigValue<T> adapter;
+        private final @NotNull SConfig config;
+        private final @NotNull Parameter.Value<T> newValue;
+        private final @NotNull BiFunction<List<T>, Collection<? extends T>, List<T>> action;
+
+        private ExecuteCollection(@NotNull SConfig config,
+                                  @NotNull CollectionConfigValue<?> adapter,
+                                  @NotNull Parameter.Value<Object> newValue,
+                                  BiFunction<List<T>, Collection<? extends T>, List<T>> action) {
+            this.adapter = (CollectionConfigValue<T>) adapter;
+            this.newValue = (Parameter.Value<T>) newValue;
+            this.config = config;
+            this.action = action;
+        }
+
+        @Override
+        public CommandResult execute(CommandContext context) {
+            Collection<? extends T> to = context.all(this.newValue);
+            List<T> original;
+            try {
+                original = this.adapter.parse(this.config);
+            } catch (SerializationException e) {
+                e.printStackTrace();
+                original = new ArrayList<>();
+            }
+
+            return SetConfigCommand.execute(context.cause().audience(), this.config, this.adapter, this.action.apply(original, to));
+        }
+    }
+
     private SetConfigCommand() {
         throw new RuntimeException("Cannot run");
     }
@@ -55,6 +89,36 @@ public final class SetConfigCommand {
                 EssentialsSMain.plugin().logger().warn("Cannot find a command parameter for " + configValue.type().getSimpleName());
                 continue;
             }
+            if (configValue instanceof CollectionConfigValue) {
+                Parameter.Value<Object> parameter = opParameter.get().key("value").consumeAllRemaining().build();
+                Parameter.Multi seqParameter = Parameter.seqBuilder(parameter).build();
+                CollectionConfigValue<?> collectionConfigValue = (CollectionConfigValue<?>) configValue;
+                Command.Parameterized addCommand = Command
+                        .builder()
+                        .addParameter(seqParameter)
+                        .executor(new ExecuteCollection<>(config, collectionConfigValue, parameter, (ori, adding) -> {
+                            ori.addAll(adding);
+                            return ori;
+                        }))
+                        .build();
+                Command.Parameterized removeCommand = Command
+                        .builder()
+                        .addParameter(seqParameter)
+                        .executor(new ExecuteCollection<>(config, collectionConfigValue, parameter, (ori, adding) -> {
+                            ori.removeAll(adding);
+                            return ori;
+                        }))
+                        .build();
+                Command.Parameterized setCommand = Command
+                        .builder()
+                        .addParameter(seqParameter)
+                        .executor(new ExecuteCollection<>(config, collectionConfigValue, parameter, (ori, adding) -> new ArrayList<>(adding)))
+                        .build();
+                Command.Parameterized cmd = Command.builder().addChild(addCommand, "add").addChild(removeCommand, "remove").addChild(setCommand, "set").build();
+                command.addChild(cmd, Arrays.stream(configValue.nodes()).map(Object::toString).collect(Collectors.joining(".")));
+                continue;
+            }
+
             Parameter.Value<Object> parameter = opParameter.get().key("value").build();
             Command.Parameterized cmd = Command.builder().addParameter(parameter).executor(new Execute<>(config, configValue, parameter)).build();
             command.addChild(cmd, Arrays.stream(configValue.nodes()).map(Object::toString).collect(Collectors.joining(".")));
@@ -72,10 +136,20 @@ public final class SetConfigCommand {
             if (value instanceof Component) {
                 messageValue = ((Component) value);
             } else {
-                messageValue = FriendlyStrings
-                        .ofType(value)
-                        .map(friendly -> friendly.toFriendlyComponent(value))
-                        .orElseGet(() -> Component.text(value.toString()));
+                if (value instanceof Collection) {
+                    messageValue = Component.text(((Collection<?>) value)
+                                                          .stream()
+                                                          .map(v -> FriendlyStrings
+                                                                  .ofType(v)
+                                                                  .map(friendly -> friendly.toFriendlyString(v))
+                                                                  .orElseGet(v::toString))
+                                                          .collect(Collectors.joining(", ")));
+                } else {
+                    messageValue = FriendlyStrings
+                            .ofType(value)
+                            .map(friendly -> friendly.toFriendlyComponent(value))
+                            .orElseGet(() -> Component.text(value.toString()));
+                }
             }
             audience.sendMessage(Component
                                          .text("set ")

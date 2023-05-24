@@ -2,7 +2,11 @@ package org.essentialss.misc;
 
 import org.jetbrains.annotations.NotNull;
 
-public class StringHelper {
+public final class StringHelper {
+
+    private StringHelper() {
+        throw new RuntimeException("Should not generate");
+    }
 
     public static void isIdFormat(@NotNull String id) {
         if (!id.equals(id.toLowerCase())) {

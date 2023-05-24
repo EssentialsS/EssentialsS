@@ -13,14 +13,15 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 
-public class FlameCommand {
+//need to test this with another client
+public final class FlameCommand {
 
     private static final class Execute implements CommandExecutor {
 
-        private @Nullable Boolean forceState;
-        private Parameter.Value<SGeneralPlayerData> playerParameter;
+        private final @Nullable Boolean forceState;
+        private final Parameter.Value<SGeneralPlayerData> playerParameter;
 
-        public Execute(Parameter.Value<SGeneralPlayerData> playerParameter, @Nullable Boolean forceState) {
+        private Execute(Parameter.Value<SGeneralPlayerData> playerParameter, @Nullable Boolean forceState) {
             this.playerParameter = playerParameter;
             this.forceState = forceState;
         }
@@ -30,6 +31,10 @@ public class FlameCommand {
             SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.playerParameter);
             return FlameCommand.execute(player, this.forceState);
         }
+    }
+
+    private FlameCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     private static Command.Parameterized createFlameCommand(@Nullable Boolean forceState) {

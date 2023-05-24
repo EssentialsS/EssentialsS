@@ -20,9 +20,9 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
 
-public class PluginsCommand {
+public final class PluginsCommand {
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final Parameter.Value<Integer> pageParameter;
 
@@ -35,6 +35,10 @@ public class PluginsCommand {
             int page = context.one(this.pageParameter).orElse(1);
             return PluginsCommand.execute(context.cause().audience(), page);
         }
+    }
+
+    private PluginsCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createPluginsCommand() {

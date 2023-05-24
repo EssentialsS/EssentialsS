@@ -16,7 +16,7 @@ import org.spongepowered.api.effect.VanishState;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class VanishCommand {
+public final class VanishCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -54,13 +54,13 @@ public class VanishCommand {
                 if (opAffectsMonsterSpawns.isPresent()) {
                     state = state.affectMonsterSpawning(opAffectsMonsterSpawns.get());
                 }
-                if(opSound.isPresent()){
+                if (opSound.isPresent()) {
                     state = state.createSounds(opSound.get());
                 }
-                if(opParticle.isPresent()){
+                if (opParticle.isPresent()) {
                     state = state.createParticles(opParticle.get());
                 }
-                if(opCollision.isPresent()){
+                if (opCollision.isPresent()) {
                     state = state.ignoreCollisions(opCollision.get());
                 }
                 if (opTarget.isPresent()) {
@@ -69,6 +69,10 @@ public class VanishCommand {
                 return state;
             });
         }
+    }
+
+    private VanishCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createVanishCommand() {
@@ -84,18 +88,10 @@ public class VanishCommand {
                 .aliases("affectsMonsterSpawning", "monsterSpawning", "ms")
                 .setParameter(affectsMonsterSpawning)
                 .build();
-        Flag playSoundFlag = Flag.builder().aliases("playSound", "sound", "s")
-                .setParameter(playSound)
-                .build();
-        Flag showParticleFlag = Flag.builder().aliases("showParticles", "particles", "p")
-                .setParameter(showParticle)
-                .build();
-        Flag ignoreCollisionFlag = Flag.builder().aliases("ignoreCollision", "noCollision", "nc")
-                .setParameter(ignoreCollision)
-                .build();
-        Flag noTargetFlag = Flag.builder().aliases("ignoreTarget", "noTarget", "nt")
-                .setParameter(noTarget)
-                .build();
+        Flag playSoundFlag = Flag.builder().aliases("playSound", "sound", "s").setParameter(playSound).build();
+        Flag showParticleFlag = Flag.builder().aliases("showParticles", "particles", "p").setParameter(showParticle).build();
+        Flag ignoreCollisionFlag = Flag.builder().aliases("ignoreCollision", "noCollision", "nc").setParameter(ignoreCollision).build();
+        Flag noTargetFlag = Flag.builder().aliases("ignoreTarget", "noTarget", "nt").setParameter(noTarget).build();
 
         return Command
                 .builder()

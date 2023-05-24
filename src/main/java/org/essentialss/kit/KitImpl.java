@@ -55,7 +55,7 @@ public class KitImpl implements Kit {
 
     @Override
     public String displayName() {
-        if (this.displayName == null) {
+        if (null == this.displayName) {
             return this.idName;
         }
         return this.displayName;

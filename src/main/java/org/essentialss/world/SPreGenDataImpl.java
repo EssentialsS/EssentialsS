@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class SPreGenDataImpl implements SPreGenData {
 
     private final Vector3i center;
-    private final LinkedTransferQueue<Vector3i> completedChunks = new LinkedTransferQueue<>();
+    private final Collection<Vector3i> completedChunks = new LinkedTransferQueue<>();
     private final Audience messenger;
     private final double radius;
     private final SWorldData world;
     private boolean hasStarted;
 
-    public SPreGenDataImpl(SWorldData world, Vector3i center, double radius, Audience audience) {
+    SPreGenDataImpl(SWorldData world, Vector3i center, double radius, Audience audience) {
         this.world = world;
         this.radius = radius;
         this.messenger = audience;
@@ -58,8 +58,8 @@ public class SPreGenDataImpl implements SPreGenData {
             for (Vector3i process : toProcess) {
                 world.loadChunk(process, true);
                 this.completedChunks.add(process);
-                for (int rangeX = 0; rangeX < 3; rangeX++) {
-                    for (int rangeZ = 0; rangeZ < 3; rangeZ++) {
+                for (int rangeX = 0; 3 > rangeX; rangeX++) {
+                    for (int rangeZ = 0; 3 > rangeZ; rangeZ++) {
                         Vector3i toAdd = process.add(rangeX - 1, 0, rangeZ - 1);
                         int distance = this.center.distanceSquared(toAdd);
                         if (distance > this.radius) {

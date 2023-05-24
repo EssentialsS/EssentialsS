@@ -108,7 +108,7 @@ public class KitManagerImpl implements KitManager {
     }
 
     @Override
-    public void save(@NotNull Kit kit) throws ConfigurateException {
+    public void save(@NotNull Kit kit) throws ConfigurateException, SerializationException {
         File file = kit.file();
         HoconConfigurationLoader loader = TypeLoaders.applyAll(HoconConfigurationLoader.builder().file(file)).build();
         CommentedConfigurationNode node = loader.createNode();

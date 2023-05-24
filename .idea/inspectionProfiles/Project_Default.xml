@@ -1,6 +1,7 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="40a1e99b-3a70-3cbf-becb-cbf5aa7e4a0b" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AbstractClassWithoutAbstractMethods" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AnonymousClassComplexity" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_limit" value="3" />
@@ -79,7 +80,7 @@
     <inspection_tool class="MissortedModifiers" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_requireAnnotationsFirst" value="true" />
     </inspection_tool>
-    <inspection_tool class="MoveFieldAssignmentToInitializer" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
+    <inspection_tool class="MoveFieldAssignmentToInitializer" enabled="false" level="WEAK WARNING" enabled_by_default="false" editorAttributes="INFO_ATTRIBUTES" />
     <inspection_tool class="MultiCatchCanBeSplit" enabled="false" level="INFORMATION" enabled_by_default="false" />
     <inspection_tool class="MultipleVariablesInDeclaration" enabled="true" level="WARNING" enabled_by_default="true" editorAttributes="WARNING_ATTRIBUTES" />
     <inspection_tool class="NegatedEqualityExpression" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
@@ -136,10 +137,9 @@
         <constraint name="ParameterType" within="" contains="" />
         <constraint name="Parameter" minCount="0" maxCount="2147483647" within="" contains="" />
       </replaceConfiguration>
-      <searchConfiguration name="Raw message" description="Messages sent to the player should be in a &#10;MessageAdapter. This allows the player to change&#10;the language of the message" suppressId="allow-raw-message" problemDescriptor="Message should be in a MessageAdapter" text="$player$.sendMessage(java.awt.Component.text($text$))" recursive="true" caseInsensitive="false" type="JAVA" pattern_context="default">
+      <searchConfiguration name="Should be MessageAdapter" description="This should be suppressed if already in MessageAdapter.&#10;&#10;This deters hardcoded messages from leaking in" suppressId="i-am-message-adapter" problemDescriptor="Message cannot be translated if hardcoded. Use in MessageAdapter" text="net.kyori.adventure.text.Component.text($parmeter$)" recursive="true" caseInsensitive="true" type="JAVA" pattern_context="default">
         <constraint name="__context__" within="" contains="" />
-        <constraint name="player" within="" contains="" />
-        <constraint name="text" within="" contains="" />
+        <constraint name="parmeter" regexp="[&quot;]+" within="" contains="" />
       </searchConfiguration>
     </inspection_tool>
     <inspection_tool class="SimplifiableAnnotation" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />

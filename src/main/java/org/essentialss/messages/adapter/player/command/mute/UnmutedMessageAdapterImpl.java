@@ -21,6 +21,7 @@ import org.spongepowered.api.profile.GameProfile;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("i-am-message-adapter")
 public class UnmutedMessageAdapterImpl extends AbstractMessageAdapter implements UnmutedMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;

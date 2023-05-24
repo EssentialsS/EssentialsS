@@ -22,6 +22,7 @@ import org.essentialss.world.points.spawn.SSpawnWrapperImpl;
 import org.essentialss.world.points.warps.SWarpsImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mose.property.impl.unknown.UnknownProperty;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -43,11 +44,14 @@ public class SWorldDataImpl implements SWorldData {
     private final @Nullable String id;
     private final Collection<SPoint> points = new LinkedHashSet<>();
     private final Collection<SSpawnType> mainSpawnType = new ArrayList<>();
+    private final UnknownProperty<Boolean, Boolean> isLoaded;
     private @Nullable SPreGenDataImpl preGen;
 
     SWorldDataImpl(@NotNull SWorldDataBuilder builder) {
         this.key = builder.worldKey();
         this.id = builder.worldId();
+        this.isLoaded = new UnknownProperty<>(t -> t, () -> this.spongeWorld().isPresent());
+
         if ((null == this.key) && (null == this.id)) {
             throw new IllegalArgumentException("World has not been specified");
         }
@@ -82,6 +86,11 @@ public class SWorldDataImpl implements SWorldData {
     @Override
     public Optional<SPreGenData> generatingChunkData() {
         return Optional.ofNullable(this.preGen);
+    }
+
+    @Override
+    public UnknownProperty<Boolean, Boolean> isLoadedProperty() {
+        return this.isLoaded;
     }
 
     @Override
@@ -120,7 +129,7 @@ public class SWorldDataImpl implements SWorldData {
 
     @Override
     public Optional<SSpawnPoint> register(@NotNull SSpawnPointBuilder builder, boolean runEvent, @Nullable Cause cause) {
-        new Validator<>(builder.point()).notNull().validate();
+        new Validator<>(builder.position()).notNull().validate();
         SSpawnPoint spawnPoint = new SSpawnPointImpl(builder, this);
         Optional<SSpawnPoint> register = this.register(spawnPoint, runEvent, cause);
         if (!register.isPresent()) {
@@ -130,7 +139,7 @@ public class SWorldDataImpl implements SWorldData {
             //noinspection DataFlowIssue
             Optional<World<?, ?>> opWorld = this.spongeWorld();
             if (opWorld.isPresent()) {
-                Vector3d point = Objects.requireNonNull(builder.point());
+                Vector3d point = Objects.requireNonNull(builder.position()).get();
                 opWorld.get().properties().setSpawnPosition(point.toInt());
                 return Optional.of(spawnPoint);
             }
@@ -188,9 +197,7 @@ public class SWorldDataImpl implements SWorldData {
 
     private boolean deregisterPoint(@NotNull SPoint point, boolean runEvent, @Nullable Cause cause) {
         //TODO events
-        boolean result = this.points.remove(point);
-        //TODO events
-        return result;
+        return this.points.remove(point);
     }
 
     @Override

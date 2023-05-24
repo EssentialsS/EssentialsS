@@ -44,6 +44,10 @@ public class RegistryConfigValue<R extends DefaultedRegistryValue> implements Co
 
     @Override
     public void set(@NotNull ConfigurationNode root, @Nullable R value) throws SerializationException {
+        if (value == null) {
+            root.node(this.nodes).set(null);
+            return;
+        }
         root.node(this.nodes).set(value.key(this.registryType.get()).formatted());
     }
 

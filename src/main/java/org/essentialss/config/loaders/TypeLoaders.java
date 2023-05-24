@@ -44,6 +44,7 @@ public final class TypeLoaders {
                         return (TypeLoader<?>) field.get(null);
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
+                        //noinspection ReturnOfNull
                         return null;
                     }
                 })

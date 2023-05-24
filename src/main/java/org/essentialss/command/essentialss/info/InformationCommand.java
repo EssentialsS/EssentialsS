@@ -16,7 +16,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.plugin.PluginContainer;
 
-public class InformationCommand {
+public final class InformationCommand {
 
     private static class Execute implements CommandExecutor {
 
@@ -24,6 +24,10 @@ public class InformationCommand {
         public CommandResult execute(CommandContext context) throws CommandException {
             return InformationCommand.execute(context.cause().audience());
         }
+    }
+
+    private InformationCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createInfoCommand() {

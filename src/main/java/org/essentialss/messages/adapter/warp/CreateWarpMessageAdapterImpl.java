@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings("i-am-message-adapter")
 public class CreateWarpMessageAdapterImpl extends AbstractMessageAdapter implements CreateWarpMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;

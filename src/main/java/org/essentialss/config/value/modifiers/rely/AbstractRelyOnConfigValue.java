@@ -31,7 +31,8 @@ public abstract class AbstractRelyOnConfigValue<O, R> implements ConfigValue<O> 
     }
 
     @Override
-    public @NotNull Object[] nodes() {
+    @NotNull
+    public Object[] nodes() {
         return this.configValue.nodes();
     }
 

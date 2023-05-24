@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.OptionalInt;
 
-public class BackListCommand {
+public final class BackListCommand {
 
     private static class Execute implements CommandExecutor {
 
@@ -36,6 +36,10 @@ public class BackListCommand {
         }
     }
 
+    private BackListCommand() {
+        throw new RuntimeException("Should not generate");
+    }
+
     public static Command.Parameterized createBackListCommand() {
         Parameter.Value<Integer> pageParameter = Parameter.rangedInteger(1, Integer.MAX_VALUE).key("page").optional().build();
 
@@ -43,7 +47,7 @@ public class BackListCommand {
     }
 
     public static CommandResult execute(SGeneralPlayerData player, int page) {
-        if (page <= 0) {
+        if (0 >= page) {
             return CommandResult.error(Component.text("Unknown page number"));
         }
         List<OfflineLocation> backTeleportLocations = player.backTeleportLocations();

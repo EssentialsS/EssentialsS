@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("i-am-message-adapter")
 public class SChatMessageAdapterImpl extends AbstractEnabledMessageAdapter implements ChatMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> MAIN_VALUE;

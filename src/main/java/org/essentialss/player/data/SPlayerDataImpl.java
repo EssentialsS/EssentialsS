@@ -64,6 +64,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
         this.shownAfk = WriteNeverNullPropertyImpl.bool();
         this.lastAction = new WritePropertyImpl<>(t -> t, LocalDateTime.now());
         this.isAfk = new ReadOnlyNeverNullPropertyImpl<>(t -> t, () -> false, null);
+        //noinspection unchecked
         this.teleportRequests = new WriteCollectionPropertyImpl<>(t -> {
             List<TeleportRequest> requests = new LinkedList<>(t);
             requests.sort(Comparator.comparing(req -> req.expiresAt().orElse(LocalDateTime.MAX)));
@@ -77,7 +78,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
             } catch (SerializationException e) {
                 return false;
             }
-            if (duration == null) {
+            if (null == duration) {
                 return false;
             }
             LocalDateTime willBeAfk = localDateTime.plus(duration);
@@ -246,6 +247,7 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
         if (data instanceof SPlayerDataImpl) {
             SPlayerDataImpl pData = (SPlayerDataImpl) data;
             this.shownAfk.setValue(pData.shownAfk.value().orElse(false));
+            //noinspection unchecked
             this.teleportRequests.addAll(pData.teleportRequests.value().orElseGet(SingleOrderedUnmodifiableCollection::new));
             this.backTeleportIndex.setValue(pData.backTeleportIndex.value().orElse(0));
         }

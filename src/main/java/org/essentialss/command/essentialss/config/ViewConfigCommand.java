@@ -17,6 +17,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,12 +70,16 @@ public final class ViewConfigCommand {
             valueMessage = (Component) raw;
         } else {
             Object finalRaw = raw;
-            valueMessage = Arrays
-                    .stream(FriendlyStrings.values())
-                    .filter(friendly -> Arrays.stream(friendly.supportedTypes()).anyMatch(clazz -> clazz.isInstance(finalRaw)))
-                    .findAny()
-                    .map(friendly -> friendly.toFriendlyComponent(finalRaw))
-                    .orElseGet(() -> Component.text(finalRaw.toString()));
+            if (finalRaw instanceof Collection) {
+                String joined = ((Collection<?>) finalRaw)
+                        .stream()
+                        .map(v -> FriendlyStrings.ofType(v).map(friendly -> friendly.toFriendlyString(v)).orElseGet(v::toString))
+                        .collect(Collectors.joining(", "));
+                valueMessage = Component.text(joined);
+            } else {
+                valueMessage = Component.text(
+                        FriendlyStrings.ofType(finalRaw).map(friendly -> friendly.toFriendlyString(finalRaw)).orElseGet(finalRaw::toString));
+            }
         }
         audience.sendMessage(Component
                                      .text(Stream.of(value.nodes()).map(Object::toString).collect(Collectors.joining(".")))

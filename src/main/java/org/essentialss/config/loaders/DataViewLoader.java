@@ -32,7 +32,7 @@ public class DataViewLoader implements TypeLoader<DataView> {
 
     @Override
     public void serialize(Type type, @Nullable DataView obj, ConfigurationNode node) throws SerializationException {
-        if (obj == null) {
+        if (null == obj) {
             node.set(null);
             return;
         }

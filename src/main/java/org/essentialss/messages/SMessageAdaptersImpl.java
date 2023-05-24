@@ -18,6 +18,14 @@ import org.essentialss.api.message.adapters.player.listener.chat.ChatMessageAdap
 import org.essentialss.api.message.adapters.player.listener.spy.CommandSpyMessageAdapter;
 import org.essentialss.api.message.adapters.vanilla.player.PlayerJoinMessageAdapter;
 import org.essentialss.api.message.adapters.warp.CreateWarpMessageAdapter;
+import org.essentialss.api.message.adapters.world.NoWorldByThatKeyMessageAdapter;
+import org.essentialss.api.message.adapters.world.WorldHasAlreadyLoadedMessageAdapter;
+import org.essentialss.api.message.adapters.world.create.CreatedWorldMessageAdapter;
+import org.essentialss.api.message.adapters.world.create.CreatingWorldMessageAdapter;
+import org.essentialss.api.message.adapters.world.load.LoadedWorldMessageAdapter;
+import org.essentialss.api.message.adapters.world.load.LoadingWorldMessageAdapter;
+import org.essentialss.api.message.adapters.world.unload.UnloadedWorldMessageAdapter;
+import org.essentialss.api.message.adapters.world.unload.UnloadingWorldMessageAdapter;
 import org.essentialss.api.utils.Singleton;
 import org.essentialss.messages.adapter.player.command.PingMessageAdapterImpl;
 import org.essentialss.messages.adapter.player.command.PlayerOnlyCommandMessageAdapterImpl;
@@ -34,6 +42,14 @@ import org.essentialss.messages.adapter.player.listener.chat.SChatMessageAdapter
 import org.essentialss.messages.adapter.player.listener.spy.CommandSpyMessageAdapterImpl;
 import org.essentialss.messages.adapter.vanilla.player.PlayerJoinMessageAdapterImpl;
 import org.essentialss.messages.adapter.warp.CreateWarpMessageAdapterImpl;
+import org.essentialss.messages.adapter.world.NoWorldByThatKeyMessageAdapterImpl;
+import org.essentialss.messages.adapter.world.WorldHasAlreadyLoadedMessageAdapterImpl;
+import org.essentialss.messages.adapter.world.create.CreatedWorldAdapterImpl;
+import org.essentialss.messages.adapter.world.create.CreatingWorldAdapterImpl;
+import org.essentialss.messages.adapter.world.load.LoadedWorldAdapterImpl;
+import org.essentialss.messages.adapter.world.load.LoadingWorldAdapterImpl;
+import org.essentialss.messages.adapter.world.unload.UnloadedWorldAdapterImpl;
+import org.essentialss.messages.adapter.world.unload.UnloadingWorldAdapterImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
@@ -58,6 +74,15 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     private final Singleton<CommandSpyMessageAdapter> commandSpy = new Singleton<>(CommandSpyMessageAdapterImpl::new);
     private final Singleton<ChatMessageAdapter> chat = new Singleton<>(SChatMessageAdapterImpl::new);
     private final Singleton<PlayerJoinMessageAdapter> playerJoin = new Singleton<>(PlayerJoinMessageAdapterImpl::new);
+    private final Singleton<CreatedWorldMessageAdapter> createdWorld = new Singleton<>(CreatedWorldAdapterImpl::new);
+    private final Singleton<CreatingWorldMessageAdapter> creatingWorld = new Singleton<>(CreatingWorldAdapterImpl::new);
+    private final Singleton<LoadingWorldMessageAdapter> loadingWorld = new Singleton<>(LoadingWorldAdapterImpl::new);
+    private final Singleton<LoadedWorldMessageAdapter> loadedWorld = new Singleton<>(LoadedWorldAdapterImpl::new);
+    private final Singleton<UnloadingWorldMessageAdapter> unloadingWorld = new Singleton<>(UnloadingWorldAdapterImpl::new);
+    private final Singleton<UnloadedWorldMessageAdapter> unloadedWorld = new Singleton<>(UnloadedWorldAdapterImpl::new);
+    private final Singleton<NoWorldByThatKeyMessageAdapter> noWorldByThatKey = new Singleton<>(NoWorldByThatKeyMessageAdapterImpl::new);
+    private final Singleton<WorldHasAlreadyLoadedMessageAdapter> worldHasAlreadyLoaded = new Singleton<>(WorldHasAlreadyLoadedMessageAdapterImpl::new);
+
 
     private final @NotNull MessageConfig config;
 
@@ -119,8 +144,33 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     }
 
     @Override
+    public Singleton<CreatedWorldMessageAdapter> createWorld() {
+        return this.createdWorld;
+    }
+
+    @Override
+    public Singleton<CreatingWorldMessageAdapter> creatingWorld() {
+        return this.creatingWorld;
+    }
+
+    @Override
+    public Singleton<LoadedWorldMessageAdapter> loadedWorld() {
+        return this.loadedWorld;
+    }
+
+    @Override
+    public Singleton<LoadingWorldMessageAdapter> loadingWorld() {
+        return this.loadingWorld;
+    }
+
+    @Override
     public Singleton<MutedMessageAdapter> muted() {
         return this.muted;
+    }
+
+    @Override
+    public Singleton<NoWorldByThatKeyMessageAdapter> noWorldByThatKey() {
+        return this.noWorldByThatKey;
     }
 
     @Override
@@ -139,6 +189,16 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     }
 
     @Override
+    public Singleton<UnloadedWorldMessageAdapter> unloadWorld() {
+        return this.unloadedWorld;
+    }
+
+    @Override
+    public Singleton<UnloadingWorldMessageAdapter> unloadingWorld() {
+        return this.unloadingWorld;
+    }
+
+    @Override
     public Singleton<UnmutedMessageAdapter> unmuted() {
         return this.unmuted;
     }
@@ -146,6 +206,11 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     @Override
     public Singleton<WhoIsMessageAdapter> whoIs() {
         return this.whoIs;
+    }
+
+    @Override
+    public Singleton<WorldHasAlreadyLoadedMessageAdapter> worldHasAlreadyLoaded() {
+        return this.worldHasAlreadyLoaded;
     }
 
     @Override

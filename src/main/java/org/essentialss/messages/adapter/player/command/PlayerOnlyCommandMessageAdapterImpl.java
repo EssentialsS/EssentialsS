@@ -15,6 +15,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.util.Collection;
 import java.util.Collections;
 
+@SuppressWarnings("i-am-message-adapter")
 public class PlayerOnlyCommandMessageAdapterImpl extends AbstractMessageAdapter implements PlayerOnlyCommandMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
@@ -23,14 +24,14 @@ public class PlayerOnlyCommandMessageAdapterImpl extends AbstractMessageAdapter 
         ComponentConfigValue configValue = new ComponentConfigValue("player", "command", "PlayerOnlyCommand");
         Component defaultValue = Component.text("Sorry. This command can only be ran as a player");
         CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(configValue, defaultValue);
-        ;
     }
 
-    public PlayerOnlyCommandMessageAdapterImpl(@NotNull MessageConfig config) {
+    public PlayerOnlyCommandMessageAdapterImpl(@SuppressWarnings("TypeMayBeWeakened") @NotNull MessageConfig config) {
         super(new Singleton<>(() -> {
             try {
                 return CONFIG_VALUE.parse(config);
             } catch (SerializationException e) {
+                //noinspection ReturnOfNull
                 return null;
             }
         }));

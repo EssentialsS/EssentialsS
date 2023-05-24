@@ -9,6 +9,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.gson.GsonConfigurationLoader;
+import org.spongepowered.plugin.metadata.Inheritable;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class UpdateCheck implements Runnable {
 
     private final Audience audience;
 
-    public UpdateCheck(@NotNull Audience audience) {
+    private UpdateCheck(@NotNull Audience audience) {
         this.audience = audience;
     }
 
@@ -111,7 +112,7 @@ public class UpdateCheck implements Runnable {
         }
     }
 
-    private static VersionEntry create(PluginMetadata metadata) {
+    private static VersionEntry create(Inheritable metadata) {
         VersionEntry entry = new VersionEntry();
         entry.versionName = metadata.version().toString();
         entry.id = -1;

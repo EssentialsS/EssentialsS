@@ -17,6 +17,7 @@ import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.Collection;
 
+@SuppressWarnings("i-am-message-adapter")
 public class WhoIsCommandManagerAdapterImpl extends AbstractMessageAdapter implements WhoIsMessageAdapter {
 
     private static final SingleConfigValue.Default<Component> CONFIG_VALUE;

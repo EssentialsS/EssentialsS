@@ -22,7 +22,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.permission.Subject;
 
-public class GamemodeCommand {
+public final class GamemodeCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -46,9 +46,17 @@ public class GamemodeCommand {
         }
     }
 
+    private GamemodeCommand() {
+        throw new RuntimeException("Should not generate");
+    }
+
     public static Command.Parameterized createGamemodeCommand() {
-        Parameter.Value<SGeneralPlayerData> playerParameter =
-                SParameters.onlinePlayer(p -> true).key("player").requiredPermission(SPermissions.GAMEMODE_OTHER.node()).optional().build();
+        Parameter.Value<SGeneralPlayerData> playerParameter = SParameters
+                .onlinePlayer(p -> true)
+                .key("player")
+                .requiredPermission(SPermissions.GAMEMODE_OTHER.node())
+                .optional()
+                .build();
         Parameter.Value<GameMode> gamemodeParameter = Parameter
                 .registryElement(TypeToken.get(GameMode.class), RegistryTypes.GAME_MODE, ResourceKey.MINECRAFT_NAMESPACE)
                 .key("gamemode")

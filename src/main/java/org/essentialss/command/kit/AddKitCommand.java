@@ -19,7 +19,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 
-public class AddKitCommand {
+public final class AddKitCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -38,6 +38,10 @@ public class AddKitCommand {
             SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.playerParameter);
             return AddKitCommand.execute(context.cause().audience(), player.spongePlayer().inventory(), idName, displayName);
         }
+    }
+
+    private AddKitCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createAddKitCommand() {

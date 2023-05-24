@@ -1,10 +1,9 @@
 package org.essentialss.command.nick;
 
 import net.kyori.adventure.text.Component;
-import org.essentialss.EssentialsSMain;
-import org.essentialss.api.EssentialsSAPI;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.utils.SParameters;
+import org.essentialss.misc.CommandHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.command.Command;
@@ -13,9 +12,6 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.entity.living.player.Player;
-
-import java.util.Optional;
 
 public final class NicknameCommand {
 
@@ -29,15 +25,8 @@ public final class NicknameCommand {
 
         @Override
         public CommandResult execute(CommandContext context) throws CommandException {
-            Optional<SGeneralUnloadedData> opPlayer = context.one(this.target);
-            if (!opPlayer.isPresent() && (context.subject() instanceof Player)) {
-                opPlayer = Optional.of(EssentialsSMain.plugin().playerManager().get().dataFor((Player) context.subject()));
-            }
-
-            if (!opPlayer.isPresent()) {
-                throw new CommandException(Component.text("Player must be specified"));
-            }
-            return NicknameCommand.execute(opPlayer.get(), null);
+            SGeneralUnloadedData player = CommandHelper.playerDataOrTarget(context, this.target);
+            return NicknameCommand.execute(player, null);
         }
     }
 
@@ -53,11 +42,7 @@ public final class NicknameCommand {
 
         @Override
         public CommandResult execute(CommandContext context) throws CommandException {
-            Optional<SGeneralUnloadedData> opPlayer = context.one(this.target);
-            if (!opPlayer.isPresent() && (context.subject() instanceof Player)) {
-                opPlayer = Optional.of(EssentialsSAPI.get().playerManager().get().dataFor((Player) context.subject()));
-            }
-            SGeneralUnloadedData player = opPlayer.orElseThrow(() -> new CommandException(Component.text("Player must be specified")));
+            SGeneralUnloadedData player = CommandHelper.playerDataOrTarget(context, this.target);
             Component component = context.requireOne(this.newNickname);
             return NicknameCommand.execute(player, component);
         }

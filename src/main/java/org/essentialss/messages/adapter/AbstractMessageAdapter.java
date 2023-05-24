@@ -22,6 +22,7 @@ public abstract class AbstractMessageAdapter implements MessageAdapter {
             try {
                 return configValue.parse(EssentialsSMain.plugin().messageManager().get().config().get());
             } catch (SerializationException e) {
+                //noinspection ReturnOfNull
                 return null;
             }
         });

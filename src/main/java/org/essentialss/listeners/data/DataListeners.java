@@ -11,6 +11,8 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Optional;
@@ -34,6 +36,16 @@ public class DataListeners {
 
         OfflineLocation location = new OfflineLocation(player.location());
         playerData.addBackTeleportLocation(location);
+    }
+
+    @Listener
+    public void onWorldLoad(LoadWorldEvent event) {
+        EssentialsSMain.plugin().worldManager().get().dataFor(event.world()).isLoadedProperty().onValueUpdate(false, true);
+    }
+
+    @Listener
+    public void onWorldUnload(UnloadWorldEvent event) {
+        EssentialsSMain.plugin().worldManager().get().dataFor(event.world()).isLoadedProperty().onValueUpdate(true, false);
     }
 
     @Listener(beforeModifications = true)

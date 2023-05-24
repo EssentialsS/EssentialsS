@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
-public class BackCommand {
+public final class BackCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -45,6 +45,10 @@ public class BackCommand {
             return BackCommand.execute(player, spaces,
                                        context.one(this.worldParameter).map(w -> EssentialsSMain.plugin().worldManager().get().dataFor(w)).orElse(null));
         }
+    }
+
+    private BackCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createBackCommand() {
@@ -71,8 +75,8 @@ public class BackCommand {
                 .build();
     }
 
-    public static CommandResult execute(SGeneralPlayerData player, int spaces, @Nullable SWorldData targetWorld) {
-        if (spaces <= 0) {
+    public static CommandResult execute(SGeneralPlayerData player, int spaces, @SuppressWarnings("TypeMayBeWeakened") @Nullable SWorldData targetWorld) {
+        if (0 >= spaces) {
             return CommandResult.error(Component.text("Back spaces must be positive"));
         }
         List<OfflineLocation> backTeleportLocations = player.backTeleportLocations();

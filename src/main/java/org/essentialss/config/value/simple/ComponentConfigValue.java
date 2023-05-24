@@ -17,13 +17,9 @@ public class ComponentConfigValue implements SingleConfigValue<Component> {
     }
 
     @Override
-    public @NotNull Object[] nodes() {
+    @NotNull
+    public Object[] nodes() {
         return this.nodes;
-    }
-
-    @Override
-    public @NotNull Class<Component> type() {
-        return Component.class;
     }
 
     @SuppressWarnings("allow-nullable")
@@ -45,5 +41,10 @@ public class ComponentConfigValue implements SingleConfigValue<Component> {
             return;
         }
         node.set(GsonComponentSerializer.gson().serialize(value));
+    }
+
+    @Override
+    public @NotNull Class<Component> type() {
+        return Component.class;
     }
 }

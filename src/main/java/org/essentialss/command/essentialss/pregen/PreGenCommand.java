@@ -16,7 +16,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 
-public class PreGenCommand {
+public final class PreGenCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -39,6 +39,10 @@ public class PreGenCommand {
             int radius = context.requireOne(this.radiusParameter);
             return PreGenCommand.execute(context.cause().audience(), worldData, centerChunk, radius);
         }
+    }
+
+    private PreGenCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createPreGenCommand() {

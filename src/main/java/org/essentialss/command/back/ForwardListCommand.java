@@ -18,13 +18,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.OptionalInt;
 
-public class ForwardListCommand {
+public final class ForwardListCommand {
 
-    private static class Execute implements CommandExecutor {
+    private static final class Execute implements CommandExecutor {
 
         private final Parameter.Value<Integer> pageParameter;
 
-        public Execute(Parameter.Value<Integer> pageParameter) {
+        private Execute(Parameter.Value<Integer> pageParameter) {
             this.pageParameter = pageParameter;
         }
 
@@ -36,6 +36,10 @@ public class ForwardListCommand {
         }
     }
 
+    private ForwardListCommand() {
+        throw new RuntimeException("Should not generate");
+    }
+
     public static Command.Parameterized createForwardListCommand() {
         Parameter.Value<Integer> pageParameter = Parameter.rangedInteger(1, Integer.MAX_VALUE).key("page").optional().build();
 
@@ -43,7 +47,7 @@ public class ForwardListCommand {
     }
 
     public static CommandResult execute(SGeneralPlayerData player, int page) {
-        if (page <= 0) {
+        if (0 >= page) {
             return CommandResult.error(Component.text("Unknown page number"));
         }
         List<OfflineLocation> backTeleportLocations = player.backTeleportLocations();

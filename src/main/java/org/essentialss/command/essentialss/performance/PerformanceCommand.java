@@ -21,10 +21,9 @@ import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import java.util.TreeSet;
 
-public class PerformanceCommand {
+public final class PerformanceCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -39,6 +38,10 @@ public class PerformanceCommand {
             int page = context.one(this.pageParameter).orElse(1);
             return PerformanceCommand.execute(context.cause().audience(), page);
         }
+    }
+
+    private PerformanceCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     private static Component createPercentageText(double percent, boolean inverse) {
@@ -60,7 +63,9 @@ public class PerformanceCommand {
             double currentTicks = Sponge.server().ticksPerSecond();
             double averageTickTime = Sponge.server().averageTickTime();
 
-            Component currentTPSText = Component.text("Current TPS: ").append(Component.text(currentTicks).color(percentToColour(currentTicks / 20.0, false)));
+            Component currentTPSText = Component
+                    .text("Current TPS: ")
+                    .append(Component.text(currentTicks).color(percentToColour(currentTicks / Constants.MINIMUM_STABLE_TICKS, false)));
             Component averageTPSText = Component
                     .text("Average TPS (milliseconds): ")
                     .append(Component.text(averageTickTime).color((5.5 < averageTickTime) ? NamedTextColor.RED : NamedTextColor.GREEN));
@@ -81,7 +86,7 @@ public class PerformanceCommand {
         Component ramUsageText = Component.text("RAM: ").append(createPercentageText(memoryPercent, false));
         text.add(ramUsageText);
 
-        Set<String> has = new TreeSet<>();
+        Collection<String> has = new TreeSet<>();
         for (FileStore store : FileSystems.getDefault().getFileStores()) {
             try {
                 if (store.isReadOnly()) {
@@ -89,7 +94,7 @@ public class PerformanceCommand {
                 }
                 long freeSpace = store.getUnallocatedSpace();
                 long totalSpace = store.getTotalSpace();
-                if (totalSpace == 0) {
+                if (0 == totalSpace) {
                     continue;
                 }
                 double percent = (double) (totalSpace - freeSpace) / totalSpace;
@@ -102,8 +107,8 @@ public class PerformanceCommand {
                 Component driveText = Component.text(nameType).append(createPercentageText(percent, true));
                 text.add(driveText);
                 has.add(nameType);
-            } catch (IOException e) {
-                continue;
+            } catch (IOException ignored) {
+
             }
         }
 

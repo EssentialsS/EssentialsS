@@ -17,7 +17,7 @@ public class ItemStackLoader implements TypeLoader<ItemStack> {
 
     @Override
     public void serialize(Type type, @Nullable ItemStack obj, ConfigurationNode node) throws SerializationException {
-        if (obj == null) {
+        if (null == obj) {
             node.set(null);
             return;
         }

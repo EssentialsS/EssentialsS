@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class SMessageConfigImpl implements MessageConfig {
 
-    private @NotNull Locale locale;
+    private final @NotNull Locale locale;
 
     public SMessageConfigImpl(@NotNull Locale locale) {
         this.locale = locale;

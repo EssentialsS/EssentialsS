@@ -12,7 +12,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 
-public class GlowCommand {
+public final class GlowCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -27,6 +27,10 @@ public class GlowCommand {
             SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.playerParameter);
             return GlowCommand.execute(player);
         }
+    }
+
+    private GlowCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createGlowCommand() {

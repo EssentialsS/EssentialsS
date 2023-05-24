@@ -24,7 +24,7 @@ public class KitSlotImpl implements KitSlot {
 
     @Override
     public OptionalInt preferredSlotIndex() {
-        if (this.slotIndex == null) {
+        if (null == this.slotIndex) {
             return OptionalInt.empty();
         }
         return OptionalInt.of(this.slotIndex);

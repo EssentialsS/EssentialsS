@@ -16,9 +16,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Collection;
-import java.util.Deque;
 import java.util.LinkedList;
 
+@SuppressWarnings("i-am-message-adapter")
 public class CommandSpyMessageAdapterImpl extends AbstractEnabledMessageAdapter implements CommandSpyMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
@@ -64,7 +64,7 @@ public class CommandSpyMessageAdapterImpl extends AbstractEnabledMessageAdapter 
     public @NotNull Collection<SPlaceHolder<?>> supportedPlaceholders() {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
 
-        Deque<SPlaceHolder<?>> placeholders = new LinkedList<>();
+        Collection<SPlaceHolder<?>> placeholders = new LinkedList<>();
         placeholders.addAll(messageManager.placeholdersFor(Subject.class));
         placeholders.addAll(messageManager.placeholdersFor(SGeneralPlayerData.class));
         placeholders.addAll(messageManager.placeholdersFor(SPlaceHolders.COMMAND));

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings("i-am-message-adapter")
 public class AwayFromKeyboardBarMessageAdapterImpl extends AbstractEnabledMessageAdapter implements AwayFromKeyboardBarMessageAdapter {
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
 

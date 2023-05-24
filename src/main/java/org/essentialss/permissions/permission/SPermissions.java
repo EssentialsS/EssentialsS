@@ -64,6 +64,16 @@ public enum SPermissions implements SPermission {
     ANVIL_OTHER("essentialss.inv.anvil.other"),
     ESSENTIALSS_PERFORMANCE("essentialss.performance"),
     ESSENTIALSS_PLUGINS("essentialss.plugins"),
+    GOD_MODE_SELF("essentialss.god.self"),
+    GOD_MODE_OTHER("essentialss.god.other"),
+    DEMI_GOD_MODE_SELF("essentialss.demigod.self"),
+    DEMI_GOD_MODE_OTHER("essentialss.demigod.other"),
+    LOAD_WORLD("essentialss.world.load"),
+    UNLOAD_WORLD("essentialss.world.unload"),
+    CREATE_WORLD("essentialss.world.create"),
+    LIST_WORLDS("essentialss.worlds.list"),
+    FEED_SELF("essentialss.feed.self"),
+    FEED_OTHER("essentialss.feed.other"),
     BREW_SELF("essentialss.inv.anvil.self"),
     BREW_OTHER("essentialss.inv.anvil.other");
 
@@ -89,12 +99,12 @@ public enum SPermissions implements SPermission {
         return this.shouldApplyToDefault;
     }
 
-    public static SPermissions getPermissionForGamemode(@NotNull GameMode gamemode) {
+    public static SPermissions getPermissionForGamemode(@SuppressWarnings("TypeMayBeWeakened") @NotNull GameMode gamemode) {
         if (gamemode.equals(GameModes.SURVIVAL.get())) {
-            return SPermissions.GAMEMODE_SURVIVAL;
+            return GAMEMODE_SURVIVAL;
         }
         if (gamemode.equals(GameModes.CREATIVE.get())) {
-            return SPermissions.GAMEMODE_CREATIVE;
+            return GAMEMODE_CREATIVE;
         }
         throw new IllegalStateException("No permission found for gamemode of " + gamemode.key(RegistryTypes.GAME_MODE));
     }

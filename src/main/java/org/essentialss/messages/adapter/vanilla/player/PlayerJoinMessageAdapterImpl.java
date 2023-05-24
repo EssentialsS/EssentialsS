@@ -19,6 +19,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import java.util.Collection;
 import java.util.LinkedList;
 
+@SuppressWarnings("i-am-message-adapter")
 public class PlayerJoinMessageAdapterImpl extends AbstractVanillaMessageAdapter implements PlayerJoinMessageAdapter {
 
     public static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;

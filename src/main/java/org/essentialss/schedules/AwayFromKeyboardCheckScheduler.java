@@ -87,9 +87,7 @@ public class AwayFromKeyboardCheckScheduler implements Runnable {
                     if (event.isCancelled()) {
                         return;
                     }
-                    event.kickAdaptedMessage().ifPresent(c -> {
-                        ((ServerPlayer) p.spongePlayer()).kick();
-                    });
+                    event.kickAdaptedMessage().ifPresent(c -> ((ServerPlayer) p.spongePlayer()).kick());
                 });
     }
 

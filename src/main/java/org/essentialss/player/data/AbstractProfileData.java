@@ -13,14 +13,17 @@ import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHome;
 import org.essentialss.api.world.points.home.SHomeBuilder;
+import org.essentialss.misc.CollectionHelper;
 import org.essentialss.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
 import org.mose.property.CollectionProperty;
 import org.mose.property.Property;
 import org.mose.property.impl.WritePropertyImpl;
 import org.mose.property.impl.collection.WriteCollectionPropertyImpl;
+import org.mose.property.impl.nevernull.ReadOnlyNeverNullPropertyImpl;
 import org.mose.property.impl.nevernull.WriteNeverNullPropertyImpl;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -31,13 +34,15 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
-    protected final WriteNeverNullPropertyImpl<Boolean, Boolean> isInJail = WriteNeverNullPropertyImpl.bool();
-    protected final Property.Write<LocalDateTime, LocalDateTime> releasedFromJail = new WritePropertyImpl<>(t -> t, null);
+    final WriteNeverNullPropertyImpl<Boolean, Boolean> isInJail = WriteNeverNullPropertyImpl.bool();
+    final Property.Write<LocalDateTime, LocalDateTime> releasedFromJail = new WritePropertyImpl<>(t -> t, null);
     private final WriteNeverNullPropertyImpl<Boolean, Boolean> canLooseItemsWhenUsed = WriteNeverNullPropertyImpl.bool(true);
     private final Property.Write<Component, Component> displayName = new WritePropertyImpl<>(t -> t, null);
     private final WriteNeverNullPropertyImpl<Boolean, Boolean> isCommandSpying = WriteNeverNullPropertyImpl.bool();
     private final WriteNeverNullPropertyImpl<Boolean, Boolean> isPreventingTeleportRequests = WriteNeverNullPropertyImpl.bool();
     private final WriteNeverNullPropertyImpl<Boolean, Boolean> unlimitedFood = WriteNeverNullPropertyImpl.bool();
+    @SuppressWarnings("TypeMayBeWeakened")
+    private final ReadOnlyNeverNullPropertyImpl<Boolean, Boolean> hasGodMode = new ReadOnlyNeverNullPropertyImpl<>(t -> t, () -> false, null);
     private final CollectionProperty.Write<OfflineLocation, OrderedUnmodifiableCollection<OfflineLocation>> backTeleportLocations;
     private final CollectionProperty.Write<MailMessage, UnmodifiableCollection<MailMessage>> mailMessages;
     private final CollectionProperty.Write<SHome, UnmodifiableCollection<SHome>> homes;
@@ -47,13 +52,18 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
 
     private final Map<Property.Write<?, ?>, Property.ReadOnly<?, ?>> readOnlyProperties = new ConcurrentHashMap<>();
 
-    protected AbstractProfileData() {
+    AbstractProfileData() {
         this.backTeleportLocations = this.orderedCollectionProperty(new LinkedTransferQueue<>());
         this.mailMessages = this.collectionProperty(new LinkedTransferQueue<>());
         this.homes = this.collectionProperty(new LinkedTransferQueue<>());
         this.immuneTo = this.collectionProperty(new LinkedTransferQueue<>());
         this.moduleData = new WriteCollectionPropertyImpl<>(LinkedTransferQueue::new, LinkedTransferQueue::new, new LinkedTransferQueue<>());
         this.muteTypes = this.collectionProperty(new LinkedTransferQueue<>());
+        this.hasGodMode.bindTo(this.immuneTo, immuneTo -> {
+            Collection<DamageType> types = DamageTypes.registry().stream().collect(Collectors.toCollection(LinkedHashSet::new));
+            types.remove(DamageTypes.VOID.get());
+            return CollectionHelper.match(immuneTo, types);
+        });
 
         this.moduleData.registerCollectionAddEvent((collectionProperty, before, adding) -> {
             List<ModuleData<?>> toRemove = adding
@@ -87,6 +97,11 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     @Override
     public @NotNull Property.Write<Component, Component> displayNameProperty() {
         return this.displayName;
+    }
+
+    @Override
+    public <P extends Property.ReadOnly<Boolean, Boolean> & Property.NeverNull<Boolean, Boolean>> P hasGodModeProperty() {
+        return (P) this.hasGodMode;
     }
 
     @Override
@@ -164,7 +179,8 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
                 Object otherValue = field.get(data);
                 //properties
                 if (thisValue instanceof CollectionProperty.Write) {
-                    Collection<?> otherCollectionValue = ((Property<Collection<?>, ? extends Collection<?>>) otherValue).value().get();
+                    Collection<?> otherCollectionValue = ((Property.NeverNull<Collection<?>, ? extends Collection<?>>) otherValue).safeValue();
+                    //noinspection unchecked,rawtypes
                     ((CollectionProperty.Write) thisValue).addAll(otherCollectionValue);
                 }
                 if (thisValue instanceof Property.Write) {
@@ -194,7 +210,7 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
                                                  collection);
     }
 
-    protected <T, D, P extends Property.ReadOnly<T, D>> P getReadOnly(Property.Write<T, D> writable) {
+    <T, D, P extends Property.ReadOnly<T, D>> P getReadOnly(Property.Write<T, D> writable) {
         Property.ReadOnly<?, ?> readOnly = this.readOnlyProperties.get(writable);
         if (null != readOnly) {
             return (P) readOnly;
@@ -204,7 +220,7 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
         return (P) newProp;
     }
 
-    protected <X> WriteCollectionPropertyImpl<X, OrderedUnmodifiableCollection<X>> orderedCollectionProperty(Collection<X> collection) {
+    private <X> WriteCollectionPropertyImpl<X, OrderedUnmodifiableCollection<X>> orderedCollectionProperty(Collection<X> collection) {
         return new WriteCollectionPropertyImpl<>(SingleOrderedUnmodifiableCollection::new,
                                                  () -> new SingleOrderedUnmodifiableCollection<>(Collections.emptyList()), collection);
     }

@@ -6,6 +6,7 @@ import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.misc.CommandHelper;
 import org.essentialss.permissions.permission.SPermissions;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
@@ -15,7 +16,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 
-public class KitCommand {
+public final class KitCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -37,6 +38,10 @@ public class KitCommand {
         }
     }
 
+    private KitCommand() {
+        throw new RuntimeException("Should not generate");
+    }
+
     private static Command.Builder createGenericCommand(boolean equip) {
         Parameter.Value<SGeneralPlayerData> player = SParameters
                 .onlinePlayer(p -> true)
@@ -49,7 +54,12 @@ public class KitCommand {
                         SPermissions.ABSTRACT_KIT_TYPE.node() + thisKit.plugin().metadata().id() + "." + thisKit.name()))
                 .key("kit")
                 .build();
-        return Command.builder().executor(new Execute(player, kit, equip)).addParameter(kit).addParameter(player);
+        return Command
+                .builder()
+                .executor(new Execute(player, kit, equip))
+                .addParameter(kit)
+                .addParameter(player)
+                .executionRequirements(cause -> Sponge.isServerAvailable());
     }
 
     public static Command.Parameterized createKitCommand() {
@@ -67,7 +77,7 @@ public class KitCommand {
             return CommandResult.success();
         }
         if (!(player.spongePlayer() instanceof ServerPlayer)) {
-            return CommandResult.error(Component.text("Server ability only"));
+            throw new RuntimeException("Ran a server only command on client");
         }
         InventoryMenu menu = kit.createInventory().asMenu();
         menu.setTitle(Component.text(kit.displayName()));

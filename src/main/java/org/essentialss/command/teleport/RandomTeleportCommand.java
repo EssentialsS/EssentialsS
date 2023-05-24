@@ -3,6 +3,7 @@ package org.essentialss.command.teleport;
 import net.kyori.adventure.text.Component;
 import org.essentialss.EssentialsSMain;
 import org.essentialss.api.player.data.SGeneralPlayerData;
+import org.essentialss.api.utils.Constants;
 import org.essentialss.api.utils.SParameters;
 import org.essentialss.misc.CommandHelper;
 import org.essentialss.permissions.permission.SPermissions;
@@ -25,14 +26,14 @@ import org.spongepowered.math.vector.Vector2d;
 
 import java.util.Random;
 
-public class RandomTeleportCommand {
+public final class RandomTeleportCommand {
 
     private static final class Execute implements CommandExecutor {
 
         private final Parameter.Value<SGeneralPlayerData> player;
         private final Parameter.Value<ServerWorld> world;
 
-        public Execute(Parameter.Value<SGeneralPlayerData> player, Parameter.Value<ServerWorld> world) {
+        private Execute(Parameter.Value<SGeneralPlayerData> player, Parameter.Value<ServerWorld> world) {
             this.player = player;
             this.world = world;
         }
@@ -42,12 +43,16 @@ public class RandomTeleportCommand {
             SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.player);
             World<?, ?> world = CommandHelper.worldOrTarget(context, this.world);
             if (!(world instanceof ServerWorld)) {
-                throw new CommandException(Component.text("server command only"));
+                throw new RuntimeException("Ran a server command on client");
             }
-            RandomTeleportCommand.executeAsync(player, (ServerWorld) world);
+            executeAsync(player, (ServerWorld) world);
             context.cause().audience().sendMessage(Component.text("Finding safe location"));
             return CommandResult.success();
         }
+    }
+
+    private RandomTeleportCommand() {
+        throw new RuntimeException("Should not generate");
     }
 
     public static Command.Parameterized createRandomTeleportCommand() {
@@ -80,8 +85,8 @@ public class RandomTeleportCommand {
         int yLocation;
         int zLocation;
         while (true) {
-            double x = random.nextInt((int) targetDim) / 2.0;
-            double z = random.nextInt((int) targetDim) / 2.0;
+            double x = random.nextInt((int) targetDim) / (double) Constants.TWO;
+            double z = random.nextInt((int) targetDim) / (double) Constants.TWO;
             if (random.nextBoolean()) {
                 x = -x;
             }

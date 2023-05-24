@@ -20,6 +20,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.util.Collection;
 import java.util.LinkedList;
 
+@SuppressWarnings("i-am-message-adapter")
 public class PingMessageAdapterImpl extends AbstractMessageAdapter implements PingMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
@@ -36,11 +37,12 @@ public class PingMessageAdapterImpl extends AbstractMessageAdapter implements Pi
         super(CONFIG_VALUE);
     }
 
-    public PingMessageAdapterImpl(@NotNull MessageConfig config) {
+    public PingMessageAdapterImpl(@SuppressWarnings("TypeMayBeWeakened") @NotNull MessageConfig config) {
         super(new Singleton<>(() -> {
             try {
                 return CONFIG_VALUE.parse(config);
             } catch (SerializationException e) {
+                //noinspection ReturnOfNull
                 return null;
             }
         }));

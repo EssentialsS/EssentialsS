@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings("i-am-message-adapter")
 public class AwayFromKeyboardForTooLongMessageAdapterImpl extends AbstractEnabledMessageAdapter implements AwayFromKeyboardForTooLongMessageAdapter {
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;
 

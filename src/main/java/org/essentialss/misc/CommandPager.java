@@ -94,7 +94,7 @@ public class CommandPager<T> {
         if (pager.hasPreviousPage(page)) {
             Component component = Component
                     .text("<<Previous<<")
-                    .clickEvent(ClickEvent.runCommand(command.replaceAll(PAGE_ARGUMENT, (page - 1) + "")));
+                    .clickEvent(ClickEvent.runCommand(command.replaceAll(PAGE_ARGUMENT, String.valueOf(page - 1))));
             pageNext = pageNext.append(component);
         }
         if (pager.hasNextPage(page)) {
@@ -104,7 +104,7 @@ public class CommandPager<T> {
             }
             Component nextPage = Component
                     .text(">>Next>>")
-                    .clickEvent(ClickEvent.runCommand(command.replaceAll(PAGE_ARGUMENT, (page + 1) + "")));
+                    .clickEvent(ClickEvent.runCommand(command.replaceAll(PAGE_ARGUMENT, String.valueOf(page + 1))));
             pageNext = pageNext.append(nextPage);
         }
         if (!pageNext.equals(Component.empty())) {

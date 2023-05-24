@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("i-am-message-adapter")
 public class YouAreNowUnmutedMessageAdapterImpl extends AbstractMessageAdapter implements YouAreNowUnmutedMessageAdapter {
 
     private static final SingleDefaultConfigValueWrapper<Component> CONFIG_VALUE;

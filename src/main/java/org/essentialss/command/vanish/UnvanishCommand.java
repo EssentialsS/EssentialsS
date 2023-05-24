@@ -12,7 +12,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.VanishState;
 
-public class UnvanishCommand {
+public final class UnvanishCommand {
 
     private static final class Execute implements CommandExecutor {
 
@@ -30,14 +30,14 @@ public class UnvanishCommand {
         }
     }
 
+    private UnvanishCommand() {
+        throw new RuntimeException("Should not generate");
+    }
+
     public static Command.Parameterized createUnvanishCommand() {
         Parameter.Value<SGeneralPlayerData> playerParameter = SParameters.onlinePlayer(p -> true).key("player").optional().build();
 
-        return Command
-                .builder()
-                .addParameter(playerParameter)
-                .executor(new Execute(playerParameter))
-                .build();
+        return Command.builder().addParameter(playerParameter).executor(new Execute(playerParameter)).build();
     }
 
     public static CommandResult execute(SGeneralPlayerData player) {

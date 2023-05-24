@@ -7,6 +7,7 @@ import org.essentialss.api.utils.SParameters;
 import org.essentialss.misc.CommandHelper;
 import org.essentialss.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
@@ -37,7 +38,7 @@ public final class DisplayInventoryCommand {
         public CommandResult execute(CommandContext context) throws CommandException {
             SGeneralPlayerData player = CommandHelper.playerDataOrTarget(context, this.player);
             if (!(player.spongePlayer() instanceof ServerPlayer)) {
-                return CommandResult.error(Component.text("server only command"));
+                throw new RuntimeException("Ran a server only command on client");
             }
             return DisplayInventoryCommand.execute((ServerPlayer) player.spongePlayer(), this.supplier);
         }
@@ -58,6 +59,7 @@ public final class DisplayInventoryCommand {
         return Command
                 .builder()
                 .addParameter(playerData)
+                .executionRequirements(cause -> Sponge.isServerAvailable())
                 .executor(new Execute(playerData, ContainerTypes.ANVIL))
                 .permission(SPermissions.ANVIL_SELF.node())
                 .build();
@@ -76,6 +78,7 @@ public final class DisplayInventoryCommand {
                 .addParameter(playerData)
                 .executor(new Execute(playerData, ContainerTypes.BLAST_FURNACE))
                 .permission(SPermissions.BLAST_FURNACE_SELF.node())
+                .executionRequirements(cause -> Sponge.isServerAvailable())
                 .build();
     }
 
@@ -92,6 +95,7 @@ public final class DisplayInventoryCommand {
                 .addParameter(playerData)
                 .executor(new Execute(playerData, ContainerTypes.BREWING_STAND))
                 .permission(SPermissions.BREW_SELF.node())
+                .executionRequirements(cause -> Sponge.isServerAvailable())
                 .build();
     }
 
@@ -108,6 +112,7 @@ public final class DisplayInventoryCommand {
                 .addParameter(playerData)
                 .executor(new Execute(playerData, ContainerTypes.CRAFTING))
                 .permission(SPermissions.CRAFTING_SELF.node())
+                .executionRequirements(cause -> Sponge.isServerAvailable())
                 .build();
     }
 
@@ -124,6 +129,7 @@ public final class DisplayInventoryCommand {
                 .addParameter(playerData)
                 .executor(new Execute(playerData, ContainerTypes.FURNACE))
                 .permission(SPermissions.FURNACE_SELF.node())
+                .executionRequirements(cause -> Sponge.isServerAvailable())
                 .build();
     }
 

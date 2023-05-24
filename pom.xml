@@ -6,7 +6,7 @@
 
     <groupId>org.essentialss</groupId>
     <artifactId>essentialss</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
     <packaging>pom</packaging>
 
     <name>EssentialsS</name>

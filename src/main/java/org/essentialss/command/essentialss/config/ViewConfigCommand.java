@@ -72,14 +72,15 @@ public final class ViewConfigCommand {
         } else {
             Object finalRaw = raw;
             if (finalRaw instanceof Collection) {
-                Collection<?> collectionValue = (Collection<?>) value;
+                Collection<?> collectionValue = (Collection<?>) finalRaw;
                 Stream<CharSequence> stream = collectionValue.stream().map(v -> {
                     Optional<String> op = FriendlyStrings.ofType(v).map(friendly -> friendly.toFriendlyString(v));
                     //needs to be like this otherwise github actions compiler fails ... for some reason
-                    if(op.isPresent()){
+                    if (op.isPresent()) {
                         return op.get();
                     }
-                    return v.toString();                });
+                    return v.toString();
+                });
                 String message = stream.collect(Collectors.joining(", "));
                 valueMessage = Component.text(message);
             } else {

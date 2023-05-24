@@ -24,6 +24,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SetConfigCommand {
 
@@ -138,10 +139,11 @@ public final class SetConfigCommand {
             } else {
                 if (value instanceof Collection) {
                     Collection<?> collectionValue = (Collection<?>) value;
-                    String message = collectionValue.stream().map(v -> {
+                    Stream<CharSequence> stream = collectionValue.stream().map(v -> {
                         Optional<Object> op = FriendlyStrings.ofType(v).map(friendly -> friendly.toFriendlyString(v));
                         return op.orElseGet(v::toString).toString();
-                    }).collect(Collectors.joining(", "));
+                    });
+                    String message = stream.collect(Collectors.joining(", "));
                     messageValue = Component.text(message);
                 } else {
                     messageValue = FriendlyStrings

@@ -73,10 +73,11 @@ public final class ViewConfigCommand {
             Object finalRaw = raw;
             if (finalRaw instanceof Collection) {
                 Collection<?> collectionValue = (Collection<?>) value;
-                String message = collectionValue.stream().map(v -> {
+                Stream<CharSequence> stream = collectionValue.stream().map(v -> {
                     Optional<Object> op = FriendlyStrings.ofType(v).map(friendly -> friendly.toFriendlyString(v));
                     return op.orElseGet(v::toString).toString();
-                }).collect(Collectors.joining(", "));
+                });
+                String message = stream.collect(Collectors.joining(", "));
                 valueMessage = Component.text(message);
             } else {
                 valueMessage = Component.text(

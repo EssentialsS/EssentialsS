@@ -137,13 +137,12 @@ public final class SetConfigCommand {
                 messageValue = ((Component) value);
             } else {
                 if (value instanceof Collection) {
-                    messageValue = Component.text(((Collection<?>) value)
-                                                          .stream()
-                                                          .map(v -> FriendlyStrings
-                                                                  .ofType(v)
-                                                                  .map(friendly -> friendly.toFriendlyString(v))
-                                                                  .orElseGet(v::toString))
-                                                          .collect(Collectors.joining(", ")));
+                    Collection<?> collectionValue = (Collection<?>) value;
+                    String message = collectionValue.stream().map(v -> {
+                        Optional<Object> op = FriendlyStrings.ofType(v).map(friendly -> friendly.toFriendlyString(v));
+                        return op.orElseGet(v::toString).toString();
+                    }).collect(Collectors.joining(", "));
+                    messageValue = Component.text(message);
                 } else {
                     messageValue = FriendlyStrings
                             .ofType(value)

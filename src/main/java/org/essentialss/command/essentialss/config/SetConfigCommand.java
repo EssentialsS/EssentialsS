@@ -141,7 +141,11 @@ public final class SetConfigCommand {
                     Collection<?> collectionValue = (Collection<?>) value;
                     Stream<CharSequence> stream = collectionValue.stream().map(v -> {
                         Optional<String> op = FriendlyStrings.ofType(v).map(friendly -> friendly.toFriendlyString(v));
-                        return op.orElseGet(v::toString);
+                        //needs to be like this otherwise github actions compiler fails ... for some reason
+                        if (op.isPresent()) {
+                            return op.get();
+                        }
+                        return v.toString();
                     });
                     String message = stream.collect(Collectors.joining(", "));
                     messageValue = Component.text(message);

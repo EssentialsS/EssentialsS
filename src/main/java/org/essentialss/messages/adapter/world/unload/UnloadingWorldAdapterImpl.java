@@ -13,6 +13,7 @@ import org.essentialss.config.value.simple.ComponentConfigValue;
 import org.essentialss.messages.adapter.AbstractMessageAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +25,7 @@ public class UnloadingWorldAdapterImpl extends AbstractMessageAdapter implements
 
     static {
         ComponentConfigValue messageConfigValue = new ComponentConfigValue("world", "unload", "Unloading");
-        Component defaultMessage = Component.text("Creating world of " + SPlaceHolders.RESOURCE_KEY.copyWithTagType("world").formattedPlaceholderTag() + ".");
+        Component defaultMessage = Component.text("Creating world of " + SPlaceHolders.WORLD_NAME.formattedPlaceholderTag() + ".");
         CONFIG_VALUE = new SingleDefaultConfigValueWrapper<>(messageConfigValue, defaultMessage);
     }
 
@@ -34,10 +35,13 @@ public class UnloadingWorldAdapterImpl extends AbstractMessageAdapter implements
 
     @NotNull
     @Override
-    public Component adaptMessage(@NotNull Component messageToAdapt, @NotNull ResourceKey worldKey) {
+    public Component adaptMessage(@NotNull Component messageToAdapt, @NotNull ServerWorld worldKey) {
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
         for (SPlaceHolder<ResourceKey> placeholder : messageManager.mappedPlaceholdersFor(ResourceKey.class)) {
-            messageToAdapt = placeholder.copyWithTagType("world").apply(messageToAdapt, worldKey);
+            messageToAdapt = placeholder.copyWithTagType("world").apply(messageToAdapt, worldKey.key());
+        }
+        for (SPlaceHolder<ServerWorld> placeholder : messageManager.mappedPlaceholdersFor(ServerWorld.class)) {
+            messageToAdapt = placeholder.apply(messageToAdapt, worldKey);
         }
         SWorldData worldData = EssentialsSMain.plugin().worldManager().get().dataFor(worldKey);
         for (SPlaceHolder<SWorldData> placeholder : messageManager.mappedPlaceholdersFor(SWorldData.class)) {
@@ -59,6 +63,7 @@ public class UnloadingWorldAdapterImpl extends AbstractMessageAdapter implements
         MessageManager messageManager = EssentialsSMain.plugin().messageManager().get();
         Collection<SPlaceHolder<?>> placeHolders = new ArrayList<>();
         placeHolders.addAll(messageManager.placeholdersFor(ResourceKey.class));
+        placeHolders.addAll(messageManager.placeholdersFor(ServerWorld.class));
         placeHolders.addAll(messageManager.placeholdersFor(SWorldData.class));
         return placeHolders;
     }

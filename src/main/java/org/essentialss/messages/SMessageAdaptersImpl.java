@@ -144,7 +144,7 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     }
 
     @Override
-    public Singleton<CreatedWorldMessageAdapter> createWorld() {
+    public Singleton<CreatedWorldMessageAdapter> createdWorld() {
         return this.createdWorld;
     }
 

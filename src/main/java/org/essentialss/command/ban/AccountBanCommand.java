@@ -39,9 +39,7 @@ public final class AccountBanCommand {
             GameProfile profile = context
                     .requireOne(this.offlinePlayer)
                     .profile()
-                    .orElseThrow(() -> {
-                        new RuntimeException("Ran a server only command outside server");
-                    });
+                    .orElseThrow(() -> new RuntimeException("Ran a server only command outside server"));
             Optional<Component> opReason = context.one(this.reason);
             return AccountBanCommand.execute(profile, null, opReason.orElse(null));
         }

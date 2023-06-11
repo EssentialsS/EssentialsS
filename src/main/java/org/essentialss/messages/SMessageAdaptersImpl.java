@@ -72,6 +72,7 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     private final Singleton<YouAreNowUnmutedMessageAdapter> youAreNowUnmuted = new Singleton<>(YouAreNowUnmutedMessageAdapterImpl::new);
     private final Singleton<PingMessageAdapter> ping = new Singleton<>(PingMessageAdapterImpl::new);
     private final Singleton<CommandSpyMessageAdapter> commandSpy = new Singleton<>(CommandSpyMessageAdapterImpl::new);
+    @Deprecated
     private final Singleton<ChatMessageAdapter> chat = new Singleton<>(SChatMessageAdapterImpl::new);
     private final Singleton<PlayerJoinMessageAdapter> playerJoin = new Singleton<>(PlayerJoinMessageAdapterImpl::new);
     private final Singleton<CreatedWorldMessageAdapter> createdWorld = new Singleton<>(CreatedWorldAdapterImpl::new);

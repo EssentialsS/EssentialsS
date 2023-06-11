@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.essentialss.EssentialsSMain;
 import org.essentialss.api.player.data.SGeneralPlayerData;
 import org.essentialss.api.utils.SParameters;
+import org.essentialss.permissions.permission.SPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -11,6 +12,7 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -18,7 +20,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.service.permission.Subject;
+
+import java.util.UUID;
 
 public final class InventorySeeCommand {
 
@@ -33,15 +36,16 @@ public final class InventorySeeCommand {
         @Override
         public CommandResult execute(CommandContext context) {
             SGeneralPlayerData player = context.requireOne(this.player);
-            Subject subject = context.subject();
-            if (!(subject instanceof ServerPlayer)) {
+            Object root = context.cause().root();
+            if (!(root instanceof ServerPlayer)) {
                 Component playerOnlyCommandMessage = EssentialsSMain.plugin().messageManager().get().adapters().playerOnlyCommand().get().adaptMessage();
                 return CommandResult.error(playerOnlyCommandMessage);
             }
-            ServerPlayer thisPlayer = (ServerPlayer) subject;
+            Player thisPlayer = (Player) root;
             PlayerInventory playerInventory = player.spongePlayer().inventory();
 
-            return InventorySeeCommand.execute(thisPlayer, player.displayName(), playerInventory);
+            return InventorySeeCommand.execute(EssentialsSMain.plugin().playerManager().get().dataFor(thisPlayer), player.displayName(), playerInventory,
+                                               player.uuid());
         }
     }
 
@@ -59,7 +63,15 @@ public final class InventorySeeCommand {
                 .build();
     }
 
-    public static CommandResult execute(@NotNull ServerPlayer player, @NotNull Component title, @NotNull Inventory playerInventory) {
+    public static CommandResult execute(@NotNull SGeneralPlayerData playerData,
+                                        @NotNull Component title,
+                                        @NotNull Inventory playerInventory,
+                                        @NotNull UUID playerId) {
+        Player player = playerData.spongePlayer();
+        if (!(player instanceof ServerPlayer)) {
+            return CommandResult.error(Component.text("Server only command"));
+        }
+        ServerPlayer sPlayer = (ServerPlayer) player;
         ViewableInventory showingInventory = ViewableInventory
                 .builder()
                 .type(ContainerTypes.GENERIC_9X6)
@@ -71,8 +83,13 @@ public final class InventorySeeCommand {
 
         InventoryMenu menu = showingInventory.asMenu();
         menu.setTitle(title);
-        menu = menu.setReadOnly(true);
-        menu.open(player);
+        if (sPlayer.hasPermission(SPermissions.INVENTORY_SEE_WRITE.node())) {
+            menu.registerClose((cause, container) -> playerData.removeViewingInventoryOf());
+        } else {
+            menu = menu.setReadOnly(true);
+        }
+        menu.open(sPlayer);
+        playerData.setViewingInventoryOf(playerId);
         return CommandResult.success();
     }
 }

@@ -7,6 +7,7 @@ import org.essentialss.api.ban.SBanManager;
 import org.essentialss.api.config.SConfigManager;
 import org.essentialss.api.config.configs.BanConfig;
 import org.essentialss.api.config.configs.GeneralConfig;
+import org.essentialss.api.group.GroupManager;
 import org.essentialss.api.kit.KitManager;
 import org.essentialss.api.message.MessageManager;
 import org.essentialss.api.player.SPlayerManager;
@@ -48,6 +49,7 @@ import org.essentialss.command.vanish.VanishCommand;
 import org.essentialss.command.world.ListWorldsCommand;
 import org.essentialss.command.world.WorldCommand;
 import org.essentialss.config.SConfigManagerImpl;
+import org.essentialss.group.GroupManagerImpl;
 import org.essentialss.kit.KitManagerImpl;
 import org.essentialss.listeners.afk.AwayFromKeyboardListeners;
 import org.essentialss.listeners.ban.BanConnectionListeners;
@@ -59,8 +61,10 @@ import org.essentialss.listeners.connection.ConnectionListeners;
 import org.essentialss.listeners.data.DataListeners;
 import org.essentialss.listeners.data.GodListeners;
 import org.essentialss.messages.SMessageManagerImpl;
+import org.essentialss.misc.OrElse;
 import org.essentialss.player.SPlayerManagerImpl;
 import org.essentialss.schedules.AwayFromKeyboardCheckScheduler;
+import org.essentialss.schedules.CooldownScheduler;
 import org.essentialss.schedules.UpdateCheck;
 import org.essentialss.world.SWorldManagerImpl;
 import org.jetbrains.annotations.NotNull;
@@ -93,6 +97,7 @@ public class EssentialsSMain implements EssentialsSAPI {
     private final Singleton<MessageManager> messageManager = new Singleton<>(SMessageManagerImpl::new);
     private final Singleton<KitManager> kitManager = new Singleton<>(KitManagerImpl::new);
     private final Collection<ParameterAdapter> parameterAdapters = new LinkedTransferQueue<>();
+    private final Singleton<GroupManager> groupManager = new Singleton<>(GroupManagerImpl::new);
 
     @SuppressWarnings("AccessStaticViaInstance")
     @Inject
@@ -116,6 +121,12 @@ public class EssentialsSMain implements EssentialsSAPI {
     @Override
     public @NotNull PluginContainer container() {
         return this.container;
+    }
+
+    @NotNull
+    @Override
+    public Singleton<GroupManager> groupManager() {
+        return this.groupManager;
     }
 
     @Override
@@ -249,6 +260,7 @@ public class EssentialsSMain implements EssentialsSAPI {
     private void registerAsyncedSchedulers() {
         Scheduler scheduler = Sponge.asyncScheduler();
         scheduler.submit(AwayFromKeyboardCheckScheduler.createTask(), "AwayFromKeyboard");
+        scheduler.submit(CooldownScheduler.createKitCooldownTask(), "KitCooldown");
     }
 
     private void registerEvents() {
@@ -258,10 +270,16 @@ public class EssentialsSMain implements EssentialsSAPI {
         eventManager.registerListeners(this.container, new AwayFromKeyboardListeners());
         eventManager.registerListeners(this.container, new MuteListener());
         eventManager.registerListeners(this.container, new SpyListener());
-        eventManager.registerListeners(this.container, new ChatListener());
         eventManager.registerListeners(this.container, new DataListeners());
         eventManager.registerListeners(this.container, new VanillaMessageListener());
         eventManager.registerListeners(this.container, new GodListeners());
+
+        if (OrElse.ifTry(Exception.class, () -> {
+            Class.forName("org.spongepowered.api.event.message.PlayerChatEvent");
+            return true;
+        }, () -> false)) {
+            eventManager.registerListeners(this.container, new ChatListener());
+        }
     }
 
     public static EssentialsSMain plugin() {

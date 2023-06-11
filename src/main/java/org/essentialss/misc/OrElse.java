@@ -2,6 +2,7 @@ package org.essentialss.misc;
 
 import org.essentialss.api.utils.lamda.ThrowableFunction;
 import org.essentialss.api.utils.lamda.ThrowableSupplier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -49,5 +50,12 @@ public final class OrElse {
             }
             throw new RuntimeException("error below", e);
         }
+    }
+
+    public static <O, I, R> R mapNull(@Nullable O check, Function<O, R> map, Supplier<R> whenNull) {
+        if (null == check) {
+            return whenNull.get();
+        }
+        return map.apply(check);
     }
 }

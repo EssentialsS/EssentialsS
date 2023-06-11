@@ -6,7 +6,7 @@
 
     <groupId>org.essentialss</groupId>
     <artifactId>essentialss</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.9</version>
     <packaging>pom</packaging>
 
     <name>EssentialsS</name>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.essentialss</groupId>
             <artifactId>api</artifactId>
-            <version>0.0.8</version>
+            <version>0.0.9</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

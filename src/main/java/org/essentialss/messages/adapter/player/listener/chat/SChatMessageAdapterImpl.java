@@ -23,6 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+//Will be moving to it's own module as it is not supported in API 10+
+@Deprecated
 @SuppressWarnings("i-am-message-adapter")
 public class SChatMessageAdapterImpl extends AbstractEnabledMessageAdapter implements ChatMessageAdapter {
 

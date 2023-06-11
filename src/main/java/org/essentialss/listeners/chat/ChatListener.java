@@ -10,6 +10,8 @@ import org.spongepowered.api.event.message.PlayerChatEvent;
 
 import java.util.Optional;
 
+//Will be moving to it's own module as it is not supported in API 10+
+@Deprecated
 public class ChatListener {
 
     @Listener(order = Order.LAST)

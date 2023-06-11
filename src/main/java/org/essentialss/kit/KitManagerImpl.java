@@ -1,6 +1,8 @@
 package org.essentialss.kit;
 
 import org.essentialss.EssentialsSMain;
+import org.essentialss.api.group.Group;
+import org.essentialss.api.group.GroupManager;
 import org.essentialss.api.kit.Kit;
 import org.essentialss.api.kit.KitBuilder;
 import org.essentialss.api.kit.KitManager;
@@ -8,6 +10,7 @@ import org.essentialss.api.kit.KitSlot;
 import org.essentialss.api.utils.arrays.UnmodifiableCollection;
 import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.config.loaders.TypeLoaders;
+import org.essentialss.config.value.simple.DurationConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataView;
@@ -21,9 +24,8 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.time.Duration;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ public class KitManagerImpl implements KitManager {
     private static final Object[] ITEMS_NODE = {"items"};
     private static final Object[] ITEM_SLOT_NODE = {"slot"};
     private static final Object[] ITEM_NODE = {"item"};
+    private static final Object COOLDOWNS_NODE = "cooldowns";
+    private static final Object DURATION = "duration";
     private final Collection<Kit> kits = new LinkedHashSet<>();
 
     @Override
@@ -57,6 +61,7 @@ public class KitManagerImpl implements KitManager {
 
     @Override
     public void reloadKits() {
+        GroupManager groupManager = EssentialsSMain.plugin().groupManager().get();
         File folder = this.kitFolder();
         File[] pluginFolders = folder.listFiles();
         if (null == pluginFolders) {
@@ -98,7 +103,25 @@ public class KitManagerImpl implements KitManager {
                             throw new RuntimeException(e);
                         }
                     }).collect(Collectors.toList());
-                    this.kits.add(new KitImpl(opContainer.get(), idName, displayName, kitSlots));
+
+                    Map<Group, Duration> cooldowns = node
+                            .node(COOLDOWNS_NODE)
+                            .childrenMap()
+                            .keySet()
+                            .stream()
+                            .map(groupObj -> groupManager.group(groupObj.toString()).orElseGet(() -> groupManager.register(groupObj.toString())))
+                            .map(group -> {
+                                try {
+                                    Duration duration = new DurationConfigValue(COOLDOWNS_NODE, group.groupName(), COOLDOWNS_NODE).parse(node);
+                                    return new AbstractMap.SimpleEntry<>(group, duration);
+                                } catch (SerializationException e) {
+                                    e.printStackTrace();
+                                    return null;
+                                }
+                            })
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                    this.kits.add(new KitImpl(opContainer.get(), idName, displayName, cooldowns, kitSlots));
                 } catch (ConfigurateException e) {
                     throw new RuntimeException(e);
                 }
@@ -122,5 +145,10 @@ public class KitManagerImpl implements KitManager {
             indexNode.node(ITEM_NODE).comment("The item's data").set(DataView.class, slot.item().toContainer());
         }
         loader.save(node);
+    }
+
+    @Override
+    public void unregister(@NotNull Kit kit) {
+        this.kits.remove(kit);
     }
 }

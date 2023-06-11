@@ -53,16 +53,20 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     private final CollectionProperty.Write<SPlayerModifier<?>, Collection<SPlayerModifier<?>>> afkModifier;
     private final Property.Write<Integer, Integer> backTeleportIndex;
     private final Property.Write<LocalDateTime, LocalDateTime> lastAction;
+    private final Property.Write<LocalDateTime, LocalDateTime> kitCooldownRelease;
     private final ReadOnlyNeverNullPropertyImpl<Boolean, Boolean> isAfk;
     private final WriteNeverNullPropertyImpl<Boolean, Boolean> shownAfk;
+    private final WritePropertyImpl<UUID, UUID> viewingInventoryOf;
 
     public SPlayerDataImpl(Player player) {
         this.player = player;
 
+        this.viewingInventoryOf = new WritePropertyImpl<>(t -> t, null);
         this.afkModifier = new WriteCollectionPropertyImpl<>(t -> t, LinkedTransferQueue::new);
         this.backTeleportIndex = new WritePropertyImpl<>(t -> t, null);
         this.shownAfk = WriteNeverNullPropertyImpl.bool();
         this.lastAction = new WritePropertyImpl<>(t -> t, LocalDateTime.now());
+        this.kitCooldownRelease = new WritePropertyImpl<>(t -> t, null);
         this.isAfk = new ReadOnlyNeverNullPropertyImpl<>(t -> t, () -> false, null);
         //noinspection unchecked
         this.teleportRequests = new WriteCollectionPropertyImpl<>(t -> {
@@ -185,6 +189,11 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     }
 
     @Override
+    public Property.Write<LocalDateTime, LocalDateTime> kitCooldownReleaseProperty() {
+        return this.kitCooldownRelease;
+    }
+
+    @Override
     public Property.Write<LocalDateTime, LocalDateTime> lastActionProperty() {
         return this.lastAction;
     }
@@ -233,6 +242,11 @@ public class SPlayerDataImpl extends AbstractProfileData implements SGeneralPlay
     public CollectionProperty.ReadOnly<TeleportRequest, OrderedUnmodifiableCollection<TeleportRequest>> teleportRequestsProperty() {
         this.updateTeleportRequests();
         return this.getReadOnly(this.teleportRequests);
+    }
+
+    @Override
+    public Property.Write<UUID, UUID> viewingInventoryOfProperty() {
+        return this.viewingInventoryOf;
     }
 
     @NotNull

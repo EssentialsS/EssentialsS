@@ -5,9 +5,12 @@ import org.essentialss.api.config.configs.GeneralConfig;
 import org.essentialss.api.config.value.CollectionConfigValue;
 import org.essentialss.api.config.value.ConfigValue;
 import org.essentialss.api.config.value.SingleConfigValue;
+import org.essentialss.api.group.Group;
+import org.essentialss.config.value.ListConfigValueImpl;
 import org.essentialss.config.value.ListDefaultConfigValueImpl;
 import org.essentialss.config.value.primitive.BooleanConfigValue;
 import org.essentialss.config.value.primitive.IntegerConfigValue;
+import org.essentialss.config.value.simple.GroupConfigNode;
 import org.essentialss.config.value.simple.RegistryConfigValue;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
@@ -30,10 +33,12 @@ public class SGeneralConfigImpl implements GeneralConfig {
     private static final IntegerConfigValue PAGE_SIZE;
     private static final BooleanConfigValue CHECK_FOR_UPDATE_ON_LAUNCH;
     private static final ListDefaultConfigValueImpl<DamageType> DEMI_GOD_IMMUNE_TO;
+    private static final ListConfigValueImpl<Group> GROUP;
 
     static {
         PAGE_SIZE = new IntegerConfigValue(10, "misc", "ListPageSize");
         CHECK_FOR_UPDATE_ON_LAUNCH = new BooleanConfigValue(false, "update", "CheckOnStartup");
+        GROUP = new ListConfigValueImpl<>(new GroupConfigNode(), "Groups");
         DEMI_GOD_IMMUNE_TO = new ListDefaultConfigValueImpl<>(RegistryConfigValue.damageType(), () -> DamageTypes
                 .registry()
                 .stream()
@@ -50,6 +55,11 @@ public class SGeneralConfigImpl implements GeneralConfig {
     @Override
     public CollectionConfigValue.Default<DamageType> demiGodImmuneTo() {
         return DEMI_GOD_IMMUNE_TO;
+    }
+
+    @Override
+    public CollectionConfigValue<Group> groups() {
+        return GROUP;
     }
 
     @Override
@@ -90,6 +100,7 @@ public class SGeneralConfigImpl implements GeneralConfig {
         ConfigurationNode node = loader.load();
         PAGE_SIZE.setDefaultIfNotPresent(node);
         CHECK_FOR_UPDATE_ON_LAUNCH.setDefaultIfNotPresent(node);
+        DEMI_GOD_IMMUNE_TO.setDefaultIfNotPresent(node);
         loader.save(node);
     }
 }

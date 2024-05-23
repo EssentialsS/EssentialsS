@@ -1,6 +1,7 @@
 package org.essentialss.player.data;
 
 import net.kyori.adventure.text.Component;
+import org.essentialss.api.events.world.points.RegisterPointEvent;
 import org.essentialss.api.message.MuteType;
 import org.essentialss.api.player.data.SGeneralUnloadedData;
 import org.essentialss.api.player.data.module.ModuleData;
@@ -13,15 +14,21 @@ import org.essentialss.api.utils.arrays.impl.SingleUnmodifiableCollection;
 import org.essentialss.api.world.points.OfflineLocation;
 import org.essentialss.api.world.points.home.SHome;
 import org.essentialss.api.world.points.home.SHomeBuilder;
+import org.essentialss.events.point.register.RegisterPointPostEventImpl;
+import org.essentialss.events.point.register.RegisterPointPreEventImpl;
 import org.essentialss.misc.CollectionHelper;
 import org.essentialss.world.points.home.SHomeImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mose.property.CollectionProperty;
 import org.mose.property.Property;
 import org.mose.property.impl.WritePropertyImpl;
 import org.mose.property.impl.collection.WriteCollectionPropertyImpl;
 import org.mose.property.impl.nevernull.ReadOnlyNeverNullPropertyImpl;
 import org.mose.property.impl.nevernull.WriteNeverNullPropertyImpl;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 
@@ -145,9 +152,25 @@ public abstract class AbstractProfileData implements SGeneralUnloadedData {
     }
 
     @Override
-    public void register(@NotNull SHomeBuilder builder) {
+    public Optional<SHome> register(@NotNull SHomeBuilder builder, @Nullable Cause cause) {
         SHome home = new SHomeImpl(builder);
-        this.homes.add(home);
+        if (null != cause) {
+            RegisterPointEvent.Pre preEvent = new RegisterPointPreEventImpl(home, cause.with(this));
+            Sponge.eventManager().post(preEvent);
+            if (preEvent.isCancelled()) {
+                return Optional.empty();
+            }
+        }
+
+        if (this.homes.add(home)) {
+            return Optional.of(home);
+        }
+
+        if (null != cause) {
+            Event postEvent = new RegisterPointPostEventImpl(home, cause.with(this));
+            Sponge.eventManager().post(postEvent);
+        }
+        return Optional.empty();
     }
 
     @Override

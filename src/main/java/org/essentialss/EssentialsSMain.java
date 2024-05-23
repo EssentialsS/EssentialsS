@@ -37,6 +37,7 @@ import org.essentialss.command.nick.NicknameCommand;
 import org.essentialss.command.nick.WhoIsCommand;
 import org.essentialss.command.ping.PingCommand;
 import org.essentialss.command.point.PointCommand;
+import org.essentialss.command.point.list.ListHomeCommand;
 import org.essentialss.command.point.list.ListSpawnCommand;
 import org.essentialss.command.point.list.ListWarpCommand;
 import org.essentialss.command.run.RunCommand;
@@ -196,6 +197,10 @@ public class EssentialsSMain implements EssentialsSAPI {
         //warp
         event.register(this.container, PointCommand.createWarpCommand(), "warp");
         event.register(this.container, ListWarpCommand.createWarpListCommand(), "warps");
+
+        //home
+        event.register(this.container, PointCommand.createHomeCommand(), "home");
+        event.register(this.container, ListHomeCommand.createHomeListCommand(), "homes");
 
         //spawn
         event.register(this.container, PointCommand.createSpawnCommand(), "spawn");

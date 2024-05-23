@@ -42,7 +42,6 @@ public class SMessageManagerImpl implements MessageManager {
                 }
             });
             this.hasUpdatedConfig = true;
-
         }
         return this.adapters;
     }

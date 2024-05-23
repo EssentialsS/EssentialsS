@@ -106,7 +106,7 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
-            <version>8.1.0</version>
+            <version>8.2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -130,7 +130,7 @@
         <dependency>
             <groupId>com.github.mosemister</groupId>
             <artifactId>DataProperties</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>1.0.3</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

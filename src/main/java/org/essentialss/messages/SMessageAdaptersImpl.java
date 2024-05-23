@@ -16,8 +16,9 @@ import org.essentialss.api.message.adapters.player.listener.afk.AwayFromKeyboard
 import org.essentialss.api.message.adapters.player.listener.afk.BackToKeyboardMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.chat.ChatMessageAdapter;
 import org.essentialss.api.message.adapters.player.listener.spy.CommandSpyMessageAdapter;
+import org.essentialss.api.message.adapters.point.CreateHomeMessageAdapter;
 import org.essentialss.api.message.adapters.vanilla.player.PlayerJoinMessageAdapter;
-import org.essentialss.api.message.adapters.warp.CreateWarpMessageAdapter;
+import org.essentialss.api.message.adapters.point.CreateWarpMessageAdapter;
 import org.essentialss.api.message.adapters.world.NoWorldByThatKeyMessageAdapter;
 import org.essentialss.api.message.adapters.world.WorldHasAlreadyLoadedMessageAdapter;
 import org.essentialss.api.message.adapters.world.create.CreatedWorldMessageAdapter;
@@ -40,8 +41,9 @@ import org.essentialss.messages.adapter.player.listener.afk.AwayFromKeyboardMess
 import org.essentialss.messages.adapter.player.listener.afk.BackToKeyboardMessageAdapterImpl;
 import org.essentialss.messages.adapter.player.listener.chat.SChatMessageAdapterImpl;
 import org.essentialss.messages.adapter.player.listener.spy.CommandSpyMessageAdapterImpl;
+import org.essentialss.messages.adapter.point.CreateHomeMessageAdapterImpl;
 import org.essentialss.messages.adapter.vanilla.player.PlayerJoinMessageAdapterImpl;
-import org.essentialss.messages.adapter.warp.CreateWarpMessageAdapterImpl;
+import org.essentialss.messages.adapter.point.CreateWarpMessageAdapterImpl;
 import org.essentialss.messages.adapter.world.NoWorldByThatKeyMessageAdapterImpl;
 import org.essentialss.messages.adapter.world.WorldHasAlreadyLoadedMessageAdapterImpl;
 import org.essentialss.messages.adapter.world.create.CreatedWorldAdapterImpl;
@@ -66,6 +68,7 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     private final Singleton<AwayFromKeyboardMessageAdapter> awayFromKeyboard = new Singleton<>(AwayFromKeyboardMessageAdapterImpl::new);
     private final Singleton<AwayFromKeyboardBarMessageAdapter> awayFromKeyboardBar = new Singleton<>(AwayFromKeyboardBarMessageAdapterImpl::new);
     private final Singleton<CreateWarpMessageAdapter> createWarp = new Singleton<>(CreateWarpMessageAdapterImpl::new);
+    private final Singleton<CreateHomeMessageAdapter> createHome = new Singleton<>(CreateHomeMessageAdapterImpl::new);
     private final Singleton<MutedMessageAdapter> muted = new Singleton<>(MutedMessageAdapterImpl::new);
     private final Singleton<UnmutedMessageAdapter> unmuted = new Singleton<>(UnmutedMessageAdapterImpl::new);
     private final Singleton<YouAreNowMutedMessageAdapter> youAreNowMuted = new Singleton<>(YouAreNowMutedMessageAdapterImpl::new);
@@ -142,6 +145,11 @@ public class SMessageAdaptersImpl implements MessageAdapters {
     @Override
     public Singleton<CreateWarpMessageAdapter> createWarp() {
         return this.createWarp;
+    }
+
+    @Override
+    public Singleton<CreateHomeMessageAdapter> createHome() {
+        return this.createHome;
     }
 
     @Override

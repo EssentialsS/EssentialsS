@@ -1,16 +1,9 @@
-import org.spongepowered.gradle.plugin.config.PluginLoaders
-import org.spongepowered.plugin.metadata.model.PluginDependency
-
 plugins {
-    id "java-library"
-    id("org.spongepowered.gradle.plugin") version '2.0.2'
+    id 'java'
 }
-
-compileJava.options.encoding = 'UTF-8'
 
 group = 'org.essentialss'
 version = PLUGIN_VERSION
-description = 'One stop ship for all essential tools'
 
 repositories {
     mavenCentral()
@@ -29,24 +22,6 @@ java {
     targetCompatibility = JavaVersion.valueOf("VERSION_" + JAVA_VERSION)
 }
 
-sponge {
-    apiVersion(SPONGE_VERSION)
-    license('All Rights Reserved')
-    loader {
-        name(PluginLoaders.JAVA_PLAIN)
-        version("1.0")
-    }
-    plugin('essentials-s') {
-        displayName('EssentialsS')
-        entrypoint('org.essentialss.EssentialsSMain')
-        description('One stop ship for all essential tools')
-        dependency('spongeapi') {
-            loadOrder(PluginDependency.LoadOrder.AFTER)
-            optional(false)
-        }
-    }
-}
-
 dependencies {
     try {
         implementation project(':api')
@@ -55,6 +30,7 @@ dependencies {
         implementation 'com.github.EssentialsS:API:bleeding-SNAPSHOT'
     }
     implementation("com.github.mosemister:DataProperties:1.0.3")
+    implementation("org.spongepowered:spongeapi:" + SPONGE_VERSION)
 
     testImplementation("org.mockito:mockito-core:5.2.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")

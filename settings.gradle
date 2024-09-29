@@ -2,5 +2,6 @@ rootProject.name = "Essentials-S"
 include "api"
 include 'api8'
 include 'api10'
+include 'api11'
 include 'common'
 

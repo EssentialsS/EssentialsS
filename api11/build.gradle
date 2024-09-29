@@ -4,8 +4,8 @@ plugins {
     id 'java'
 }
 
-JAVA_VERSION = 17
-SPONGE_VERSION = '10.0.0'
+JAVA_VERSION = 21
+SPONGE_VERSION = '11.0.0'
 
 group = 'org.essentialss'
 version = PLUGIN_VERSION
@@ -26,7 +26,8 @@ dependencies {
     implementation project(":api")
     implementation project(":common")
 
-    implementation "org.spongepowered:spongeapi:10.0.0"
+    implementation "org.spongepowered:spongeapi:11.0.0"
+    implementation "org.jetbrains:annotations:24.0.1"
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

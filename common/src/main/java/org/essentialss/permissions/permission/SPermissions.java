@@ -31,7 +31,7 @@ public enum SPermissions implements SPermission {
     CONFIG_VIEW_MESSAGE("essentialss.config.message.view"),
     WARP_CREATE("essentialss.warp.create"),
     WARP_TELEPORT_SELF("essentialss.warp.teleport.self"),
-    WARP_TELEPORT_OTHER("essentialsss.warp.teleport.other"),
+    WARP_TELEPORT_OTHER("essentialss.warp.teleport.other"),
     WARP_REMOVE("essentialss.warp.remove"),
     WARPS("essentialss.warps"),
     HOME_CREATE_SELF("essentialss.home.create.self", true),
@@ -42,9 +42,9 @@ public enum SPermissions implements SPermission {
     HOME_REMOVE_OTHER("essentialss.home.remove.other"),
     HOMES_SELF("essentialss.homes.self", true),
     HOMES_OTHER("essentialss.homes.other"),
-    VIEW_TELEPORT_REQUESTS_SELF("essentailss.teleport.requests.self", true),
+    VIEW_TELEPORT_REQUESTS_SELF("essentialss.teleport.requests.self", true),
     VIEW_TELEPORT_REQUESTS_OTHER("essentialss.teleport.requests.other"),
-    TELEPORT_REQUEST_TO_PLAYER_SELF("essentailss.teleport.request.to.self", true),
+    TELEPORT_REQUEST_TO_PLAYER_SELF("essentialss.teleport.request.to.self", true),
     TELEPORT_REQUEST_TO_PLAYER_OTHER("essentailss.teleport.request.to.other"),
     TELEPORT_REQUEST_HERE_SELF("essentialss.teleport.request.here.self", true),
     TELEPORT_REQUEST_HERE_OTHER("essentialss.teleport.request.here.other"),
@@ -65,7 +65,7 @@ public enum SPermissions implements SPermission {
     INVENTORY_SEE_READ("essentialss.inv.see.read"),
     INVENTORY_SEE_WRITE("essentialss.inv.see.write"),
     CRAFTING_SELF("essentialss.inv.crafting.self"),
-    CRAFTING_OTHER("essentailss.inv.crafting.other"),
+    CRAFTING_OTHER("essentialss.inv.crafting.other"),
     FURNACE_SELF("essentialss.inv.furnace.self"),
     FURNACE_OTHER("essentialss.inv.furnace.other"),
     BLAST_FURNACE_SELF("essentialss.inv.blastfurnace.self"),
@@ -87,7 +87,8 @@ public enum SPermissions implements SPermission {
     BREW_SELF("essentialss.inv.anvil.self"),
     BREW_OTHER("essentialss.inv.anvil.other");
 
-    private final @NotNull String node;
+    @NotNull
+    private final String node;
     private final boolean shouldApplyToDefault;
 
     SPermissions(@NotNull String node) {

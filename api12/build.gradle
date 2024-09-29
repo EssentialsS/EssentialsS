@@ -1,0 +1,51 @@
+import java.util.stream.Stream
+
+plugins {
+    id 'java'
+}
+
+JAVA_VERSION = 21
+SPONGE_VERSION = '12.0.0-SNAPSHOT'
+
+group = 'org.essentialss'
+version = PLUGIN_VERSION
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sponge-repo'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
+    }
+    maven {
+        name = "jit"
+        url = 'https://jitpack.io'
+    }
+}
+
+dependencies {
+    implementation project(":api")
+    implementation project(":common")
+
+    implementation "org.spongepowered:spongeapi:12.0.0-SNAPSHOT"
+    implementation "org.jetbrains:annotations:24.0.1"
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+jar {
+    dependsOn(":api:jar")
+    var include = new String[]{"common-", "api-", "DataProperties"}
+    from {
+        configurations.runtimeClasspath.filter {
+            if (Stream.of(include).anyMatch(allowed -> it.name.startsWith(allowed))) {
+                return true;
+            }
+            return false;
+        }.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
